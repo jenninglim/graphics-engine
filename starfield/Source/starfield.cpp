@@ -16,7 +16,7 @@ using glm::mat3;
 #define FULLSCREEN_MODE false
 #define NUMBER_OF_STARS 10000
 #define FOCAL_LENGTH SCREEN_HEIGHT / 2 
-#define VELOCITY 0.001
+#define VELOCITY 0.01
 
 
 /* ----------------------------------------------------------------------------*/
