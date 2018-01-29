@@ -13,10 +13,10 @@ using glm::vec4;
 using glm::mat4;
 
 
-#define SCREEN_WIDTH 1000
-#define SCREEN_HEIGHT 1000
+#define SCREEN_WIDTH 500
+#define SCREEN_HEIGHT 500
 #define FULLSCREEN_MODE false
-#define CAM_FOCAL_LENGTH 400 
+#define CAM_FOCAL_LENGTH 200 
 /* ----------------------------------------------------------------------------*/
 /* FUNCTIONS                                                                   */
 
@@ -102,7 +102,11 @@ vec3 solveLinearEq(Triangle triangle, Ray r)
     vec3 b = vec3(s.x-v0.x,s.y-v0.y,s.z-v0.z);
     
     mat3 A( -d, e1, e2 );
-    return glm::inverse( A ) * b;
+    //if (determinant(A) != 0)
+    //{
+        return glm::inverse( A ) * b;
+    //}
+    //return vec3(0,0,0);
 }
 
 bool ClosestIntersection(vec4 start, vec4 dir, const vector<Triangle> &triangles, Intersection &closestIntersection){
@@ -111,7 +115,7 @@ bool ClosestIntersection(vec4 start, vec4 dir, const vector<Triangle> &triangles
     Ray ray(start, dir);
     for(int i = 0; i < triangles.size(); i++){
         vec3 x_value = solveLinearEq(triangles[i],ray);
-        if(x_value.y > 0 && x_value.z > 0 && x_value.y + x_value.z < 1 && x_value.x >= 0){
+        if(x_value.y >= 0 && x_value.z >= 0 && x_value.y + x_value.z <= 1 && x_value.x >= 0){
             //Valid Intersection found
             intersectionFound = true;
             if(x_value.x < closestIntersection.distance){
@@ -123,3 +127,4 @@ bool ClosestIntersection(vec4 start, vec4 dir, const vector<Triangle> &triangles
     }
     return intersectionFound;
 }
+
