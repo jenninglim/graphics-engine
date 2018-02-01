@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include "glm/ext.hpp"
 
+
 using namespace std;
 using glm::vec3;
 using glm::mat3;
@@ -13,29 +14,29 @@ using glm::vec4;
 using glm::mat4;
 
 
-#define SCREEN_WIDTH 500
-#define SCREEN_HEIGHT 500
+#define SCREEN_WIDTH 200
+#define SCREEN_HEIGHT 200
 #define FULLSCREEN_MODE false
-#define CAM_FOCAL_LENGTH 200 
+#define CAM_FOCAL_LENGTH 200
 /* ----------------------------------------------------------------------------*/
 /* FUNCTIONS                                                                   */
 
-void Update();
+void Update(Camera &cam);
 void Draw(screen* screen, Camera cam, vector<Triangle>& triangles);
 bool ClosestIntersection(vec4 start, vec4 dir, const vector<Triangle> &triangles, Intersection &closestIntersection);
 
 int main( int argc, char* argv[] )
 {
-  
+
   screen *screen = InitializeSDL( SCREEN_WIDTH, SCREEN_HEIGHT, FULLSCREEN_MODE );
   vector<Triangle> triangles;
   vec4 camPos(0,0,-2,1);
   Camera cam(CAM_FOCAL_LENGTH, camPos);
   LoadTestModel(triangles);
-  
+
   while( NoQuitMessageSDL() )
     {
-      Update();
+      Update(cam);
       Draw(screen, cam, triangles);
       SDL_Renderframe(screen);
     }
@@ -50,6 +51,7 @@ int main( int argc, char* argv[] )
 void Draw(screen* screen, Camera cam, vector<Triangle>& triangles)
 {
     /* Clear buffer */
+    std::cout<<glm::to_string(cam.cameraPos)<<std::endl;
      memset(screen->buffer, 0, screen->height*screen->width*sizeof(uint32_t));
     for(int y = 0; y < SCREEN_HEIGHT; y++){
         for(int x = 0; x < SCREEN_WIDTH; x++){
@@ -66,7 +68,7 @@ void Draw(screen* screen, Camera cam, vector<Triangle>& triangles)
             }
         }
     }
-    
+
     /*
   uint32_t x = rand() % screen->width;
       uint32_t y = rand() % screen->height;
@@ -77,7 +79,7 @@ void Draw(screen* screen, Camera cam, vector<Triangle>& triangles)
 
 
 /*Place updates of parameters here*/
-void Update()
+void Update(Camera &cam)
 {
   static int t = SDL_GetTicks();
   /* Compute frame time */
@@ -87,6 +89,26 @@ void Update()
   /*Good idea to remove this*/
   std::cout << "Render time: " << dt << " ms." << std::endl;
   /* Update variables*/
+
+  const uint8_t* keystate = SDL_GetKeyboardState( 0 );
+	if ( keystate[SDL_SCANCODE_UP] )
+	{
+        cam.forward();
+        std::cout << "forward" << std::endl;
+	}
+	if ( keystate[SDL_SCANCODE_DOWN] )
+	{
+		cam.backward();
+	}
+	if ( keystate[SDL_SCANCODE_LEFT] )
+	{
+	    cam.left();
+	}
+	if ( keystate[SDL_SCANCODE_RIGHT] )
+	{
+	    cam.right ();
+	}
+
 }
 
 vec3 solveLinearEq(Triangle triangle, Ray r)
@@ -100,7 +122,7 @@ vec3 solveLinearEq(Triangle triangle, Ray r)
     vec3 e1 = vec3(v1.x-v0.x,v1.y-v0.y,v1.z-v0.z);
     vec3 e2 = vec3(v2.x-v0.x,v2.y-v0.y,v2.z-v0.z);
     vec3 b = vec3(s.x-v0.x,s.y-v0.y,s.z-v0.z);
-    
+
     mat3 A( -d, e1, e2 );
     //if (determinant(A) != 0)
     //{
@@ -110,7 +132,7 @@ vec3 solveLinearEq(Triangle triangle, Ray r)
 }
 
 bool ClosestIntersection(vec4 start, vec4 dir, const vector<Triangle> &triangles, Intersection &closestIntersection){
-    
+
     bool intersectionFound =  false;
     Ray ray(start, dir);
     for(int i = 0; i < triangles.size(); i++){
@@ -127,4 +149,3 @@ bool ClosestIntersection(vec4 start, vec4 dir, const vector<Triangle> &triangles
     }
     return intersectionFound;
 }
-

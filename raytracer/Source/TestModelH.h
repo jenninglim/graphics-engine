@@ -5,19 +5,64 @@
 
 #include <glm/glm.hpp>
 #include <vector>
+
+using glm::vec3;
+using glm::vec4;
+using glm::mat3;
+using glm::mat4;
+
 //Camera
 class Camera
 {
     public:
-        float focalLength; 
+        float focalLength;
         glm::vec4 cameraPos;
+        glm::mat4 camToWorld;
+        glm::mat4 R;
 
     Camera(float focalLength, glm::vec4 cameraPos)
         :focalLength(focalLength), cameraPos(cameraPos)
     {}
 
+    void forward(){
+        this->cameraPos = this->cameraPos + glm::vec4(0,0,1,0);
+    }
+    void backward(){
+        this->cameraPos = this->cameraPos + glm::vec4(0,0,-1,0);
+    }
+    void left(){
+        this->cameraPos = this->cameraPos + glm::vec4(-1,0,0,0);
+    }
+    void right(){
+        this->cameraPos = this->cameraPos + glm::vec4(1,0,0,0);
+    }
+
+    private:
+
+    void lookAt(vec3 to)
+    {
+        vec3 forward = normal(vec3(this->cameraPos) - to);  
+        vec3 tmp = vec3(0, 1, 0)
+        vec3 right  = cross(normalize(tmp), forward); 
+        vec3 up = cross(forward, right);
+        
+        this->camToWorld[0][0] = right.x; 
+        this->camToWorld[0][1] = right.y; 
+        this->camToWorld[0][2] = right.z; 
+        this->camToWorld[1][0] = up.x; 
+        this->camToWorld[1][1] = up.y; 
+        this->camToWorld[1][2] = up.z; 
+        this->camToWorld[2][0] = forward.x; 
+        this->camToWorld[2][1] = forward.y; 
+        this->camToWorld[2][2] = forward.z; 
+        this->camToWorld[3][0] = from.x; 
+        this->camToWorld[3][1] = from.y; 
+        this->camToWorld[3][2] = from.z; 
+                                                 
+    }
+
 };
-    
+
 // Intersection
 struct Intersection
 {
@@ -36,7 +81,7 @@ class Ray
     Ray(glm::vec4 start, glm::vec4 dir)
         :initial(start), direction(dir)
     {}
-    
+
 };
 
 // Used to describe a triangular surface:
@@ -131,7 +176,7 @@ void LoadTestModel( std::vector<Triangle>& triangles )
 	B = vec4(130,0, 65,1);
 	C = vec4(240,0,272,1);
 	D = vec4( 82,0,225,1);
-	       
+
 	E = vec4(290,165,114,1);
 	F = vec4(130,165, 65,1);
 	G = vec4(240,165,272,1);
@@ -164,7 +209,7 @@ void LoadTestModel( std::vector<Triangle>& triangles )
 	B = vec4(265,0,296,1);
 	C = vec4(472,0,406,1);
 	D = vec4(314,0,456,1);
-	       
+
 	E = vec4(423,330,247,1);
 	F = vec4(265,330,296,1);
 	G = vec4(472,330,406,1);
@@ -215,7 +260,7 @@ void LoadTestModel( std::vector<Triangle>& triangles )
 		triangles[i].v0.w = 1.0;
 		triangles[i].v1.w = 1.0;
 		triangles[i].v2.w = 1.0;
-		
+
 		triangles[i].ComputeNormal();
 	}
 }
