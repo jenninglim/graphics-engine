@@ -14,8 +14,8 @@ using glm::vec4;
 using glm::mat4;
 
 
-#define SCREEN_WIDTH 200
-#define SCREEN_HEIGHT 200
+#define SCREEN_WIDTH 100
+#define SCREEN_HEIGHT 100
 #define FULLSCREEN_MODE false
 #define CAM_FOCAL_LENGTH 200
 /* ----------------------------------------------------------------------------*/
@@ -55,7 +55,9 @@ void Draw(screen* screen, Camera cam, vector<Triangle>& triangles)
      memset(screen->buffer, 0, screen->height*screen->width*sizeof(uint32_t));
     for(int y = 0; y < SCREEN_HEIGHT; y++){
         for(int x = 0; x < SCREEN_WIDTH; x++){
-            vec4 d(x - SCREEN_WIDTH/2, y- SCREEN_HEIGHT/2, cam.focalLength, 1) ;
+            vec4 rayFromOrigin(x - SCREEN_WIDTH/2, y- SCREEN_HEIGHT/2, cam.focalLength,1);
+            vec4 rayFromCam = cam.R * rayFromOrigin;
+            vec4 d(rayFromCam.x, rayFromCam.y, rayFromCam.z, 1) ;
             Intersection closestIntersection = {
                 cam.cameraPos,
                 std::numeric_limits<float>::max(),
@@ -63,18 +65,10 @@ void Draw(screen* screen, Camera cam, vector<Triangle>& triangles)
             if (ClosestIntersection(cam.cameraPos, d, triangles, closestIntersection))
             {
                 vec3 color =triangles[closestIntersection.triangleIndex].color;
-                //cout << closestIntersection.triangleIndex <<endl;
                 PutPixelSDL(screen, x, y, color);
             }
         }
     }
-
-    /*
-  uint32_t x = rand() % screen->width;
-      uint32_t y = rand() % screen->height;
-      PutPixelSDL(screen, x, y, colour);
-    }
-    */
 }
 
 
