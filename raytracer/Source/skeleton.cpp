@@ -6,7 +6,8 @@
 #include "Camera.h"
 #include <stdint.h>
 #include "glm/ext.hpp"
-
+#include <math.h>
+#include "Light.h"
 
 using namespace std;
 using glm::vec3;
@@ -14,23 +15,26 @@ using glm::mat3;
 using glm::vec4;
 using glm::mat4;
 
-
-#define SCREEN_WIDTH 100
-#define SCREEN_HEIGHT 100
+#define _USE_MATH_DEFINES
+#define SCREEN_WIDTH 500
+#define SCREEN_HEIGHT 500
 #define FULLSCREEN_MODE false
 #define CAM_FOCAL_LENGTH 200
 /* ----------------------------------------------------------------------------*/
 /* FUNCTIONS                                                                   */
 
 void Update(Camera &cam);
-void Draw(screen* screen, Camera cam, vector<Triangle>& triangles);
+void Draw(screen* screen, Camera cam, vector<Triangle>& triangles, Light light );
 bool ClosestIntersection(vec4 start, vec4 dir, const vector<Triangle> &triangles, Intersection &closestIntersection);
+vec3 DirectLight(const Intersection& i,vector<Triangle> triangles, Light light);
 
 int main( int argc, char* argv[] )
 {
 
   screen *screen = InitializeSDL( SCREEN_WIDTH, SCREEN_HEIGHT, FULLSCREEN_MODE );
   vector<Triangle> triangles;
+  Light light(vec4(0, -0.5, -0.7, 1), 14.f* vec3(1,1,1));
+
   vec4 camPos(0,0,-2,1);
   Camera cam(CAM_FOCAL_LENGTH, camPos);
   LoadTestModel(triangles);
@@ -38,40 +42,42 @@ int main( int argc, char* argv[] )
   while( NoQuitMessageSDL() )
     {
       Update(cam);
-      Draw(screen, cam, triangles);
+      Draw(screen, cam, triangles, light);
       SDL_Renderframe(screen);
     }
 
   SDL_SaveImage( screen, "screenshot.bmp" );
+
 
   KillSDL(screen);
   return 0;
 }
 
 /*Place your drawing here*/
-void Draw(screen* screen, Camera cam, vector<Triangle>& triangles)
+void Draw(screen* screen, Camera cam, vector<Triangle>& triangles, Light light)
 {
     /* Clear buffer */
     std::cout<<glm::to_string(cam.cameraPos)<<std::endl;
-     memset(screen->buffer, 0, screen->height*screen->width*sizeof(uint32_t));
+    memset(screen->buffer, 0, screen->height*screen->width*sizeof(uint32_t));
     for(int y = 0; y < SCREEN_HEIGHT; y++){
         for(int x = 0; x < SCREEN_WIDTH; x++){
             vec4 rayFromOrigin(x - SCREEN_WIDTH/2, y- SCREEN_HEIGHT/2, cam.focalLength,1);
             vec4 rayFromCam = cam.R * rayFromOrigin;
             vec4 d(rayFromCam.x, rayFromCam.y, rayFromCam.z, 1) ;
+            d = glm::normalize(d);
             Intersection closestIntersection = {
                 cam.cameraPos,
                 std::numeric_limits<float>::max(),
                 0};
             if (ClosestIntersection(cam.cameraPos, d, triangles, closestIntersection))
             {
-                vec3 color =triangles[closestIntersection.triangleIndex].color;
+                vec3 lightColor = DirectLight(closestIntersection, triangles, light);
+                vec3 color =lightColor * triangles[closestIntersection.triangleIndex].color;
                 PutPixelSDL(screen, x, y, color);
             }
         }
     }
 }
-
 
 /*Place updates of parameters here*/
 void Update(Camera &cam)
@@ -130,6 +136,7 @@ bool ClosestIntersection(vec4 start, vec4 dir, const vector<Triangle> &triangles
 
     bool intersectionFound =  false;
     Ray ray(start, dir);
+    
     for(int i = 0; i < triangles.size(); i++){
         vec3 x_value = solveLinearEq(triangles[i],ray);
         if(x_value.y >= 0 && x_value.z >= 0 && x_value.y + x_value.z <= 1 && x_value.x >= 0){
@@ -143,4 +150,16 @@ bool ClosestIntersection(vec4 start, vec4 dir, const vector<Triangle> &triangles
         }
     }
     return intersectionFound;
+}
+
+vec3 DirectLight(const Intersection& i,vector<Triangle> triangles, Light light)
+{
+    vec4 r_hat = glm::normalize(light.position - i.position);
+    float dist = glm::length(light.position - i.position);
+    vec4 n_hat = glm::normalize(triangles[i.triangleIndex].normal);
+
+    vec3 lightColour = light.colour * glm::max(glm::dot(r_hat, n_hat), 0.0f) /
+        (float) (4.0f * glm::pi<float>() * glm::pow<float>(dist,2));
+    
+return lightColour;
 }
