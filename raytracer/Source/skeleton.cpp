@@ -3,6 +3,7 @@
 #include <SDL.h>
 #include "SDLauxiliary.h"
 #include "TestModelH.h"
+#include "Camera.h"
 #include <stdint.h>
 #include "glm/ext.hpp"
 

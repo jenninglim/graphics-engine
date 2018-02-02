@@ -13,100 +13,12 @@ using glm::vec4;
 using glm::mat3;
 using glm::mat4;
 
-//Camera
-class Camera
-{
-    public:
-        float focalLength;
-        glm::vec4 cameraPos;
-        glm::mat4 R;
-        float yaw; // rotation of the camera
-        float distance;
-        mat4 increR;
-
-    Camera(float focalLength, glm::vec4 cameraPos)
-        :focalLength(focalLength), cameraPos(cameraPos)
-    {
-        yaw = 0;
-        R = mat4(1.0);
-        vec4 v0(glm::cos(ROTATION_SPEED), 0, -glm::sin(ROTATION_SPEED),0);
-        vec4 v1(glm::sin(ROTATION_SPEED), 0, glm::cos(ROTATION_SPEED),0);
-        vec4 v2(0, 1, 0,0);
-        this->increR = mat4(v0,v2,v1,vec4(0,0,0,1));
-    }
-
-    void forward(){
-        this->cameraPos = this->cameraPos + glm::vec4(0,0,1,0);
-    }
-    void backward(){
-        this->cameraPos = this->cameraPos + glm::vec4(0,0,-1,0);
-    }
-    void left(){
-        this->yaw = yaw + ROTATION_SPEED;
-        updateRotation();
-        this->cameraPos = this->increR * this->cameraPos;
-
-    }
-    void right(){
-        this->yaw = yaw - ROTATION_SPEED;
-        updateRotation();
-        this->cameraPos = glm::inverse(this->increR) * this->cameraPos;
-    }
-
-    private:
-    void updateRotation()
-    {
-        vec4 v0(glm::cos(yaw), 0, -glm::sin(yaw),0);
-        vec4 v1(glm::sin(yaw), 0, glm::cos(yaw),0);
-        vec4 v2(0, 1, 0,0);
-        this->R = mat4(v0,v2,v1,vec4(0,0,0,1));
-    }
-
-    /*
-    void lookAt(vec3 to)
-    {
-        vec3 forward = normal(vec3(this->cameraPos) - to);  
-        vec3 tmp = vec3(0, 1, 0)
-        vec3 right  = cross(normalize(tmp), forward); 
-        vec3 up = cross(forward, right);
-        
-        this->camToWorld[0][0] = right.x; 
-        this->camToWorld[0][1] = right.y; 
-        this->camToWorld[0][2] = right.z; 
-        this->camToWorld[1][0] = up.x; 
-        this->camToWorld[1][1] = up.y; 
-        this->camToWorld[1][2] = up.z; 
-        this->camToWorld[2][0] = forward.x; 
-        this->camToWorld[2][1] = forward.y; 
-        this->camToWorld[2][2] = forward.z; 
-        this->camToWorld[3][0] = from.x; 
-        this->camToWorld[3][1] = from.y; 
-        this->camToWorld[3][2] = from.z; 
-                                                 
-    }
-    */
-
-};
-
 // Intersection
 struct Intersection
 {
     glm::vec4 position;
     float distance;
     int triangleIndex;
-};
-
-// Ray
-class Ray
-{
-    public:
-        glm::vec4 initial;
-        glm::vec4 direction;
-
-    Ray(glm::vec4 start, glm::vec4 dir)
-        :initial(start), direction(dir)
-    {}
-
 };
 
 // Used to describe a triangular surface:
