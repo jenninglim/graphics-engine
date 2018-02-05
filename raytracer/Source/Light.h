@@ -9,12 +9,15 @@ class Light
     public:
         vec4 position;
         vec3 colour;
+        vec3 indirect_light;
 
     Light(vec4 position, vec3 colour)
         :position(position), colour(colour)
     {
-
+        this->indirect_light = vec3(1,1,1) * 0.5f;
     }
+
+    
 
 
 };

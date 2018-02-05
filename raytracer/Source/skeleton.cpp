@@ -140,7 +140,7 @@ bool ClosestIntersection(vec4 start, vec4 dir, const vector<Triangle> &triangles
     
     for(int i = 0; i < triangles.size(); i++){
         vec3 x_value = solveLinearEq(triangles[i],ray);
-        if(x_value.y >= 0 && x_value.z >= 0 && x_value.y + x_value.z <= 1 && x_value.x > 0){
+        if(x_value.y >= 0 && x_value.z >= 0 && x_value.y + x_value.z <= 1 && x_value.x > EPSILON){
             //Valid Intersection found
             intersectionFound = true;
             if(x_value.x < closestIntersection.distance){
@@ -177,8 +177,6 @@ vec3 DirectLight(const Intersection& i, vector<Triangle> triangles, Light light)
                 lightColour =  vec3(0,0,0);
             }
     }
-
-
-    
+    lightColour += light.indirect_light;
     return lightColour;
 }
