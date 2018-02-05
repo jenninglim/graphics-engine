@@ -16,10 +16,11 @@ using glm::vec4;
 using glm::mat4;
 
 #define _USE_MATH_DEFINES
-#define SCREEN_WIDTH 500
-#define SCREEN_HEIGHT 500
+#define SCREEN_WIDTH 200
+#define SCREEN_HEIGHT 200
 #define FULLSCREEN_MODE false
 #define CAM_FOCAL_LENGTH 200
+#define EPSILON 1e-3
 /* ----------------------------------------------------------------------------*/
 /* FUNCTIONS                                                                   */
 
@@ -139,7 +140,7 @@ bool ClosestIntersection(vec4 start, vec4 dir, const vector<Triangle> &triangles
     
     for(int i = 0; i < triangles.size(); i++){
         vec3 x_value = solveLinearEq(triangles[i],ray);
-        if(x_value.y >= 0 && x_value.z >= 0 && x_value.y + x_value.z <= 1 && x_value.x >= 0){
+        if(x_value.y >= 0 && x_value.z >= 0 && x_value.y + x_value.z <= 1 && x_value.x > 0){
             //Valid Intersection found
             intersectionFound = true;
             if(x_value.x < closestIntersection.distance){
@@ -152,7 +153,7 @@ bool ClosestIntersection(vec4 start, vec4 dir, const vector<Triangle> &triangles
     return intersectionFound;
 }
 
-vec3 DirectLight(const Intersection& i,vector<Triangle> triangles, Light light)
+vec3 DirectLight(const Intersection& i, vector<Triangle> triangles, Light light)
 {
     vec4 r_hat = glm::normalize(light.position - i.position);
     float dist = glm::length(light.position - i.position);
@@ -160,6 +161,24 @@ vec3 DirectLight(const Intersection& i,vector<Triangle> triangles, Light light)
 
     vec3 lightColour = light.colour * glm::max(glm::dot(r_hat, n_hat), 0.0f) /
         (float) (4.0f * glm::pi<float>() * glm::pow<float>(dist,2));
+
+    Intersection closestIntersection = {
+                light.position,
+                std::numeric_limits<float>::max(),
+                0};
+
+    if (ClosestIntersection(i.position, r_hat, triangles, closestIntersection))
+    {
+         if (closestIntersection.distance < glm::length(light.position - i.position) &&
+                 closestIntersection.distance > EPSILON)
+            {
+                //cout << "distance" <<closestIntersection.distance<<endl;
+                //cout << "dist" <<glm::length(light.position - i.position)<<endl;
+                lightColour =  vec3(0,0,0);
+            }
+    }
+
+
     
-return lightColour;
+    return lightColour;
 }
