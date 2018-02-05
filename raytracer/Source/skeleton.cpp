@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdio.h>
 #include <glm/glm.hpp>
 #include <SDL.h>
 #include "SDLauxiliary.h"
@@ -16,10 +17,10 @@ using glm::vec4;
 using glm::mat4;
 
 #define _USE_MATH_DEFINES
-#define SCREEN_WIDTH 200
-#define SCREEN_HEIGHT 200
+#define SCREEN_WIDTH 500
+#define SCREEN_HEIGHT 500
 #define FULLSCREEN_MODE false
-#define CAM_FOCAL_LENGTH 200
+#define CAM_FOCAL_LENGTH SCREEN_WIDTH
 #define EPSILON 1e-3
 /* ----------------------------------------------------------------------------*/
 /* FUNCTIONS                                                                   */
@@ -36,7 +37,7 @@ int main( int argc, char* argv[] )
   vector<Triangle> triangles;
   Light light(vec4(0, -0.5, -0.7, 1), 14.f* vec3(1,1,1));
 
-  vec4 camPos(0,0,-2,1);
+  vec4 camPos(0,0,-3,1);
   Camera cam(CAM_FOCAL_LENGTH, camPos);
   LoadTestModel(triangles);
 
@@ -49,7 +50,6 @@ int main( int argc, char* argv[] )
 
   SDL_SaveImage( screen, "screenshot.bmp" );
 
-
   KillSDL(screen);
   return 0;
 }
@@ -58,18 +58,20 @@ int main( int argc, char* argv[] )
 void Draw(screen* screen, Camera cam, vector<Triangle>& triangles, Light light)
 {
     /* Clear buffer */
-    std::cout<<glm::to_string(cam.cameraPos)<<std::endl;
+    //std::cout<<glm::to_string(cam.cameraPos)<<std::endl;
     memset(screen->buffer, 0, screen->height*screen->width*sizeof(uint32_t));
+    Intersection closestIntersection = {
+                cam.cameraPos,
+                std::numeric_limits<float>::max(),
+                0};
+
     for(int y = 0; y < SCREEN_HEIGHT; y++){
         for(int x = 0; x < SCREEN_WIDTH; x++){
             vec4 rayFromOrigin(x - SCREEN_WIDTH/2, y- SCREEN_HEIGHT/2, cam.focalLength,1);
             vec4 rayFromCam = cam.R * rayFromOrigin;
             vec4 d(rayFromCam.x, rayFromCam.y, rayFromCam.z, 1) ;
             d = glm::normalize(d);
-            Intersection closestIntersection = {
-                cam.cameraPos,
-                std::numeric_limits<float>::max(),
-                0};
+            closestIntersection.distance = std::numeric_limits<float>::max();
             if (ClosestIntersection(cam.cameraPos, d, triangles, closestIntersection))
             {
                 vec3 lightColor = DirectLight(closestIntersection, triangles, light);
@@ -89,14 +91,13 @@ void Update(Camera &cam)
   float dt = float(t2-t);
   t = t2;
   /*Good idea to remove this*/
-  std::cout << "Render time: " << dt << " ms." << std::endl;
+  //std::cout << "Render time: " << dt << " ms." << std::endl;
   /* Update variables*/
 
   const uint8_t* keystate = SDL_GetKeyboardState( 0 );
 	if ( keystate[SDL_SCANCODE_UP] )
 	{
         cam.forward();
-        std::cout << "forward" << std::endl;
 	}
 	if ( keystate[SDL_SCANCODE_DOWN] )
 	{
@@ -134,7 +135,6 @@ vec3 solveLinearEq(Triangle triangle, Ray r)
 }
 
 bool ClosestIntersection(vec4 start, vec4 dir, const vector<Triangle> &triangles, Intersection &closestIntersection){
-
     bool intersectionFound =  false;
     Ray ray(start, dir);
     
