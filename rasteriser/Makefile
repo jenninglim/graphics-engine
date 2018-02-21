@@ -17,8 +17,10 @@ CC=g++
 ########
 #       SDL options
 SDL_CFLAGS := $(shell sdl2-config --cflags)
-GLM_CFLAGS := -I$(GLMDIR)
+GLM_CFLAGS := -I../glm/
 SDL_LDFLAGS := $(shell sdl2-config --libs)
+
+
 
 ########
 #   This is the default action
