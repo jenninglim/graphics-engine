@@ -42,7 +42,7 @@ void Interpolate(ivec2 a, ivec2 b, vector<ivec2>& result){
 void TransformationMatrix(mat4 &M, vec4 cameraPosition, mat4 cameraRotation)
 {
 
-  M = column(mat4(1), 3, cameraPosition) * column(cameraRotation,3,cameraPosition) *  column(mat4(1) ,3, vec4 (vec3(-1.0f * cameraPosition), 1));  
+  M = column(mat4(1), 3, cameraPosition) * column(cameraRotation,3,vec4(vec3(-1.0f *cameraPosition),1)) *  column(mat4(1) ,3, vec4 (vec3(-1.0f * cameraPosition), 1));  
 }
 
 
@@ -148,7 +148,7 @@ int main( int argc, char* argv[] )
   LoadTestModel(triangles);  
 
   //create camera
-  vec4 camPos(0,0,4.001,1);
+  vec4 camPos(0,0,-3.001,1);
   Camera cam(CAM_FOCAL_LENGTH, camPos); 
 
   while( NoQuitMessageSDL() )
