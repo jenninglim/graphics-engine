@@ -148,7 +148,7 @@ int main( int argc, char* argv[] )
   LoadTestModel(triangles);  
 
   //create camera
-  vec4 camPos(0,0,-3.001,1);
+  vec4 camPos(0,0,4.001,1);
   Camera cam(CAM_FOCAL_LENGTH, camPos); 
 
   while( NoQuitMessageSDL() )
@@ -176,7 +176,7 @@ void Draw(screen* screen, vector<Triangle> &triangles, Camera cam)
     vertices[1] = triangles[i].v1; 
     vertices[2] = triangles[i].v2; 
     DrawPolygon(screen, vertices, triangles[i].color, cam);
- //   DrawPolygonEdges(screen, vertices,cam);
+    //DrawPolygonEdges(screen, vertices,cam);
     /*
     for(int v=0; v<3; ++v){
       ivec2 projPos;
