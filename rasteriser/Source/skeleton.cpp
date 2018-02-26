@@ -31,16 +31,21 @@ void Draw(screen* screen, vector<Triangle> &triangles,Camera cam, Light light);
 
 void Interpolate(Pixel a, Pixel b, vector<Pixel>& result){
   int N = result.size();
-  vec3 step = vec3(b.x - a.x, b.y - a.y, b.zinv - a.zinv) / float(glm::max(N-1, 1)); 
-  Pixel current = { a.x,
-                    a.y,
-                    a.zinv};
+  vec3 step = vec3(b.x - a.x, b.y - a.y, b.zinv - a.zinv) / float(glm::max(N-1, 1));
+  vec3 illuminationStep = b.illumination - a.illumination / float(glm::max(N-1, 1));
+ Pixel current = { a.x,
+                   a.y,
+                   a.zinv,
+                   a.illumination
+                  };
+
   for(int i =0; i <N; i++){
     result[i].x = current.x       + i*step.x;
     result[i].y = current.y       + i*step.y;
     result[i].zinv = current.zinv + i*step.z;
+    result[i].illumination = current.illumination + float(i)*illuminationStep;
   }
-
+  std::cout<<glm::to_string(illuminationStep)<<std::endl;
 }
 
 void TransformationMatrix(mat4 &M, vec4 cameraPosition, mat4 cameraRotation)
@@ -64,7 +69,7 @@ void VertexShader(const Vertex& v, Pixel& p, Camera cam, Light light)
     (float) (4.0f * glm::pi<float>() * glm::pow<float>(dist,2));
 
   //Diffuse surface
-  p.illumination = (lightColour + light.indirect_light); 
+  p.illumination =  (lightColour + light.indirect_light); 
 }
 
 void PixelShader(screen* screen, const Pixel& p, float (&depthBuffer)[SCREEN_HEIGHT][SCREEN_WIDTH], vec3 currentColor)
@@ -148,8 +153,6 @@ void DrawPolygonRows(screen* screen,
     for(unsigned int row = 0; row < leftPixels.size(); row++){
         for(int pixelX = leftPixels[row].x; pixelX <= rightPixels[row].x; pixelX++){
           Pixel p = {.x = pixelX, .y = leftPixels[row].y, .zinv = leftPixels[row].zinv, .illumination = leftPixels[row].illumination};  
-
-          std::cout<<glm::to_string(leftPixels[row].illumination)<<std::endl;
           PixelShader(screen,p, depthBuffer,color);  
         } 
      }
@@ -188,7 +191,7 @@ int main( int argc, char* argv[] )
   Camera cam(CAM_FOCAL_LENGTH, camPos); 
 
   //create light
-  Light light(vec4(0,-0.5,-0.7, 1), 14.f*vec3(1,1,1));
+  Light light(vec4(0,-0.5,-0.7, 1), 1.1f*vec3(1,1,1));
   
   
   while( NoQuitMessageSDL() )
@@ -220,18 +223,16 @@ void Draw(screen* screen, vector<Triangle> &triangles, Camera cam, Light light)
 
   for(uint32_t i=0; i<triangles.size(); ++i){
     vector<Vertex> vertices(3);
-    vertices[0] = {.position = triangles[i].v0, 
-                   .normal = glm::normalize(triangles[i].normal),
-                   .reflectance = vec2 (1,1)
-                  };
-    vertices[1] = {.position = triangles[i].v1, 
-                   .normal = glm::normalize(triangles[i].normal),
-                   .reflectance = vec2 (1,1)
-                  };
-    vertices[2] = {.position = triangles[i].v2, 
-                   .normal = glm::normalize(triangles[i].normal),
-                   .reflectance = vec2 (1,1)
-                  };
+    vertices[0].position = triangles[i].v0;
+    vertices[0].normal = glm::normalize(triangles[i].normal);
+    vertices[0].reflectance = vec2 (1,1);
+    vertices[1].position = triangles[i].v1; 
+    vertices[1].normal = glm::normalize(triangles[i].normal);
+    vertices[1].reflectance = vec2 (1,1);
+                  
+    vertices[2].position = triangles[i].v2; 
+    vertices[2].normal = glm::normalize(triangles[i].normal);
+    vertices[2].reflectance = vec2 (1,1);
     DrawPolygon(screen, vertices, triangles[i].color, cam, depthBuffer, light);
     //DrawPolygonEdges(screen, vertices,cam);
     /*
