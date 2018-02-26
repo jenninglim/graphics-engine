@@ -26,9 +26,20 @@ using glm::mat4;
 /* FUNCTIONS                                                                   */
 
 void Update(Camera &cam);
-void Draw(screen* screen, Camera cam, vector<Triangle>& triangles, Light light );
-bool ClosestIntersection(vec4 start, vec4 dir, const vector<Triangle> &triangles, Intersection &closestIntersection);
-vec3 DirectLight(const Intersection& i,vector<Triangle> triangles, Light light);
+
+void Draw(screen* screen,
+        Camera cam,
+        vector<Triangle>& triangles,
+        Light light);
+
+bool ClosestIntersection(vec4 start,
+        vec4 dir,
+        const vector<Triangle> &triangles,
+        Intersection &closestIntersection);
+
+vec3 DirectLight(const Intersection& i,
+        vector<Triangle> triangles,
+        Light light);
 
 int main( int argc, char* argv[] )
 {
@@ -61,21 +72,29 @@ void Draw(screen* screen, Camera cam, vector<Triangle>& triangles, Light light)
     //std::cout<<glm::to_string(cam.cameraPos)<<std::endl;
     memset(screen->buffer, 0, screen->height*screen->width*sizeof(uint32_t));
     Intersection closestIntersection = {
-                cam.cameraPos,
+                cam.position,
                 std::numeric_limits<float>::max(),
                 0};
 
     for(int y = 0; y < SCREEN_HEIGHT; y++){
         for(int x = 0; x < SCREEN_WIDTH; x++){
-            vec4 rayFromOrigin(x - SCREEN_WIDTH/2, y- SCREEN_HEIGHT/2, cam.focalLength,1);
+            vec4 rayFromOrigin(x - SCREEN_WIDTH/2,
+                    y- SCREEN_HEIGHT/2,
+                    cam.focalLength,1);
             vec4 rayFromCam = cam.R * rayFromOrigin;
             vec4 d(rayFromCam.x, rayFromCam.y, rayFromCam.z, 1) ;
             d = glm::normalize(d);
             closestIntersection.distance = std::numeric_limits<float>::max();
-            if (ClosestIntersection(cam.cameraPos, d, triangles, closestIntersection))
+            if (ClosestIntersection(cam.position,
+                        d,
+                        triangles,
+                        closestIntersection))
             {
-                vec3 lightColor = DirectLight(closestIntersection, triangles, light);
-                vec3 color =lightColor * triangles[closestIntersection.triangleIndex].color;
+                vec3 lightColor = DirectLight(closestIntersection,
+                        triangles,
+                        light);
+                vec3 color = lightColor *
+                    triangles[closestIntersection.triangleIndex].color;
                 PutPixelSDL(screen, x, y, color);
             }
         }

@@ -17,6 +17,11 @@ class Light
         this->indirect_light = vec3(1,1,1) * 0.5f;
     }
 
+    Light(vec4 position, vec3 colour, vec3 indirect_light)
+        :position(position), colour(colour), indirect_light(indirect_light)
+    {
+       // WHAT DO?? 
+    }
     
 
 
