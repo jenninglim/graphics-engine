@@ -17,7 +17,7 @@ using glm::mat3;
 using glm::vec4;
 using glm::mat4;
 
-#define SCREEN_WIDTH 1000
+#define SCREEN_WIDTH 500
 #define SCREEN_HEIGHT SCREEN_WIDTH
 #define CAM_FOCAL_LENGTH SCREEN_WIDTH
 #define FULLSCREEN_MODE false
@@ -77,7 +77,7 @@ void PixelShader(screen* screen, const Pixel& p, float (&depthBuffer)[SCREEN_HEI
 {
   int x = p.x;
   int y = p.y;
-  if( p.zinv - EPSILON > depthBuffer[y][x] )
+  if( p.zinv > depthBuffer[y][x] )
   {
     depthBuffer[y][x] = p.zinv;
     PutPixelSDL( screen, x, y, p.illumination* currentColor );
@@ -154,7 +154,8 @@ void DrawPolygonRows(screen* screen,
         vec3 color,
         float (&depthBuffer)[SCREEN_HEIGHT][SCREEN_WIDTH])
 {
-    for(unsigned int row = 0; row < leftPixels.size(); row++){
+    for(unsigned int row = 0; row < leftPixels.size(); row++)
+    {
             /*
           Pixel p = {.x = pixelX, .y = leftPixels[row].y,
               .zinv = leftPixels[row].zinv,
