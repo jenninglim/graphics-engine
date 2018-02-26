@@ -6,6 +6,13 @@
 #include <glm/glm.hpp>
 #include <vector>
 
+typedef struct Pixel
+{
+    int x;
+    int y;
+    int zinv;
+} Pixel;
+
 // Used to describe a triangular surface:
 class Triangle
 {
