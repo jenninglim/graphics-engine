@@ -17,7 +17,7 @@ using glm::mat3;
 using glm::vec4;
 using glm::mat4;
 
-#define SCREEN_WIDTH 500
+#define SCREEN_WIDTH 100
 #define SCREEN_HEIGHT SCREEN_WIDTH
 #define CAM_FOCAL_LENGTH SCREEN_WIDTH
 #define FULLSCREEN_MODE false
@@ -33,7 +33,7 @@ void Interpolate(Pixel a, Pixel b, vector<Pixel>& result){
   int N = result.size();
   vec3 step = vec3(b.x - a.x, b.y - a.y, b.zinv - a.zinv) / float(glm::max(N-1, 1));
   vec3 illuminationStep = b.illumination - a.illumination / float(glm::max(N-1, 1));
- Pixel current = { a.x,
+  Pixel current = { a.x,
                    a.y,
                    a.zinv,
                    a.illumination
@@ -45,12 +45,14 @@ void Interpolate(Pixel a, Pixel b, vector<Pixel>& result){
     result[i].zinv = current.zinv + i*step.z;
     result[i].illumination = current.illumination + float(i)*illuminationStep;
   }
-  std::cout<<glm::to_string(illuminationStep)<<std::endl;
 }
 
 void TransformationMatrix(mat4 &M, vec4 cameraPosition, mat4 cameraRotation)
+
 {
-  M = column(mat4(1), 3, cameraPosition) * column(cameraRotation,3,vec4(vec3(-1.0f *cameraPosition),1)) *  column(mat4(1) ,3, vec4 (vec3(-1.0f * cameraPosition), 1));  
+  M = column(mat4(1), 3, cameraPosition) *
+      column(cameraRotation,3,vec4(vec3(-1.0f *cameraPosition),1)) *
+      column(mat4(1) ,3, vec4 (vec3(-1.0f * cameraPosition), 1));  
 }
 
 
@@ -65,9 +67,8 @@ void VertexShader(const Vertex& v, Pixel& p, Camera cam, Light light)
  
   vec4 r_hat = glm::normalize(light.position - v.position);
   float dist = glm::length(light.position - v.position);
-  vec3 lightColour = light.power * glm::max(glm::dot(r_hat, v.normal), 0.0f) /
-    (float) (4.0f * glm::pi<float>() * glm::pow<float>(dist,2));
-
+  vec3 lightColour = light.power * glm::max(glm::dot(vec4(1), vec4(1)), 0.0f) /
+    (float) (4.0f * glm::pi<float>() * glm::pow<float>(10,2));
   //Diffuse surface
   p.illumination =  (lightColour + light.indirect_light); 
 }
@@ -76,10 +77,10 @@ void PixelShader(screen* screen, const Pixel& p, float (&depthBuffer)[SCREEN_HEI
 {
   int x = p.x;
   int y = p.y;
-  if( p.zinv + EPSILON > depthBuffer[y][x] )
+  if( p.zinv - EPSILON > depthBuffer[y][x] )
   {
     depthBuffer[y][x] = p.zinv;
-    PutPixelSDL( screen, x, y, p.illumination*currentColor );
+    PutPixelSDL( screen, x, y, p.illumination* currentColor );
   }
 }
 
@@ -87,6 +88,7 @@ void DrawLineSDL(screen* screen, Pixel a, Pixel b, vec3 color){
   ivec2 delta = abs(ivec2(a.x - b.x, a.y - b.y));
   int pixels = glm::max(delta.x, delta.y)+1;
   vector<Pixel> line(pixels);
+
   Interpolate(a,b,line);
   for(int pixel_num = 0; pixel_num < pixels; pixel_num++){
     PutPixelSDL(screen, line[pixel_num].x, line[pixel_num].y, color);
@@ -121,6 +123,7 @@ void ComputePolygonRows(const vector<Pixel>& vertexPixels, vector<Pixel>& leftPi
     rightPixels[i].x = numeric_limits<int>::min(); 
   }
 
+  
   for(int i = 0; i < 3; i++){
     Pixel vertex1 = vertexPixels[i];
     Pixel vertex2 = vertexPixels[(i+1)%3];
@@ -149,12 +152,20 @@ void DrawPolygonRows(screen* screen,
         const vector<Pixel>& leftPixels,
         const vector<Pixel>& rightPixels,
         vec3 color,
-        float (&depthBuffer)[SCREEN_HEIGHT][SCREEN_WIDTH]){
+        float (&depthBuffer)[SCREEN_HEIGHT][SCREEN_WIDTH])
+{
     for(unsigned int row = 0; row < leftPixels.size(); row++){
-        for(int pixelX = leftPixels[row].x; pixelX <= rightPixels[row].x; pixelX++){
-          Pixel p = {.x = pixelX, .y = leftPixels[row].y, .zinv = leftPixels[row].zinv, .illumination = leftPixels[row].illumination};  
-          PixelShader(screen,p, depthBuffer,color);  
-        } 
+            /*
+          Pixel p = {.x = pixelX, .y = leftPixels[row].y,
+              .zinv = leftPixels[row].zinv,
+              .illumination = leftPixels[row].illumination};  
+              */
+          vector<Pixel> pixxes(rightPixels[row].x - leftPixels[row].x + 1);
+          Interpolate(leftPixels[row], rightPixels[row], pixxes);
+          for (int i = 0; i < pixxes.size(); i++)
+          {
+            PixelShader(screen,pixxes[i], depthBuffer,color);  
+          }
      }
 }
 
@@ -191,9 +202,7 @@ int main( int argc, char* argv[] )
   Camera cam(CAM_FOCAL_LENGTH, camPos); 
 
   //create light
-  Light light(vec4(0,-0.5,-0.7, 1), 1.1f*vec3(1,1,1));
-  
-  
+  Light light(vec4(0,-0.5,-0.7, 1), 0.1f*vec3(1,1,1));
   while( NoQuitMessageSDL() )
     {
       Update();
