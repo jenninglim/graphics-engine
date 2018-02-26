@@ -24,15 +24,16 @@ all:Build
 
 #   ########
 #Object list
-
-OBJ = $(B_DIR)/$(FILE).o
+OBJ = $(B_DIR)/$(FILE).o $(B_DIR)/Intersection.o
 
 
 ########
 #Objects
-$(B_DIR)/$(FILE).o : $(S_DIR)/$(FILE).cpp $(S_DIR)/SDLauxiliary.h $(S_DIR)/TestModelH.h $(S_DIR)/Camera.h $(S_DIR)/Light.h
+$(B_DIR)/$(FILE).o : $(S_DIR)/$(FILE).cpp $(S_DIR)/SDLauxiliary.h 
 	$(CC) $(CC_OPTS) -o $(B_DIR)/$(FILE).o $(S_DIR)/$(FILE).cpp $(SDL_CFLAGS) $(GLM_CFLAGS)
 
+$(B_DIR)/Intersection.o : $(S_DIR)/Intersection.cpp $(S_DIR)/Intersection.h 
+	$(CC) $(CC_OPTS) -o $(B_DIR)/Intersection.o $(S_DIR)/Intersection.cpp $(SDL_CFLAGS) $(GLM_CFLAGS)
 
 ########
 #Main build rule     

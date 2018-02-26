@@ -1,6 +1,7 @@
 #ifndef  CAMERA_H
 #define CAMERA_H
 
+#include "Config.h"
 using namespace glm;
 
 // Ray
@@ -66,7 +67,4 @@ class Camera
     }
 
 };
-
-
-
 #endif
