@@ -6,6 +6,7 @@
 #include "SDLauxiliary.h"
 #include "TestModelH.h"
 #include "Camera.h"
+#include "Light.h"
 //? TODO:why not imported in glm
 #include <glm/gtc/matrix_access.hpp>
 #include <glm/gtx/string_cast.hpp>
@@ -26,7 +27,7 @@ using glm::mat4;
 /* FUNCTIONS                                                                   */
 
 void Update();
-void Draw(screen* screen, vector<Triangle> &triangles,Camera cam);
+void Draw(screen* screen, vector<Triangle> &triangles,Camera cam, Light light);
 
 void Interpolate(Pixel a, Pixel b, vector<Pixel>& result){
   int N = result.size();
@@ -48,14 +49,33 @@ void TransformationMatrix(mat4 &M, vec4 cameraPosition, mat4 cameraRotation)
 }
 
 
-void VertexShader(const vec4& v, Pixel& p, Camera cam)
+void VertexShader(const Vertex& v, Pixel& p, Camera cam, Light light)
 {
   mat4 tMatrix(0);
   TransformationMatrix(tMatrix, cam.cameraPos,cam.R);
-  vec4 tPosition = tMatrix * v;
+  vec4 tPosition = tMatrix * v.position;
   p.x = cam.focalLength*tPosition.x / tPosition.z + SCREEN_WIDTH / 2 ;
   p.y = cam.focalLength*tPosition.y / tPosition.z + SCREEN_HEIGHT /2;
   p.zinv = 1 / tPosition.z;
+ 
+  vec4 r_hat = glm::normalize(light.position - v.position);
+  float dist = glm::length(light.position - v.position);
+  vec3 lightColour = light.power * glm::max(glm::dot(r_hat, v.normal), 0.0f) /
+    (float) (4.0f * glm::pi<float>() * glm::pow<float>(dist,2));
+
+  //Diffuse surface
+  p.illumination = (lightColour + light.indirect_light); 
+}
+
+void PixelShader(screen* screen, const Pixel& p, float (&depthBuffer)[SCREEN_HEIGHT][SCREEN_WIDTH], vec3 currentColor)
+{
+  int x = p.x;
+  int y = p.y;
+  if( p.zinv + EPSILON > depthBuffer[y][x] )
+  {
+    depthBuffer[y][x] = p.zinv;
+    PutPixelSDL( screen, x, y, p.illumination*currentColor );
+  }
 }
 
 void DrawLineSDL(screen* screen, Pixel a, Pixel b, vec3 color){
@@ -67,8 +87,8 @@ void DrawLineSDL(screen* screen, Pixel a, Pixel b, vec3 color){
     PutPixelSDL(screen, line[pixel_num].x, line[pixel_num].y, color);
   } 
 }
-
-void DrawPolygonEdges(screen* screen, const vector<vec4>& vertices, Camera cam){
+/*
+void DrawPolygonEdges(screen* screen, const vector<Vertex>& vertices, Camera cam){
   int V = vertices.size(); 
   vector<Pixel> projectedVertices(V); 
   for(int i = 0; i < V; ++i){
@@ -81,7 +101,7 @@ void DrawPolygonEdges(screen* screen, const vector<vec4>& vertices, Camera cam){
     DrawLineSDL(screen, projectedVertices[i], projectedVertices[j], color);
   }
 }
-
+*/
 void ComputePolygonRows(const vector<Pixel>& vertexPixels, vector<Pixel>& leftPixels, vector<Pixel>& rightPixels)
 {
   int minY =glm::min(vertexPixels[0].y,glm::min(vertexPixels[1].y,vertexPixels[2].y));
@@ -126,32 +146,33 @@ void DrawPolygonRows(screen* screen,
         vec3 color,
         float (&depthBuffer)[SCREEN_HEIGHT][SCREEN_WIDTH]){
     for(unsigned int row = 0; row < leftPixels.size(); row++){
-    for(int pixelX = leftPixels[row].x; pixelX <= rightPixels[row].x; pixelX++)
-    {
-        if (depthBuffer[leftPixels[row].y][pixelX] < leftPixels[row].zinv +  EPSILON){
-            PutPixelSDL(screen, pixelX,leftPixels[row].y, color);
-            depthBuffer[leftPixels[row].y][pixelX] = leftPixels[row].zinv;
-        }
-     } 
-  }
+        for(int pixelX = leftPixels[row].x; pixelX <= rightPixels[row].x; pixelX++){
+          Pixel p = {.x = pixelX, .y = leftPixels[row].y, .zinv = leftPixels[row].zinv, .illumination = leftPixels[row].illumination};  
+
+          std::cout<<glm::to_string(leftPixels[row].illumination)<<std::endl;
+          PixelShader(screen,p, depthBuffer,color);  
+        } 
+     }
 }
 
 void DrawPolygon(screen* screen,
-        const vector<vec4>& vertices,
+        const vector<Vertex>& vertices,
         vec3 color,
         Camera cam,
-        float (&depthBuffer)[SCREEN_HEIGHT][SCREEN_WIDTH])
+        float (&depthBuffer)[SCREEN_HEIGHT][SCREEN_WIDTH],
+        Light light)
 {
   int V = vertices.size();
   vector<Pixel> vertexPixels(V); 
   for(int i = 0; i<V; ++i){
-    VertexShader(vertices[i], vertexPixels[i], cam); 
+    VertexShader(vertices[i], vertexPixels[i], cam, light); 
   }
   vector<Pixel> leftPixels;
   vector<Pixel> rightPixels;
   ComputePolygonRows(vertexPixels, leftPixels, rightPixels);
   DrawPolygonRows(screen,leftPixels, rightPixels,color, depthBuffer);
 }
+
 
 int main( int argc, char* argv[] )
 {
@@ -166,10 +187,14 @@ int main( int argc, char* argv[] )
   vec4 camPos(0,0,-3.001,1);
   Camera cam(CAM_FOCAL_LENGTH, camPos); 
 
+  //create light
+  Light light(vec4(0,-0.5,-0.7, 1), 14.f*vec3(1,1,1));
+  
+  
   while( NoQuitMessageSDL() )
     {
       Update();
-      Draw(screen,triangles,cam);
+      Draw(screen,triangles,cam,light);
       SDL_Renderframe(screen);
     }
 
@@ -180,7 +205,7 @@ int main( int argc, char* argv[] )
 }
 
 /*Place your drawing here*/
-void Draw(screen* screen, vector<Triangle> &triangles, Camera cam)
+void Draw(screen* screen, vector<Triangle> &triangles, Camera cam, Light light)
 {
   /* Clear buffer */
   memset(screen->buffer, 0, screen->height*screen->width*sizeof(uint32_t));
@@ -194,11 +219,20 @@ void Draw(screen* screen, vector<Triangle> &triangles, Camera cam)
   }
 
   for(uint32_t i=0; i<triangles.size(); ++i){
-    vector<vec4> vertices(3);
-    vertices[0] = triangles[i].v0; 
-    vertices[1] = triangles[i].v1; 
-    vertices[2] = triangles[i].v2; 
-    DrawPolygon(screen, vertices, triangles[i].color, cam, depthBuffer);
+    vector<Vertex> vertices(3);
+    vertices[0] = {.position = triangles[i].v0, 
+                   .normal = glm::normalize(triangles[i].normal),
+                   .reflectance = vec2 (1,1)
+                  };
+    vertices[1] = {.position = triangles[i].v1, 
+                   .normal = glm::normalize(triangles[i].normal),
+                   .reflectance = vec2 (1,1)
+                  };
+    vertices[2] = {.position = triangles[i].v2, 
+                   .normal = glm::normalize(triangles[i].normal),
+                   .reflectance = vec2 (1,1)
+                  };
+    DrawPolygon(screen, vertices, triangles[i].color, cam, depthBuffer, light);
     //DrawPolygonEdges(screen, vertices,cam);
     /*
     for(int v=0; v<3; ++v){

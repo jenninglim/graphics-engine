@@ -11,8 +11,15 @@ typedef struct Pixel
     int x;
     int y;
     float zinv;
+    glm::vec3 illumination;
 } Pixel;
 
+typedef struct Vertex
+{
+    glm::vec4 position;
+    glm::vec4 normal; 
+    glm::vec2 reflectance;
+} Vertex;
 // Used to describe a triangular surface:
 class Triangle
 {
