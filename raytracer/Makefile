@@ -24,8 +24,7 @@ all:Build
 
 #   ########
 #Object list
-OBJ = $(B_DIR)/$(FILE).o $(B_DIR)/Intersection.o
-
+OBJ = $(B_DIR)/$(FILE).o $(B_DIR)/Intersection.o $(B_DIR)/Light.o
 
 ########
 #Objects
@@ -34,6 +33,10 @@ $(B_DIR)/$(FILE).o : $(S_DIR)/$(FILE).cpp $(S_DIR)/SDLauxiliary.h
 
 $(B_DIR)/Intersection.o : $(S_DIR)/Intersection.cpp $(S_DIR)/Intersection.h 
 	$(CC) $(CC_OPTS) -o $(B_DIR)/Intersection.o $(S_DIR)/Intersection.cpp $(SDL_CFLAGS) $(GLM_CFLAGS)
+
+$(B_DIR)/Light.o : $(S_DIR)/Light.cpp $(S_DIR)/Light.h 
+	$(CC) $(CC_OPTS) -o $(B_DIR)/Light.o $(S_DIR)/Light.cpp $(SDL_CFLAGS) $(GLM_CFLAGS)
+
 
 ########
 #Main build rule     

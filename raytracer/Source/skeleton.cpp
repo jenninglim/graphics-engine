@@ -28,13 +28,8 @@ void Draw(screen* screen,
         vector<Triangle>& triangles,
         Light light);
 
-vec3 DirectLight(const Intersection& i,
-        vector<Triangle> triangles,
-        Light light);
-
 int main( int argc, char* argv[] )
 {
-
   screen *screen = InitializeSDL( SCREEN_WIDTH, SCREEN_HEIGHT, FULLSCREEN_MODE );
   vector<Triangle> triangles;
   Light light(vec4(0, -0.5, -0.7, 1), 14.f* vec3(1,1,1));
@@ -121,33 +116,4 @@ void Update(Camera &cam)
 	{
 	    cam.right ();
 	}
-
-}
-
-vec3 DirectLight(const Intersection& i, vector<Triangle> triangles, Light light)
-{
-    vec4 r_hat = glm::normalize(light.position - i.position);
-    float dist = glm::length(light.position - i.position);
-    vec4 n_hat = glm::normalize(triangles[i.triangleIndex].normal);
-
-    vec3 lightColour = light.power * glm::max(glm::dot(r_hat, n_hat), 0.0f) /
-        (float) (4.0f * glm::pi<float>() * glm::pow<float>(dist,2));
-
-    Intersection closestIntersection = {
-                light.position,
-                std::numeric_limits<float>::max(),
-                0};
-
-    if (ClosestIntersection(i.position, r_hat, triangles, closestIntersection))
-    {
-         if (closestIntersection.distance < glm::length(light.position - i.position) &&
-                 closestIntersection.distance > EPSILON)
-            {
-                //cout << "distance" <<closestIntersection.distance<<endl;
-                //cout << "dist" <<glm::length(light.position - i.position)<<endl;
-                lightColour =  vec3(0,0,0);
-            }
-    }
-    lightColour += light.indirect_light;
-    return lightColour;
 }

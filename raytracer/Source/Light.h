@@ -1,6 +1,10 @@
 #ifndef LIGHT_H
 #define LIGHT_H
 
+#include "Intersection.h"
+#include <glm/glm.hpp>
+
+using namespace std;
 using glm::vec4;
 using glm::vec3;
 
@@ -22,9 +26,9 @@ class Light
     {
        // WHAT DO?? 
     }
-    
-
-
 };
 
+vec3 DirectLight(const Intersection& i,
+        vector<Triangle> triangles,
+        Light light);
 #endif
