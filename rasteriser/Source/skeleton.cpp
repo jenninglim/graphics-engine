@@ -17,7 +17,7 @@ using glm::mat3;
 using glm::vec4;
 using glm::mat4;
 
-#define SCREEN_WIDTH 100
+#define SCREEN_WIDTH 1000
 #define SCREEN_HEIGHT SCREEN_WIDTH
 #define CAM_FOCAL_LENGTH SCREEN_WIDTH
 #define FULLSCREEN_MODE false
@@ -32,7 +32,7 @@ void Draw(screen* screen, vector<Triangle> &triangles,Camera cam, Light light);
 void Interpolate(Pixel a, Pixel b, vector<Pixel>& result){
   int N = result.size();
   vec3 step = vec3(b.x - a.x, b.y - a.y, b.zinv - a.zinv) / float(glm::max(N-1, 1));
-  vec3 illuminationStep = b.illumination - a.illumination / float(glm::max(N-1, 1));
+  vec3 illuminationStep = (b.illumination - a.illumination) / float(glm::max(N-1, 1));
   Pixel current = { a.x,
                    a.y,
                    a.zinv,
@@ -67,8 +67,8 @@ void VertexShader(const Vertex& v, Pixel& p, Camera cam, Light light)
  
   vec4 r_hat = glm::normalize(light.position - v.position);
   float dist = glm::length(light.position - v.position);
-  vec3 lightColour = light.power * glm::max(glm::dot(vec4(1), vec4(1)), 0.0f) /
-    (float) (4.0f * glm::pi<float>() * glm::pow<float>(10,2));
+  vec3 lightColour = light.power * glm::max(glm::dot(r_hat, v.normal), 0.0f) /
+    (float) (4.0f * glm::pi<float>() * glm::pow<float>(dist,2));
   //Diffuse surface
   p.illumination =  (lightColour + light.indirect_light); 
 }
@@ -202,7 +202,7 @@ int main( int argc, char* argv[] )
   Camera cam(CAM_FOCAL_LENGTH, camPos); 
 
   //create light
-  Light light(vec4(0,-0.5,-0.7, 1), 0.1f*vec3(1,1,1));
+  Light light(vec4(0,-0.5,-0.7, 1), 14.1f*vec3(1,1,1));
   while( NoQuitMessageSDL() )
     {
       Update();
