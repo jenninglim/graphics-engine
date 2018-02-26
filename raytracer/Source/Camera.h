@@ -21,14 +21,14 @@ class Camera
 {
     public:
         float focalLength;
-        glm::vec4 cameraPos;
+        glm::vec4 position;
         glm::mat4 R;
         float yaw; // rotation of the camera
         float distance;
         mat4 increR;
 
     Camera(float focalLength, glm::vec4 cameraPos)
-        :focalLength(focalLength), cameraPos(cameraPos)
+        :focalLength(focalLength), position(cameraPos)
     {
         yaw = 0;
         R = mat4(1.0);
@@ -39,21 +39,21 @@ class Camera
     }
 
     void forward(){
-        this->cameraPos = this->cameraPos + glm::vec4(0,0,1,0);
+        this->position = this->position + glm::vec4(0,0,1,0);
     }
     void backward(){
-        this->cameraPos = this->cameraPos + glm::vec4(0,0,-1,0);
+        this->position = this->position + glm::vec4(0,0,-1,0);
     }
     void left(){
         this->yaw = yaw + ROTATION_SPEED;
         updateRotation();
-        this->cameraPos = this->increR * this->cameraPos;
+        this->position = this->increR * this->position;
 
     }
     void right(){
         this->yaw = yaw - ROTATION_SPEED;
         updateRotation();
-        this->cameraPos = glm::inverse(this->increR) * this->cameraPos;
+        this->position = glm::inverse(this->increR) * this->position;
     }
 
     private:
