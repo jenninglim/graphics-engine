@@ -28,8 +28,9 @@ bool ClosestIntersection(vec4 start, vec4 dir, const vector<Object> &objects, In
                 if(x_value.x < closestIntersection.distance){
                     closestIntersection.position = start + x_value.x * dir;
                     closestIntersection.distance = x_value.x;
-                    closestIntersection.triangleIndex = i;
-                    closestIntersection.objectIndex =j;
+                    closestIntersection.colour = objects[j].triangles[i].color;
+                    closestIntersection.normal = objects[j].triangles[i].normal;
+
                 }
             }
         }

@@ -15,6 +15,7 @@ class BVH
     public:
         BVH* left;
         BVH* right;
+        bool isLeaf;
         Object object;
         BoundingVolume bv;
         BVH();

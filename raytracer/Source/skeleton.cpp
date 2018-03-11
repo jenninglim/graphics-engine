@@ -63,8 +63,10 @@ void Draw(screen* screen, Camera cam, vector<Object>& objects, Light light)
 
     Intersection closestIntersection = {
                 cam.position,
+                vec3(0),
                 std::numeric_limits<float>::max(),
-                0};
+                vec4(0)
+                };
 
     for(int y = 0; y < SCREEN_HEIGHT; y++){
         for(int x = 0; x < SCREEN_WIDTH; x++){
@@ -88,7 +90,7 @@ void Draw(screen* screen, Camera cam, vector<Object>& objects, Light light)
                         objects,
                         light);
                 color = lightColor *
-                    objects[closestIntersection.objectIndex].triangles[closestIntersection.triangleIndex].color;
+                    closestIntersection.colour;
             }
         PutPixelSDL(screen, x, y, color);
         }

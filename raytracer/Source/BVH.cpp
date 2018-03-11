@@ -16,10 +16,12 @@ BVH::BVH(vector<Object> objects)
     
     if (objects.size() == 1)
     {
-       object = objects[0];
+        isLeaf = true;
+        object = objects[0];
     }
     else
     {
+        isLeaf = false;
         vector<vector<Object> > partitioning = partitionObject(objects);        
         left = new BVH(objects);
         right = new BVH(objects);

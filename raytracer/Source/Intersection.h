@@ -12,9 +12,9 @@ using namespace std;
 struct Intersection
 {
     glm::vec4 position;
+    glm ::vec3 colour;
     float distance;
-    int triangleIndex;
-    int objectIndex;
+    vec4 normal;
 };
 
 bool ClosestIntersection(vec4 start,
