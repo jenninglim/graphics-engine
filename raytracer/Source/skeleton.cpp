@@ -91,9 +91,9 @@ void Draw(screen* screen, Camera cam, BVH bvh, Light light)
                         r,
                         closestIntersection))
             {
-     //           lightColor = DirectLight(closestIntersection,
-      //                  bvh,
-       //                 light);
+                lightColor = DirectLight(closestIntersection,
+                        bvh,
+                        light);
                 color = lightColor *
                     closestIntersection.colour;
             }
