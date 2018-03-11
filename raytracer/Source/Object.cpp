@@ -2,6 +2,9 @@
 #include <glm/glm.hpp>
 #include "Object.h"
 
+#include <iostream>
+#include "glm/ext.hpp"
+
 using namespace std;
 using glm::vec3;
 using glm::vec4;
@@ -27,7 +30,7 @@ Object::Object(vector<Triangle> object)
 BoundingVolume::BoundingVolume()
 {
     this->max = vec3(std::numeric_limits<float>::max());
-    this->min = vec3(std::numeric_limits<float>::max());
+    this->min = vec3(std::numeric_limits<float>::min());
 }
 
 BoundingVolume::BoundingVolume(vec3 min, vec3 max)
@@ -50,9 +53,9 @@ void Object::computeBoundingVolume()
         if (tri_min.x < min.x) { min.x=tri_min.x; }
         if (tri_min.y < min.y) { min.y=tri_min.y; }
         if (tri_min.z < min.z) { min.z=tri_min.z; }
-        if (tri_max.x < max.x) { max.x=tri_max.x; }
-        if (tri_max.y < max.y) { max.y=tri_max.y; }
-        if (tri_max.z < max.z) { max.z=tri_max.z; }
+        if (tri_max.x > max.x) { max.x=tri_max.x; }
+        if (tri_max.y > max.y) { max.y=tri_max.y; }
+        if (tri_max.z > max.z) { max.z=tri_max.z; }
     }
     bv = BoundingVolume(min, max);
 }

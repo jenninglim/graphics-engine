@@ -34,36 +34,26 @@ vec3 solveLinearEq(Triangle triangle, Ray r)
 bool IntersectRayBoundingVolume(Ray r,
         BoundingVolume bv)
 {
-    vec4 ood = 1.f / r.direction;
-    float tmin = numeric_limits<float>::min();
-    float tmax = numeric_limits<float>::max();
-    float t1,t2 =0;
+    vec3 tmin, tmax;
     for (int i = 0; i < 3; i++)
     {
-        if (glm::abs(r.direction[i]) < EPSILON)
+        if (r.direction[i] >= 0)
         {
-            // Parallel => NO HIT
-            if (r.initial[i] < bv.min[i] - EPSILON
-            || r.initial[i] > bv.max[i] + EPSILON) { return false; }
+            tmin[i] = (bv.min[i] - r.initial[i]) / r.direction[i];
+            tmax[i] = (bv.max[i] - r.initial[i]) / r.direction[i];
         }
         else
         {
-            // Compute intersection
-            t1 = (bv.min[i] - r.initial[i]) * ood[i];
-            t2 = (bv.max[i] - r.initial[i]) * ood[i];
-
-            //Swap?
-            if (t1 > t2)
-            {
-               float temp = t2;
-               t2 = t1;
-               t1 = temp;
-            }
-            
-            if (t1 > tmin) {tmin = t1;}
-            if (t2 < tmax) {tmax = t2;}
-            if (tmin > tmax) { return false;}
+            tmin[i] = (bv.max[i] - r.initial[i]) / r.direction[i];
+            tmax[i] = (bv.min[i] - r.initial[i]) / r.direction[i];
         }
     }
-     return true;
+
+    if ((tmin[0] > tmax[1]) || (tmin[1] > tmax[0] )) {return false;}
+    if (glm::max(tmin[0], tmin[1]) > tmax[2] || tmin[2] > glm::min(tmax[0], tmax[1]))
+    {
+     return false;
+    }
+    return true;
 }
+

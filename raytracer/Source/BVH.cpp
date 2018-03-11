@@ -3,6 +3,7 @@
 
 #ifdef DEBUG
 #include <iostream>
+#include "glm/ext.hpp"
 #endif
 
 using namespace std;
@@ -106,9 +107,11 @@ BoundingVolume computeBoundingVolume(const vector<Object> objects)
         if (objects[i].bv.min.x < min.x) { min.x=objects[i].bv.min.x; }
         if (objects[i].bv.min.y < min.y) { min.y=objects[i].bv.min.y; }
         if (objects[i].bv.min.z < min.z) { min.z=objects[i].bv.min.z; }
-        if (objects[i].bv.max.x < max.x) { max.x=objects[i].bv.max.x; }
-        if (objects[i].bv.max.y < max.y) { max.y=objects[i].bv.max.y; }
-        if (objects[i].bv.max.z < max.z) { max.z=objects[i].bv.max.z; }
+        if (objects[i].bv.max.x > max.x) { max.x=objects[i].bv.max.x; }
+        if (objects[i].bv.max.y > max.y) { max.y=objects[i].bv.max.y; }
+        if (objects[i].bv.max.z > max.z) { max.z=objects[i].bv.max.z; }
+        //cout << glm::to_string(max) << endl;
     }
+    //cout <<  endl;
     return BoundingVolume(min,max);
 }
