@@ -10,6 +10,7 @@
 #include <math.h>
 #include "Light.h"
 #include "Intersection.h"
+#include "BVH.h"
 
 using namespace std;
 using glm::vec3;
@@ -25,7 +26,7 @@ void Update(Camera &cam);
 
 void Draw(screen* screen,
         Camera cam,
-        vector<Object>& triangles,
+        BVH bvh,
         Light light);
 
 int main( int argc, char* argv[] )
@@ -37,12 +38,13 @@ int main( int argc, char* argv[] )
   vec4 camPos(0,0,-3,1);
   Camera cam(CAM_FOCAL_LENGTH, camPos);
   LoadTestModel(objects);
-  bvh =BVH(objects);
+  cout << "Before init" <<endl;
+  BVH bvh = BVH(objects);
 
   while( NoQuitMessageSDL() )
     {
       Update(cam);
-      Draw(screen, cam, objects, light);
+      Draw(screen, cam, bvh, light);
       SDL_Renderframe(screen);
     }
 
@@ -53,10 +55,11 @@ int main( int argc, char* argv[] )
 }
 
 /*Place your drawing here*/
-void Draw(screen* screen, Camera cam, vector<Object>& objects, Light light)
+void Draw(screen* screen, Camera cam, BVH bvh, Light light)
 {
     vec3 color, lightColor = vec3();
     vec4 rayFromOrigin, rayFromCam, d = vec4();
+    Ray r;
 
     /* Clear buffer */
     //std::cout<<glm::to_string(cam.cameraPos)<<std::endl;
@@ -82,14 +85,14 @@ void Draw(screen* screen, Camera cam, vector<Object>& objects, Light light)
 
             d = glm::normalize(rayFromCam);
             closestIntersection.distance = std::numeric_limits<float>::max();
-            if (ClosestIntersection(cam.position,
-                        d,
-                        objects,
+            r = Ray(cam.position, d);
+            if (collision(bvh,
+                        r,
                         closestIntersection))
             {
-                lightColor = DirectLight(closestIntersection,
-                        objects,
-                        light);
+                //lightColor = DirectLight(closestIntersection,
+                 //       objects,
+                  //      light);
                 color = lightColor *
                     closestIntersection.colour;
             }
