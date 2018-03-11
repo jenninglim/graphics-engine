@@ -1,7 +1,6 @@
 #include <glm/glm.hpp>
 #include "Intersection.h"
 #include <vector>
-#include "Triangle.h"
 
 using namespace std;
 using glm::vec3;
@@ -9,19 +8,28 @@ using glm::vec4;
 
 vec3 solveLinearEq(Triangle triangle, Ray r);
 
-bool ClosestIntersection(vec4 start, vec4 dir, const vector<Triangle> &triangles, Intersection &closestIntersection){
+bool ClosestIntersection(vec4 start, vec4 dir, const vector<Object> &objects, Intersection &closestIntersection){
     bool intersectionFound =  false;
     Ray ray(start, dir);
     
-    for(int i = 0; i < triangles.size(); i++){
-        vec3 x_value = solveLinearEq(triangles[i],ray);
-        if(x_value.y >= 0 && x_value.z >= 0 && x_value.y + x_value.z <= 1 && x_value.x > EPSILON){
-            //Valid Intersection found
-            intersectionFound = true;
-            if(x_value.x < closestIntersection.distance){
-                closestIntersection.position = start + x_value.x * dir;
-                closestIntersection.distance = x_value.x;
-                closestIntersection.triangleIndex = i;
+    for(int j = 0; j < objects.size(); j++)
+    {
+        for (int i=0; i < objects[j].triangles.size(); i++)
+        {
+            vec3 x_value = solveLinearEq(objects[j].triangles[i],ray);
+            if(x_value.y >= 0
+            && x_value.z >= 0
+            && x_value.y + x_value.z <= 1
+            && x_value.x > EPSILON)
+            {
+                //Valid Intersection found
+                intersectionFound = true;
+                if(x_value.x < closestIntersection.distance){
+                    closestIntersection.position = start + x_value.x * dir;
+                    closestIntersection.distance = x_value.x;
+                    closestIntersection.triangleIndex = i;
+                    closestIntersection.objectIndex =j;
+                }
             }
         }
     }

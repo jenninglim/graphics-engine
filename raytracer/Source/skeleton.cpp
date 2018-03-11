@@ -25,23 +25,23 @@ void Update(Camera &cam);
 
 void Draw(screen* screen,
         Camera cam,
-        vector<Triangle>& triangles,
+        vector<Object>& triangles,
         Light light);
 
 int main( int argc, char* argv[] )
 {
   screen *screen = InitializeSDL( SCREEN_WIDTH, SCREEN_HEIGHT, FULLSCREEN_MODE );
-  vector<Triangle> triangles;
+  vector<Object> objects;
   Light light(vec4(0, -0.5, -0.7, 1), 14.f* vec3(1,1,1));
 
   vec4 camPos(0,0,-3,1);
   Camera cam(CAM_FOCAL_LENGTH, camPos);
-  LoadTestModel(triangles);
+  LoadTestModel(objects);
 
   while( NoQuitMessageSDL() )
     {
       Update(cam);
-      Draw(screen, cam, triangles, light);
+      Draw(screen, cam, objects, light);
       SDL_Renderframe(screen);
     }
 
@@ -52,7 +52,7 @@ int main( int argc, char* argv[] )
 }
 
 /*Place your drawing here*/
-void Draw(screen* screen, Camera cam, vector<Triangle>& triangles, Light light)
+void Draw(screen* screen, Camera cam, vector<Object>& objects, Light light)
 {
     /* Clear buffer */
     //std::cout<<glm::to_string(cam.cameraPos)<<std::endl;
@@ -73,14 +73,14 @@ void Draw(screen* screen, Camera cam, vector<Triangle>& triangles, Light light)
             closestIntersection.distance = std::numeric_limits<float>::max();
             if (ClosestIntersection(cam.position,
                         d,
-                        triangles,
+                        objects,
                         closestIntersection))
             {
                 vec3 lightColor = DirectLight(closestIntersection,
-                        triangles,
+                        objects,
                         light);
                 vec3 color = lightColor *
-                    triangles[closestIntersection.triangleIndex].color;
+                    objects[closestIntersection.objectIndex].triangles[closestIntersection.triangleIndex].color;
                 PutPixelSDL(screen, x, y, color);
             }
         }
