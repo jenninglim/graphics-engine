@@ -38,8 +38,9 @@ int main( int argc, char* argv[] )
   vec4 camPos(0,0,-3,1);
   Camera cam(CAM_FOCAL_LENGTH, camPos);
   LoadTestModel(objects);
-  
   BVH bvh = BVH(objects);
+  objects.clear(); 
+
   while( NoQuitMessageSDL() )
     {
       Update(cam);
@@ -84,22 +85,19 @@ void Draw(screen* screen, Camera cam, BVH bvh, Light light)
 
             d = glm::normalize(rayFromCam);
             closestIntersection.distance = std::numeric_limits<float>::max();
-            r = Ray(cam.position, d);
+            r.initial = cam.position;
+            r.direction = d;
             if (collision(bvh,
                         r,
                         closestIntersection))
             {
-                //lightColor = DirectLight(closestIntersection,
-                 //       objects,
-                  //      light);
+     //           lightColor = DirectLight(closestIntersection,
+      //                  bvh,
+       //                 light);
                 color = lightColor *
                     closestIntersection.colour;
             }
-            else
-            {
-                
-            }
-        PutPixelSDL(screen, x, y, color);
+            PutPixelSDL(screen, x, y, color);
         }
     }
 }
@@ -113,7 +111,7 @@ void Update(Camera &cam)
   float dt = float(t2-t);
   t = t2;
   /*Good idea to remove this*/
-  //std::cout << "Render time: " << dt << " ms." << std::endl;
+  std::cout << "Render time: " << dt << " ms." << std::endl;
   /* Update variables*/
 
   const uint8_t* keystate = SDL_GetKeyboardState( 0 );

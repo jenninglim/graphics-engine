@@ -3,40 +3,13 @@
 #include "Intersection.h"
 #include <vector>
 
+#ifdef DEBUG
+#include <iostream>
+#endif
+
 using namespace std;
 using glm::vec3;
 using glm::vec4;
-
-vec3 solveLinearEq(Triangle triangle, Ray r);
-
-bool ClosestIntersection(vec4 start, vec4 dir, const vector<Object> &objects, Intersection &closestIntersection){
-    bool intersectionFound =  false;
-    Ray ray(start, dir);
-    
-    for(int j = 0; j < objects.size(); j++)
-    {
-        for (int i=0; i < objects[j].triangles.size(); i++)
-        {
-            vec3 x_value = solveLinearEq(objects[j].triangles[i],ray);
-            if(x_value.y >= 0
-            && x_value.z >= 0
-            && x_value.y + x_value.z <= 1
-            && x_value.x > EPSILON)
-            {
-                //Valid Intersection found
-                intersectionFound = true;
-                if(x_value.x < closestIntersection.distance){
-                    closestIntersection.position = start + x_value.x * dir;
-                    closestIntersection.distance = x_value.x;
-                    closestIntersection.colour = objects[j].triangles[i].color;
-                    closestIntersection.normal = objects[j].triangles[i].normal;
-
-                }
-            }
-        }
-    }
-    return intersectionFound;
-}
 
 vec3 solveLinearEq(Triangle triangle, Ray r)
 {
@@ -62,7 +35,7 @@ bool IntersectRayBoundingVolume(Ray r,
         BoundingVolume bv)
 {
     vec4 ood = 1.f / r.direction;
-    float tmin = 0;
+    float tmin = numeric_limits<float>::min();
     float tmax = numeric_limits<float>::max();
     float t1,t2 =0;
     for (int i = 0; i < 3; i++)
@@ -70,7 +43,8 @@ bool IntersectRayBoundingVolume(Ray r,
         if (glm::abs(r.direction[i]) < EPSILON)
         {
             // Parallel => NO HIT
-            if (r.initial[i] < bv.min[i] || r.initial[i] > bv.max[i]) { return false; }
+            if (r.initial[i] < bv.min[i] - EPSILON
+            || r.initial[i] > bv.max[i] + EPSILON) { return false; }
         }
         else
         {
@@ -87,8 +61,8 @@ bool IntersectRayBoundingVolume(Ray r,
             }
             
             if (t1 > tmin) {tmin = t1;}
-            if (t2 > tmax) {tmax = t2;}
-            if (tmin > tmax) {return false;}
+            if (t2 < tmax) {tmax = t2;}
+            if (tmin > tmax) { return false;}
         }
     }
      return true;

@@ -3,6 +3,7 @@
 
 #include "Intersection.h"
 #include <glm/glm.hpp>
+#include "BVH.h"
 
 using namespace std;
 using glm::vec4;
@@ -29,6 +30,6 @@ class Light
 };
 
 vec3 DirectLight(const Intersection& i,
-        vector<Object> objects,
+        BVH bvh,
         Light light);
 #endif

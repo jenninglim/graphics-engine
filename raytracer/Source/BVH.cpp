@@ -37,8 +37,6 @@ BVH::BVH(vector<Object> objects)
 
 bool collision(BVH bvh, Ray r, Intersection &closestI)
 {
-    vec4 start = r.initial;
-    vec4 dir = r.direction;
     bool intersectionFound = false;
     if (IntersectRayBoundingVolume(r, bvh.bv))
     {
@@ -49,13 +47,13 @@ bool collision(BVH bvh, Ray r, Intersection &closestI)
                 vec3 x_value = solveLinearEq(bvh.object.triangles[i],r);
                 if(x_value.y >= 0
                         && x_value.z >= 0
-                        && x_value.y + x_value.z <= 1
+                        && x_value.y + x_value.z <= 1 + EPSILON
                         && x_value.x > EPSILON)
                 {
                     //Valid Intersection found
                     intersectionFound = true;
                     if(x_value.x < closestI.distance){
-                        closestI.position = start + x_value.x * dir;
+                        closestI.position = r.initial + x_value.x * r.direction;
                         closestI.distance = x_value.x;
                         closestI.colour = bvh.object.triangles[i].color;
                         closestI.normal = bvh.object.triangles[i].normal;

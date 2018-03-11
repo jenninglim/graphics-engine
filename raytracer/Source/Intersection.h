@@ -16,11 +16,6 @@ struct Intersection
     vec4 normal;
 };
 
-bool ClosestIntersection(vec4 start,
-        vec4 dir,
-        const vector<Object> &objects,
-        Intersection &closestIntersection);
-
 bool IntersectRayBoundingVolume(Ray r,
         BoundingVolume bv);
 

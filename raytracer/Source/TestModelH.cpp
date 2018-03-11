@@ -49,7 +49,6 @@ void LoadTestModel( std::vector<Object>& objects )
 	// Floor:
 	triangles.push_back( Triangle( C, B, A, green ) );
 	triangles.push_back( Triangle( C, D, B, green ) );
-
     push_object(objects, triangles);
 
 	// Left wall
