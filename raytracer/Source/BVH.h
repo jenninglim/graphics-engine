@@ -3,6 +3,8 @@
 
 #include <glm/glm.hpp>
 #include "Object.h"
+#include "Camera.h"
+#include "Intersection.h"
 
 using namespace std;
 using glm::vec3;
@@ -20,6 +22,8 @@ class BVH
         BoundingVolume bv;
         BVH();
         BVH(vector<Object> objects);
-
 };
+
+bool collision(BVH bvh, Ray r, Intersection &i);
+
 #endif

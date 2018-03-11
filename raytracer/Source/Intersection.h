@@ -4,7 +4,6 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include "Object.h"
-#include "BVH.h"
 #include "Camera.h"
 
 using namespace std;
@@ -22,8 +21,10 @@ bool ClosestIntersection(vec4 start,
         const vector<Object> &objects,
         Intersection &closestIntersection);
 
-bool IntersectRayBoundingVolume(vec4 start,
-        vec4 dir,
+bool IntersectRayBoundingVolume(Ray r,
         BoundingVolume bv);
+
+vec3 solveLinearEq(Triangle triangle, Ray r);
+
 
 #endif

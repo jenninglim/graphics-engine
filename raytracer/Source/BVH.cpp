@@ -1,6 +1,8 @@
 #include "BVH.h"
+#include <assert.h>
 
 using namespace std;
+
 BoundingVolume computeBoundingVolume(vector<Object> objects);
 vector<vector<Object> > partitionObject(vector<Object> objects);
 
@@ -12,6 +14,7 @@ BVH::BVH()
 
 BVH::BVH(vector<Object> objects)
 {
+    assert(objects.size() > 0);
     bv = computeBoundingVolume(objects);
     
     if (objects.size() == 1)
@@ -28,9 +31,52 @@ BVH::BVH(vector<Object> objects)
     }
 }
 
+bool collision(BVH bvh, Ray r, Intersection &closestI)
+{
+    vec4 start = r.initial;
+    vec4 dir = r.direction;
+    bool intersectionFound = false;
+    if (IntersectRayBoundingVolume(r, bvh.bv))
+    {
+        if (bvh.isLeaf == true)
+        {
+            for (int i=0; i < bvh.object.triangles.size(); i++)
+            {
+                vec3 x_value = solveLinearEq(bvh.object.triangles[i],r);
+                if(x_value.y >= 0
+                        && x_value.z >= 0
+                        && x_value.y + x_value.z <= 1
+                        && x_value.x > EPSILON)
+                {
+                    //Valid Intersection found
+                    intersectionFound = true;
+                    if(x_value.x < closestI.distance){
+                        closestI.position = start + x_value.x * dir;
+                        closestI.distance = x_value.x;
+                        closestI.colour = bvh.object.triangles[i].color;
+                        closestI.normal = bvh.object.triangles[i].normal;
+
+                    }
+                }
+            }
+        }
+        else
+        {
+            intersectionFound |= collision(*bvh.left, r, closestI);
+            intersectionFound |= collision(*bvh.right, r, closestI);
+        }
+    }
+    else
+    {
+        return false;
+    }
+    return intersectionFound;
+}
+
 vector<vector<Object> > partitionObject(vector<Object> objects)
 {
     // Naive median parititoning.
+    //
     int index = objects.size()/2;
     vector<Object> left, right;
     vector<vector<Object> >  result = vector<vector<Object> >();

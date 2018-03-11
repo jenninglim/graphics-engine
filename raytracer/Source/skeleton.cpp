@@ -37,6 +37,7 @@ int main( int argc, char* argv[] )
   vec4 camPos(0,0,-3,1);
   Camera cam(CAM_FOCAL_LENGTH, camPos);
   LoadTestModel(objects);
+  bvh =BVH(objects);
 
   while( NoQuitMessageSDL() )
     {

@@ -58,26 +58,25 @@ vec3 solveLinearEq(Triangle triangle, Ray r)
     //return vec3(0,0,0);
 }
 
-bool IntersectRayBoundingVolume(vec4 start,
-        vec4 dir,
+bool IntersectRayBoundingVolume(Ray r,
         BoundingVolume bv)
 {
-    vec4 ood = 1.f / dir;
+    vec4 ood = 1.f / r.direction;
     float tmin = 0;
     float tmax = numeric_limits<float>::max();
     float t1,t2 =0;
     for (int i = 0; i < 3; i++)
     {
-        if (glm::abs(dir[i]) < EPSILON)
+        if (glm::abs(r.direction[i]) < EPSILON)
         {
             // Parallel => NO HIT
-            if (start[i] < bv.min[i] || start[i] > bv.max[i]) { return false; }
+            if (r.initial[i] < bv.min[i] || r.initial[i] > bv.max[i]) { return false; }
         }
         else
         {
             // Compute intersection
-            t1 = (bv.min[i] - start[i]) * ood[i];
-            t2 = (bv.max[i] - start[i]) * ood[i];
+            t1 = (bv.min[i] - r.initial[i]) * ood[i];
+            t2 = (bv.max[i] - r.initial[i]) * ood[i];
 
             //Swap?
             if (t1 > t2)

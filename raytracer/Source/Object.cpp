@@ -27,7 +27,7 @@ Object::Object(vector<Triangle> object)
 BoundingVolume::BoundingVolume()
 {
     max = vec3(std::numeric_limits<float>::max());
-    min = vec3(std::numeric_limits<float>::min());
+    min = vec3(std::numeric_limits<float>::max());
 }
 
 BoundingVolume::BoundingVolume(vec3 min, vec3 max)
