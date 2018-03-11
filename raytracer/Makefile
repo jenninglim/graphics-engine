@@ -22,9 +22,9 @@ SDL_LDFLAGS := $(shell sdl2-config --libs)
 all:Build
 
 
-#   ########
+#########
 #Object list
-OBJ = $(B_DIR)/$(FILE).o $(B_DIR)/Intersection.o $(B_DIR)/Light.o
+OBJ = $(B_DIR)/$(FILE).o $(B_DIR)/TestModelH.o $(B_DIR)/Intersection.o $(B_DIR)/Light.o $(B_DIR)/Object.o 
 
 ########
 #Objects
@@ -34,8 +34,14 @@ $(B_DIR)/$(FILE).o : $(S_DIR)/$(FILE).cpp $(S_DIR)/SDLauxiliary.h
 $(B_DIR)/Intersection.o : $(S_DIR)/Intersection.cpp $(S_DIR)/Intersection.h 
 	$(CC) $(CC_OPTS) -o $(B_DIR)/Intersection.o $(S_DIR)/Intersection.cpp $(SDL_CFLAGS) $(GLM_CFLAGS)
 
+$(B_DIR)/TestModelH.o : $(S_DIR)/TestModelH.cpp $(S_DIR)/TestModelH.h 
+	$(CC) $(CC_OPTS) -o $(B_DIR)/TestModelH.o $(S_DIR)/TestModelH.cpp $(SDL_CFLAGS) $(GLM_CFLAGS)
+
 $(B_DIR)/Light.o : $(S_DIR)/Light.cpp $(S_DIR)/Light.h 
 	$(CC) $(CC_OPTS) -o $(B_DIR)/Light.o $(S_DIR)/Light.cpp $(SDL_CFLAGS) $(GLM_CFLAGS)
+
+$(B_DIR)/Object.o : $(S_DIR)/Object.cpp $(S_DIR)/Object.h 
+	$(CC) $(CC_OPTS) -o $(B_DIR)/Object.o $(S_DIR)/Object.cpp $(SDL_CFLAGS) $(GLM_CFLAGS)
 
 
 ########

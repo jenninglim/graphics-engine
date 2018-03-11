@@ -29,6 +29,6 @@ class Light
 };
 
 vec3 DirectLight(const Intersection& i,
-        vector<Triangle> triangles,
+        vector<Object> objects,
         Light light);
 #endif

@@ -3,7 +3,7 @@
 
 #include <glm/glm.hpp>
 #include <vector>
-#include "Triangle.h"
+#include "Object.h"
 #include "Camera.h"
 
 using namespace std;
@@ -13,10 +13,11 @@ struct Intersection
     glm::vec4 position;
     float distance;
     int triangleIndex;
+    int objectIndex;
 };
 
 bool ClosestIntersection(vec4 start,
         vec4 dir,
-        const vector<Triangle> &triangles,
+        const vector<Object> &objects,
         Intersection &closestIntersection);
 #endif
