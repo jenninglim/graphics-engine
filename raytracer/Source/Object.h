@@ -11,12 +11,22 @@ using glm::vec4;
 using glm::mat3;
 using glm::mat4;
 
+class BoundingVolume
+{
+    public:
+        vec3 min;
+        vec3 max;
+        BoundingVolume();
+        BoundingVolume(vec3 min, vec3 max);
+};
+
 class Object
 {
     public:
         vector<Triangle> triangles;
-
-    Object(vector<Triangle> object);
+        BoundingVolume bv;
+        Object();
+        Object(vector<Triangle> object);
+        void computeBoundingVolume();
 };
-
 #endif 

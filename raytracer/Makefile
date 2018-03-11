@@ -24,7 +24,7 @@ all:Build
 
 #########
 #Object list
-OBJ = $(B_DIR)/$(FILE).o $(B_DIR)/TestModelH.o $(B_DIR)/Intersection.o $(B_DIR)/Light.o $(B_DIR)/Object.o 
+OBJ = $(B_DIR)/$(FILE).o $(B_DIR)/TestModelH.o $(B_DIR)/Intersection.o $(B_DIR)/Light.o $(B_DIR)/Object.o $(B_DIR)/BVH.o
 
 ########
 #Objects
@@ -42,6 +42,10 @@ $(B_DIR)/Light.o : $(S_DIR)/Light.cpp $(S_DIR)/Light.h
 
 $(B_DIR)/Object.o : $(S_DIR)/Object.cpp $(S_DIR)/Object.h 
 	$(CC) $(CC_OPTS) -o $(B_DIR)/Object.o $(S_DIR)/Object.cpp $(SDL_CFLAGS) $(GLM_CFLAGS)
+
+$(B_DIR)/BVH.o : $(S_DIR)/BVH.cpp $(S_DIR)/BVH.h 
+	$(CC) $(CC_OPTS) -o $(B_DIR)/BVH.o $(S_DIR)/BVH.cpp $(SDL_CFLAGS) $(GLM_CFLAGS)
+
 
 
 ########
