@@ -19,5 +19,6 @@ class BVH
         BoundingVolume bv;
         BVH();
         BVH(vector<Object> objects);
+
 };
 #endif

@@ -1,7 +1,8 @@
 #include "BVH.h"
 
 using namespace std;
-void computeBoundingVolume(vector<Object> objects);
+BoundingVolume computeBoundingVolume(vector<Object> objects);
+vector<vector<Object> > partitionObject(vector<Object> objects);
 
 BVH::BVH()
 {
@@ -11,18 +12,41 @@ BVH::BVH()
 
 BVH::BVH(vector<Object> objects)
 {
-    computeBoundingVolume(objects);
+    bv = computeBoundingVolume(objects);
+    
     if (objects.size() == 1)
     {
-        
+       object = objects[0];
     }
     else
     {
-
+        vector<vector<Object> > partitioning = partitionObject(objects);        
+        left = new BVH(objects);
+        right = new BVH(objects);
     }
 }
 
-void computeBoundingVolume(vector<Object> objects)
+vector<vector<Object> > partitionObject(vector<Object> objects)
+{
+    // Naive median parititoning.
+    int index = objects.size()/2;
+    vector<Object> left, right;
+    vector<vector<Object> >  result = vector<vector<Object> >();
+    for (int i = 0; i < index; i++)
+    {
+        left.push_back(objects[i]);
+    }
+    for (int i = index; i < objects.size(); i++)
+    {
+        right.push_back(objects[i]);
+    }
+    result.push_back(left);
+    result.push_back(right);
+    return result;
+}
+
+
+BoundingVolume computeBoundingVolume(const vector<Object> objects)
 {
     vec3 max = vec3(std::numeric_limits<float>::min());
     vec3 min = vec3(std::numeric_limits<float>::max());
@@ -36,4 +60,5 @@ void computeBoundingVolume(vector<Object> objects)
         if (objects[i].bv.max.y < max.y) { max.y=objects[i].bv.max.y; }
         if (objects[i].bv.max.z < max.z) { max.z=objects[i].bv.max.z; }
     }
+    return BoundingVolume(min,max);
 }

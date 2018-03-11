@@ -1,3 +1,4 @@
+#include <limits>
 #include <glm/glm.hpp>
 #include "Intersection.h"
 #include <vector>
@@ -54,4 +55,41 @@ vec3 solveLinearEq(Triangle triangle, Ray r)
         return glm::inverse( A ) * b;
     //}
     //return vec3(0,0,0);
+}
+
+bool IntersectRayBoundingVolume(vec4 start,
+        vec4 dir,
+        BoundingVolume bv)
+{
+    vec4 ood = 1.f / dir;
+    float tmin = 0;
+    float tmax = numeric_limits<float>::max();
+    float t1,t2 =0;
+    for (int i = 0; i < 3; i++)
+    {
+        if (glm::abs(dir[i]) < EPSILON)
+        {
+            // Parallel => NO HIT
+            if (start[i] < bv.min[i] || start[i] > bv.max[i]) { return false; }
+        }
+        else
+        {
+            // Compute intersection
+            t1 = (bv.min[i] - start[i]) * ood[i];
+            t2 = (bv.max[i] - start[i]) * ood[i];
+
+            //Swap?
+            if (t1 > t2)
+            {
+               float temp = t2;
+               t2 = t1;
+               t1 = temp;
+            }
+            
+            if (t1 > tmin) {tmin = t1;}
+            if (t2 > tmax) {tmax = t2;}
+            if (tmin > tmax) {return false;}
+        }
+    }
+     return true;
 }

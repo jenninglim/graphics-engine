@@ -54,9 +54,13 @@ int main( int argc, char* argv[] )
 /*Place your drawing here*/
 void Draw(screen* screen, Camera cam, vector<Object>& objects, Light light)
 {
+    vec3 color, lightColor = vec3();
+    vec4 rayFromOrigin, rayFromCam, d = vec4();
+
     /* Clear buffer */
     //std::cout<<glm::to_string(cam.cameraPos)<<std::endl;
     memset(screen->buffer, 0, screen->height*screen->width*sizeof(uint32_t));
+
     Intersection closestIntersection = {
                 cam.position,
                 std::numeric_limits<float>::max(),
@@ -64,25 +68,29 @@ void Draw(screen* screen, Camera cam, vector<Object>& objects, Light light)
 
     for(int y = 0; y < SCREEN_HEIGHT; y++){
         for(int x = 0; x < SCREEN_WIDTH; x++){
-            vec4 rayFromOrigin(x - SCREEN_WIDTH/2,
-                    y- SCREEN_HEIGHT/2,
-                    cam.focalLength,1);
-            vec4 rayFromCam = cam.R * rayFromOrigin;
-            vec4 d(rayFromCam.x, rayFromCam.y, rayFromCam.z, 1) ;
-            d = glm::normalize(d);
+            rayFromOrigin.x = x - SCREEN_WIDTH/2;
+            rayFromOrigin.y = y - SCREEN_HEIGHT/2;
+            rayFromOrigin.z = cam.focalLength;
+            rayFromOrigin[3] = 1;
+
+            color = vec3(0);
+
+            rayFromCam = cam.R * rayFromOrigin;
+
+            d = glm::normalize(rayFromCam);
             closestIntersection.distance = std::numeric_limits<float>::max();
             if (ClosestIntersection(cam.position,
                         d,
                         objects,
                         closestIntersection))
             {
-                vec3 lightColor = DirectLight(closestIntersection,
+                lightColor = DirectLight(closestIntersection,
                         objects,
                         light);
-                vec3 color = lightColor *
+                color = lightColor *
                     objects[closestIntersection.objectIndex].triangles[closestIntersection.triangleIndex].color;
-                PutPixelSDL(screen, x, y, color);
             }
+        PutPixelSDL(screen, x, y, color);
         }
     }
 }
