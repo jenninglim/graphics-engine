@@ -1,40 +1,15 @@
+#include <limits>
 #include <glm/glm.hpp>
 #include "Intersection.h"
 #include <vector>
 
+#ifdef DEBUG
+#include <iostream>
+#endif
+
 using namespace std;
 using glm::vec3;
 using glm::vec4;
-
-vec3 solveLinearEq(Triangle triangle, Ray r);
-
-bool ClosestIntersection(vec4 start, vec4 dir, const vector<Object> &objects, Intersection &closestIntersection){
-    bool intersectionFound =  false;
-    Ray ray(start, dir);
-    
-    for(int j = 0; j < objects.size(); j++)
-    {
-        for (int i=0; i < objects[j].triangles.size(); i++)
-        {
-            vec3 x_value = solveLinearEq(objects[j].triangles[i],ray);
-            if(x_value.y >= 0
-            && x_value.z >= 0
-            && x_value.y + x_value.z <= 1
-            && x_value.x > EPSILON)
-            {
-                //Valid Intersection found
-                intersectionFound = true;
-                if(x_value.x < closestIntersection.distance){
-                    closestIntersection.position = start + x_value.x * dir;
-                    closestIntersection.distance = x_value.x;
-                    closestIntersection.triangleIndex = i;
-                    closestIntersection.objectIndex =j;
-                }
-            }
-        }
-    }
-    return intersectionFound;
-}
 
 vec3 solveLinearEq(Triangle triangle, Ray r)
 {
@@ -55,3 +30,30 @@ vec3 solveLinearEq(Triangle triangle, Ray r)
     //}
     //return vec3(0,0,0);
 }
+
+bool IntersectRayBoundingVolume(Ray r,
+        BoundingVolume bv)
+{
+    vec3 tmin, tmax;
+    for (int i = 0; i < 3; i++)
+    {
+        if (r.direction[i] >= 0)
+        {
+            tmin[i] = (bv.min[i] - r.initial[i]) / r.direction[i];
+            tmax[i] = (bv.max[i] - r.initial[i]) / r.direction[i];
+        }
+        else
+        {
+            tmin[i] = (bv.max[i] - r.initial[i]) / r.direction[i];
+            tmax[i] = (bv.min[i] - r.initial[i]) / r.direction[i];
+        }
+    }
+
+    if ((tmin[0] > tmax[1]) || (tmin[1] > tmax[0] )) {return false;}
+    if (glm::max(tmin[0], tmin[1]) > tmax[2] || tmin[2] > glm::min(tmax[0], tmax[1]))
+    {
+     return false;
+    }
+    return true;
+}
+

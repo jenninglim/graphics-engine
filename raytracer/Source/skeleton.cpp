@@ -10,6 +10,7 @@
 #include <math.h>
 #include "Light.h"
 #include "Intersection.h"
+#include "BVH.h"
 
 using namespace std;
 using glm::vec3;
@@ -25,7 +26,7 @@ void Update(Camera &cam);
 
 void Draw(screen* screen,
         Camera cam,
-        vector<Object>& triangles,
+        BVH bvh,
         Light light);
 
 int main( int argc, char* argv[] )
@@ -37,11 +38,13 @@ int main( int argc, char* argv[] )
   vec4 camPos(0,0,-3,1);
   Camera cam(CAM_FOCAL_LENGTH, camPos);
   LoadTestModel(objects);
+  BVH bvh = BVH(objects);
+  objects.clear(); 
 
   while( NoQuitMessageSDL() )
     {
       Update(cam);
-      Draw(screen, cam, objects, light);
+      Draw(screen, cam, bvh, light);
       SDL_Renderframe(screen);
     }
 
@@ -52,37 +55,49 @@ int main( int argc, char* argv[] )
 }
 
 /*Place your drawing here*/
-void Draw(screen* screen, Camera cam, vector<Object>& objects, Light light)
+void Draw(screen* screen, Camera cam, BVH bvh, Light light)
 {
+    vec3 color, lightColor = vec3(1);
+    vec4 rayFromOrigin, rayFromCam, d = vec4();
+    Ray r;
+
     /* Clear buffer */
     //std::cout<<glm::to_string(cam.cameraPos)<<std::endl;
     memset(screen->buffer, 0, screen->height*screen->width*sizeof(uint32_t));
+
     Intersection closestIntersection = {
                 cam.position,
+                vec3(0),
                 std::numeric_limits<float>::max(),
-                0};
+                vec4(0)
+                };
 
     for(int y = 0; y < SCREEN_HEIGHT; y++){
         for(int x = 0; x < SCREEN_WIDTH; x++){
-            vec4 rayFromOrigin(x - SCREEN_WIDTH/2,
-                    y- SCREEN_HEIGHT/2,
-                    cam.focalLength,1);
-            vec4 rayFromCam = cam.R * rayFromOrigin;
-            vec4 d(rayFromCam.x, rayFromCam.y, rayFromCam.z, 1) ;
-            d = glm::normalize(d);
+            rayFromOrigin.x = x - SCREEN_WIDTH/2;
+            rayFromOrigin.y = y - SCREEN_HEIGHT/2;
+            rayFromOrigin.z = cam.focalLength;
+            rayFromOrigin[3] = 1;
+
+            color = vec3(0);
+
+            rayFromCam = cam.R * rayFromOrigin;
+
+            d = glm::normalize(rayFromCam);
             closestIntersection.distance = std::numeric_limits<float>::max();
-            if (ClosestIntersection(cam.position,
-                        d,
-                        objects,
+            r.initial = cam.position;
+            r.direction = d;
+            if (collision(bvh,
+                        r,
                         closestIntersection))
             {
-                vec3 lightColor = DirectLight(closestIntersection,
-                        objects,
+                lightColor = DirectLight(closestIntersection,
+                        bvh,
                         light);
-                vec3 color = lightColor *
-                    objects[closestIntersection.objectIndex].triangles[closestIntersection.triangleIndex].color;
-                PutPixelSDL(screen, x, y, color);
+                color = lightColor *
+                    closestIntersection.colour;
             }
+            PutPixelSDL(screen, x, y, color);
         }
     }
 }
@@ -96,7 +111,7 @@ void Update(Camera &cam)
   float dt = float(t2-t);
   t = t2;
   /*Good idea to remove this*/
-  //std::cout << "Render time: " << dt << " ms." << std::endl;
+  std::cout << "Render time: " << dt << " ms." << std::endl;
   /* Update variables*/
 
   const uint8_t* keystate = SDL_GetKeyboardState( 0 );

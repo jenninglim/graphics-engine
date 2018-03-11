@@ -11,13 +11,15 @@ using namespace std;
 struct Intersection
 {
     glm::vec4 position;
+    glm ::vec3 colour;
     float distance;
-    int triangleIndex;
-    int objectIndex;
+    vec4 normal;
 };
 
-bool ClosestIntersection(vec4 start,
-        vec4 dir,
-        const vector<Object> &objects,
-        Intersection &closestIntersection);
+bool IntersectRayBoundingVolume(Ray r,
+        BoundingVolume bv);
+
+vec3 solveLinearEq(Triangle triangle, Ray r);
+
+
 #endif

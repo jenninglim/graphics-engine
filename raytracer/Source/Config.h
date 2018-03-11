@@ -6,4 +6,5 @@
 #define FULLSCREEN_MODE false
 #define CAM_FOCAL_LENGTH SCREEN_WIDTH
 #define EPSILON 1e-3
+#define DEBUG 1
 #endif
