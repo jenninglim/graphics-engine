@@ -38,9 +38,8 @@ int main( int argc, char* argv[] )
   vec4 camPos(0,0,-3,1);
   Camera cam(CAM_FOCAL_LENGTH, camPos);
   LoadTestModel(objects);
-  cout << "Before init" <<endl;
+  
   BVH bvh = BVH(objects);
-
   while( NoQuitMessageSDL() )
     {
       Update(cam);
@@ -57,7 +56,7 @@ int main( int argc, char* argv[] )
 /*Place your drawing here*/
 void Draw(screen* screen, Camera cam, BVH bvh, Light light)
 {
-    vec3 color, lightColor = vec3();
+    vec3 color, lightColor = vec3(1);
     vec4 rayFromOrigin, rayFromCam, d = vec4();
     Ray r;
 
@@ -95,6 +94,10 @@ void Draw(screen* screen, Camera cam, BVH bvh, Light light)
                   //      light);
                 color = lightColor *
                     closestIntersection.colour;
+            }
+            else
+            {
+                
             }
         PutPixelSDL(screen, x, y, color);
         }

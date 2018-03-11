@@ -1,6 +1,10 @@
 #include "BVH.h"
 #include <assert.h>
 
+#ifdef DEBUG
+#include <iostream>
+#endif
+
 using namespace std;
 
 BoundingVolume computeBoundingVolume(vector<Object> objects);
@@ -26,8 +30,8 @@ BVH::BVH(vector<Object> objects)
     {
         isLeaf = false;
         vector<vector<Object> > partitioning = partitionObject(objects);        
-        left = new BVH(objects);
-        right = new BVH(objects);
+        left = new BVH(partitioning[0]);
+        right = new BVH(partitioning[1]);
     }
 }
 
