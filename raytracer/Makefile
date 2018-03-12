@@ -1,15 +1,16 @@
-FILE=skeleton
-S_DIR=Source
-B_DIR=Build
+TARGET_EXEC ?= skeleton.out
 
-########
-# Output
-EXEC=$(B_DIR)/$(FILE)
+BUILD_DIR ?= Build
+SRC_DIRS ?= Source
 
-#default build settings
-CC_OPTS=-c -pipe -Wall -Wno-switch -ggdb -g3 -O3 
-LN_OPTS=
-CC=g++
+SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
+OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
+DEPS := $(OBJS:.o=.d)
+CXX := g++
+CC := g++
+
+INC_DIRS := $(shell find $(SRC_DIRS) -type d)
+INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 ########
 #SDL options
@@ -17,43 +18,32 @@ SDL_CFLAGS := $(shell sdl2-config --cflags)
 GLM_CFLAGS := -I../glm/
 SDL_LDFLAGS := $(shell sdl2-config --libs)
 
-########
-#This is the default action
-all:Build
+CPPFLAGS ?= $(INC_FLAGS) -pipe -Wall -Wno-switch -ggdb -g3 -O3
+
+$(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
+	$(CC) $(OBJS) -o $@ $(LDFLAGS) $(SDL_LDFLAGS)
+
+# assembly
+$(BUILD_DIR)/%.s.o: %.s
+	$(MKDIR_P) $(dir $@)
+	$(AS) $(ASFLAGS) -c $< -o $@
+
+# c source
+$(BUILD_DIR)/%.c.o: %.c
+	$(MKDIR_P) $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+# c++ source
+$(BUILD_DIR)/%.cpp.o: %.cpp
+	$(MKDIR_P) $(dir $@)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@ $(SDL_CFLAGS) $(GLM_CFLAGS)
 
 
-#########
-#Object list
-OBJ = $(B_DIR)/$(FILE).o $(B_DIR)/TestModelH.o $(B_DIR)/Intersection.o $(B_DIR)/Light.o $(B_DIR)/Object.o $(B_DIR)/BVH.o
+.PHONY: clean
 
-########
-#Objects
-$(B_DIR)/$(FILE).o : $(S_DIR)/$(FILE).cpp $(S_DIR)/SDLauxiliary.h 
-	$(CC) $(CC_OPTS) -o $(B_DIR)/$(FILE).o $(S_DIR)/$(FILE).cpp $(SDL_CFLAGS) $(GLM_CFLAGS)
-
-$(B_DIR)/Intersection.o : $(S_DIR)/Intersection.cpp $(S_DIR)/Intersection.h 
-	$(CC) $(CC_OPTS) -o $(B_DIR)/Intersection.o $(S_DIR)/Intersection.cpp $(SDL_CFLAGS) $(GLM_CFLAGS)
-
-$(B_DIR)/TestModelH.o : $(S_DIR)/TestModelH.cpp $(S_DIR)/TestModelH.h 
-	$(CC) $(CC_OPTS) -o $(B_DIR)/TestModelH.o $(S_DIR)/TestModelH.cpp $(SDL_CFLAGS) $(GLM_CFLAGS)
-
-$(B_DIR)/Light.o : $(S_DIR)/Light.cpp $(S_DIR)/Light.h 
-	$(CC) $(CC_OPTS) -o $(B_DIR)/Light.o $(S_DIR)/Light.cpp $(SDL_CFLAGS) $(GLM_CFLAGS)
-
-$(B_DIR)/Object.o : $(S_DIR)/Object.cpp $(S_DIR)/Object.h 
-	$(CC) $(CC_OPTS) -o $(B_DIR)/Object.o $(S_DIR)/Object.cpp $(SDL_CFLAGS) $(GLM_CFLAGS)
-
-$(B_DIR)/BVH.o : $(S_DIR)/BVH.cpp $(S_DIR)/BVH.h 
-	$(CC) $(CC_OPTS) -o $(B_DIR)/BVH.o $(S_DIR)/BVH.cpp $(SDL_CFLAGS) $(GLM_CFLAGS)
-
-
-
-########
-#Main build rule     
-Build : $(OBJ) Makefile
-	$(CC) $(LN_OPTS) -o $(EXEC) $(OBJ) $(SDL_LDFLAGS)
-#
-#
 clean:
-	rm -f $(B_DIR)/*
+	$(RM) -r $(BUILD_DIR)
 
+-include $(DEPS)
+
+MKDIR_P ?= mkdir -p
