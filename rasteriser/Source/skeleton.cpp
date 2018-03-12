@@ -203,7 +203,7 @@ int main( int argc, char* argv[] )
   Camera cam(CAM_FOCAL_LENGTH, camPos); 
 
   //create light
-  Light light(vec4(0,-0.5,-0.7, 1), 14.1f*vec3(1,1,1));
+  Light light(vec4(0,-0.5,-0.7, 1), 100.1f*vec3(1,1,1));
   while( NoQuitMessageSDL() )
     {
       Update();

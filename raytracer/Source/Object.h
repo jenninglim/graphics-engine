@@ -26,7 +26,7 @@ class Object
         vector<Triangle> triangles;
         BoundingVolume bv;
         double reflect;
-        double refract_index;
+        double refract;
         Object();
         Object(vector<Triangle> object);
         Object(vector<Triangle> object, double reflectance);

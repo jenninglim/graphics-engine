@@ -26,7 +26,7 @@ Object::Object(vector<Triangle> object)
     triangles = object;
     computeBoundingVolume();
     this->reflect = 0.6;
-    this->refract_index = 1;
+    this->refract= 0;
 }
 
 Object::Object(vector<Triangle> object, double reflectance)
@@ -35,7 +35,7 @@ Object::Object(vector<Triangle> object, double reflectance)
     this->triangles = object;
     computeBoundingVolume();
     this->reflect = reflectance;
-    this->refract_index = 1;
+    this->refract= 1;
 }
 
 Object::Object(vector<Triangle> object, double reflectance, double refract_index)
@@ -44,7 +44,7 @@ Object::Object(vector<Triangle> object, double reflectance, double refract_index
     this->triangles = object;
     computeBoundingVolume();
     this->reflect = reflectance;
-    this->refract_index = refract_index;
+    this->refract= refract_index;
 }
 
 

@@ -1,8 +1,9 @@
 #ifndef RAY_H
 #define RAY_H
 
-#include "Ray.h"
+#include "BVH.h"
 #include "Intersection.h"
+#include "Light.h"
 
 using namespace glm;
 // Ray
@@ -25,5 +26,7 @@ class Ray
 
 Ray reflect(const Ray I, const Intersection i);
 Ray refract(const Ray I, const Intersection i);
+void shootRay(const Ray r, Intersection &i, vec3 &colour, BVH bvh, Light light);
+//void fresnel(const Ray r, const Intersection i, float &kr);
 
 #endif

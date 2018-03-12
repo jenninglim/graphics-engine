@@ -7,6 +7,14 @@ void push_object(vector<Object> &objects, vector<Triangle> &object_tri, float re
     objects.push_back(object);
     object_tri.clear();
 }
+
+
+void push_object(vector<Object> &objects, vector<Triangle> &object_tri, float reflectance, float refract)
+{
+    Object object = Object(object_tri, reflectance, refract);
+    objects.push_back(object);
+    object_tri.clear();
+}
 // Loads the Cornell Box. It is scaled to fill the volume:
 // -1 <= x <= +1
 // -1 <= y <= +1
@@ -86,22 +94,18 @@ void LoadTestModel( std::vector<Object>& objects )
 	// Front
 	triangles.push_back( Triangle(E,B,A,red) );
 	triangles.push_back( Triangle(E,F,B,red) );
-    push_object(objects, triangles, BOX_REFLECTANCE);
 
 	// Front
 	triangles.push_back( Triangle(F,D,B,red) );
 	triangles.push_back( Triangle(F,H,D,red) );
-    push_object(objects, triangles, BOX_REFLECTANCE);
 
 	// BACK
 	triangles.push_back( Triangle(H,C,D,red) );
 	triangles.push_back( Triangle(H,G,C,red) );
-    push_object(objects, triangles, BOX_REFLECTANCE);
 
 	// LEFT
 	triangles.push_back( Triangle(G,E,C,red) );
 	triangles.push_back( Triangle(E,A,C,red) );
-    push_object(objects, triangles, BOX_REFLECTANCE);
 
 	// TOP
 	triangles.push_back( Triangle(G,F,E,red) );
@@ -124,29 +128,21 @@ void LoadTestModel( std::vector<Object>& objects )
 	// Front
 	triangles.push_back( Triangle(E,B,A,blue) );
 	triangles.push_back( Triangle(E,F,B,blue) );
-    push_object(objects, triangles, BOX_REFLECTANCE);
 
 	// Front
 	triangles.push_back( Triangle(F,D,B,blue) );
 	triangles.push_back( Triangle(F,H,D,blue) );
-    push_object(objects, triangles, BOX_REFLECTANCE);
 
 	// BACK
 	triangles.push_back( Triangle(H,C,D,blue) );
 	triangles.push_back( Triangle(H,G,C,blue) );
-    push_object(objects, triangles, BOX_REFLECTANCE);
 
 	// LEFT
 	triangles.push_back( Triangle(G,E,C,blue) );
 	triangles.push_back( Triangle(E,A,C,blue) );
-    push_object(objects, triangles,BOX_REFLECTANCE);
 
 	// TOP
 	triangles.push_back( Triangle(G,F,E,blue) );
 	triangles.push_back( Triangle(G,H,F,blue) );
-    push_object(objects, triangles,BOX_REFLECTANCE);
-
-
+    push_object(objects, triangles,BOX_REFLECTANCE, 2.8f);
 }
-
-
