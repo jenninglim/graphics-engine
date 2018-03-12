@@ -9,6 +9,7 @@
 #include "glm/ext.hpp"
 #include <math.h>
 #include "Light.h"
+#include "Ray.h"
 #include "Intersection.h"
 #include "BVH.h"
 
@@ -87,17 +88,23 @@ void Draw(screen* screen, Camera cam, BVH bvh, Light light)
             closestIntersection.distance = std::numeric_limits<float>::max();
             r.initial = cam.position;
             r.direction = d;
-            if (collision(bvh,
-                        r,
-                        closestIntersection))
+            for (int i=0; i < RAY_DEPTH; i++)
             {
-                lightColor = DirectLight(closestIntersection,
-                        bvh,
-                        light);
-                color = lightColor *
-                    closestIntersection.colour;
+                if (collision(bvh,
+                            r,
+                            closestIntersection))
+                {
+                    r = reflect(r, closestIntersection);
+
+                    lightColor = DirectLight(closestIntersection,
+                            bvh,
+                            light);
+                    color +=  1/(i/2+1) * 1.0f * lightColor *
+                        closestIntersection.colour;
+                }
+                PutPixelSDL(screen, x, y, color);
             }
-            PutPixelSDL(screen, x, y, color);
+
         }
     }
 }

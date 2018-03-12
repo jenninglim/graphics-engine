@@ -1,4 +1,5 @@
 #include "BVH.h"
+#include "Config.h"
 #include <assert.h>
 
 #ifdef DEBUG
@@ -10,6 +11,9 @@ using namespace std;
 
 BoundingVolume computeBoundingVolume(vector<Object> objects);
 vector<vector<Object> > partitionObject(vector<Object> objects);
+bool IntersectRayBoundingVolume(Ray r,
+        BoundingVolume bv);
+
 
 BVH::BVH()
 {
@@ -45,7 +49,7 @@ bool collision(BVH bvh, Ray r, Intersection &closestI)
         {
             for (int i=0; i < bvh.object.triangles.size(); i++)
             {
-                vec3 x_value = solveLinearEq(bvh.object.triangles[i],r);
+                vec3 x_value = solveLinearEq(bvh.object.triangles[i],r.initial, r.direction);
                 if(x_value.y >= 0
                         && x_value.z >= 0
                         && x_value.y + x_value.z <= 1 + EPSILON
@@ -115,3 +119,30 @@ BoundingVolume computeBoundingVolume(const vector<Object> objects)
     //cout <<  endl;
     return BoundingVolume(min,max);
 }
+
+bool IntersectRayBoundingVolume(Ray r,
+        BoundingVolume bv)
+{
+    vec3 tmin, tmax;
+    for (int i = 0; i < 3; i++)
+    {
+        if (r.direction[i] >= 0)
+        {
+            tmin[i] = (bv.min[i] - r.initial[i]) / r.direction[i];
+            tmax[i] = (bv.max[i] - r.initial[i]) / r.direction[i];
+        }
+        else
+        {
+            tmin[i] = (bv.max[i] - r.initial[i]) / r.direction[i];
+            tmax[i] = (bv.min[i] - r.initial[i]) / r.direction[i];
+        }
+    }
+
+    if ((tmin[0] > tmax[1]) || (tmin[1] > tmax[0] )) {return false;}
+    if (glm::max(tmin[0], tmin[1]) > tmax[2] || tmin[2] > glm::min(tmax[0], tmax[1]))
+    {
+     return false;
+    }
+    return true;
+}
+

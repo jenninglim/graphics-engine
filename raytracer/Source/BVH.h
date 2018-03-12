@@ -3,7 +3,7 @@
 
 #include <glm/glm.hpp>
 #include "Object.h"
-#include "Camera.h"
+#include "Ray.h"
 #include "Intersection.h"
 
 using namespace std;

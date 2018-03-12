@@ -4,7 +4,6 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include "Object.h"
-#include "Camera.h"
 
 using namespace std;
 // Intersection
@@ -16,10 +15,6 @@ struct Intersection
     vec4 normal;
 };
 
-bool IntersectRayBoundingVolume(Ray r,
-        BoundingVolume bv);
-
-vec3 solveLinearEq(Triangle triangle, Ray r);
-
+vec3 solveLinearEq(Triangle triangle, vec4 start, vec4 dir);
 
 #endif
