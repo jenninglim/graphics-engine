@@ -21,8 +21,8 @@ vec3 DirectLight(const Intersection& i, BVH bvh, Light light)
                 vec3(0),
                 std::numeric_limits<float>::max(),
                 vec4(0)};
-    Ray r = Ray(i.position, r_hat);
 
+    Ray r = Ray(i.position, r_hat);
     if (collision(bvh, r, closestIntersection))
     {
          if (closestIntersection.distance < glm::length(light.position - i.position) &&

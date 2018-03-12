@@ -25,6 +25,15 @@ Object::Object(vector<Triangle> object)
     scale_volume(object);
     triangles = object;
     computeBoundingVolume();
+    reflect = 0.6;
+}
+
+Object::Object(vector<Triangle> object, float reflectance)
+{
+    scale_volume(object);
+    triangles = object;
+    computeBoundingVolume();
+    reflect = reflectance;
 }
 
 BoundingVolume::BoundingVolume()

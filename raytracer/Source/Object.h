@@ -25,8 +25,10 @@ class Object
     public:
         vector<Triangle> triangles;
         BoundingVolume bv;
+        double reflect;
         Object();
         Object(vector<Triangle> object);
+        Object(vector<Triangle> object, float reflectance);
         void computeBoundingVolume();
 };
 #endif 
