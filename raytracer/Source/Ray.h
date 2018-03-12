@@ -23,6 +23,7 @@ class Ray
 
 };
 
-Ray reflect(const Ray I, Intersection i);
+Ray reflect(const Ray I, const Intersection i);
+Ray refract(const Ray I, const Intersection i);
 
 #endif

@@ -26,9 +26,11 @@ class Object
         vector<Triangle> triangles;
         BoundingVolume bv;
         double reflect;
+        double refract_index;
         Object();
         Object(vector<Triangle> object);
-        Object(vector<Triangle> object, float reflectance);
+        Object(vector<Triangle> object, double reflectance);
+        Object(vector<Triangle> object, double reflectance, double refract_index );
         void computeBoundingVolume();
 };
 #endif 

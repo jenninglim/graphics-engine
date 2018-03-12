@@ -14,6 +14,7 @@ struct Intersection
     float distance;
     vec4 normal;
     float reflect;
+    float refract;
 };
 
 vec3 solveLinearEq(Triangle triangle, vec4 start, vec4 dir);

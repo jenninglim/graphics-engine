@@ -107,7 +107,7 @@ void Draw(screen* screen, Camera cam, BVH bvh, Light light)
                         * lightColor;
                     
                     prevReflectance *= (1- closestIntersection.reflect);
-
+                    
                 }
 
                 //color *= light.indirect_light;
