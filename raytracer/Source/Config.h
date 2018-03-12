@@ -15,4 +15,7 @@
 #define DEBUG 1
 #define RAY_DEPTH 2
 
+// SCENE SETTINGS
+#define WALL_REFLECTANCE 0.9
+#define BOX_REFLECTANCE 0.5
 #endif

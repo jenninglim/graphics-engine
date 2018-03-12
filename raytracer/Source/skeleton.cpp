@@ -61,6 +61,7 @@ void Draw(screen* screen, Camera cam, BVH bvh, Light light)
     vec3 color, lightColor = vec3(1);
     vec4 rayFromOrigin, rayFromCam, d = vec4();
     Ray r;
+    float prevReflectance = 1;
 
     /* Clear buffer */
     //std::cout<<glm::to_string(cam.cameraPos)<<std::endl;
@@ -79,7 +80,7 @@ void Draw(screen* screen, Camera cam, BVH bvh, Light light)
             rayFromOrigin.y = y - SCREEN_HEIGHT/2;
             rayFromOrigin.z = cam.focalLength;
             rayFromOrigin[3] = 1;
-
+            
             color = vec3(0);
 
             rayFromCam = cam.R * rayFromOrigin;
@@ -88,6 +89,7 @@ void Draw(screen* screen, Camera cam, BVH bvh, Light light)
             closestIntersection.distance = std::numeric_limits<float>::max();
             r.initial = cam.position;
             r.direction = d;
+            prevReflectance=1;
             for (int i=0; i < RAY_DEPTH; i++)
             {
                 if (collision(bvh,
@@ -95,13 +97,20 @@ void Draw(screen* screen, Camera cam, BVH bvh, Light light)
                             closestIntersection))
                 {
                     r = reflect(r, closestIntersection);
-
                     lightColor = DirectLight(closestIntersection,
                             bvh,
                             light);
-                    color +=  1/(i/2+1) * 1.0f * lightColor *
-                        closestIntersection.colour;
+
+                    color += prevReflectance
+                        * (float) closestIntersection.reflect
+                        * closestIntersection.colour
+                        * lightColor;
+                    
+                    prevReflectance *= (1- closestIntersection.reflect);
+
                 }
+
+                //color *= light.indirect_light;
                 PutPixelSDL(screen, x, y, color);
             }
 

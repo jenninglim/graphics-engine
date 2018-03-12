@@ -13,6 +13,7 @@ struct Intersection
     glm ::vec3 colour;
     float distance;
     vec4 normal;
+    float reflect;
 };
 
 vec3 solveLinearEq(Triangle triangle, vec4 start, vec4 dir);

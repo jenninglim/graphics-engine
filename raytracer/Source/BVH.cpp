@@ -62,6 +62,7 @@ bool collision(BVH bvh, Ray r, Intersection &closestI)
                         closestI.distance = x_value.x;
                         closestI.colour = bvh.object.triangles[i].color;
                         closestI.normal = bvh.object.triangles[i].normal;
+                        closestI.reflect =bvh.object.reflect;
 
                     }
                 }
