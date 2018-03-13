@@ -1,6 +1,7 @@
 #include "TestModelH.h"
 #include "Object.h"
 #include "Box.h"
+#include "Sphere.h"
 
 void push_box(vector<Object *> &objects,
         vector<Triangle> &object_tri,
@@ -9,6 +10,14 @@ void push_box(vector<Object *> &objects,
     Object * object = new Box(object_tri, reflectance);
     objects.push_back(object);
     object_tri.clear();
+}
+
+void push_sphere(vector<Object *> &objects,
+        const vec4 pos,
+        const float r)
+{
+    Object * object = new Sphere(pos, r);
+    objects.push_back(object);
 }
 
 
@@ -147,4 +156,5 @@ void LoadTestModel( std::vector<Object *>& objects )
 	triangles.push_back( Triangle(G,F,E,blue) );
 	triangles.push_back( Triangle(G,H,F,blue) );
     push_box(objects, triangles,BOX_REFLECTANCE, 1.2f);
+    push_sphere(objects, vec4(-0.5f,0.5f,-0.5f,0), 0.2f);
 }

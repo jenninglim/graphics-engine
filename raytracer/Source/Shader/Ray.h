@@ -9,14 +9,14 @@ class Ray
 {
     public:
         glm::vec4 initial;
-        glm::vec4 direction;
+        glm::vec3 direction;
 
     Ray()
     {
         initial = vec4(0);
-        direction = vec4(0);
+        direction = vec3(0);
     }
-    Ray(glm::vec4 start, glm::vec4 dir)
+    Ray(glm::vec4 start, glm::vec3 dir)
         :initial(start), direction(dir)
     {}
 

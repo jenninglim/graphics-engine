@@ -18,6 +18,4 @@ struct Intersection
     float ior;
 };
 
-vec3 solveLinearEq(Triangle triangle, vec4 start, vec4 dir);
-
 #endif

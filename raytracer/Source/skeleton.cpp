@@ -58,7 +58,8 @@ int main( int argc, char* argv[] )
 void Draw(screen* screen, Camera cam, BVH bvh, Light light)
 {
     vec3 color;
-    vec4 rayFromOrigin, rayFromCam, d = vec4();
+    vec4 rayFromOrigin, rayFromCam;
+    vec3 d = vec3();
     Ray r;
      /* Clear buffer */
     //std::cout<<glm::to_string(cam.cameraPos)<<std::endl;
@@ -75,7 +76,9 @@ void Draw(screen* screen, Camera cam, BVH bvh, Light light)
 
             rayFromCam = cam.R * rayFromOrigin;
 
-            d = glm::normalize(rayFromCam);
+            d = glm::normalize(vec3(rayFromCam[0],
+                        rayFromCam[1],
+                        rayFromCam[2]));
 
             r.initial = cam.position;
             r.direction = d;

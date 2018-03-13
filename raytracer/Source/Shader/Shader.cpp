@@ -23,7 +23,11 @@ typedef struct Ray_t
 
 Ray reflect(const Ray I, const Intersection i) 
 { 
-    vec4 dir = I.direction - 2 * glm::dot(I.direction, i.normal) * i.normal;
+    vec3 norm = vec3(i.normal[0],
+            i.normal[1],
+            i.normal[2]);
+    vec3 dir = I.direction - 2 * glm::dot(I.direction, norm) * norm;
+    dir = glm::normalize(dir);
     return  Ray(i.position, dir);
 } 
 
@@ -44,8 +48,8 @@ Ray refract(const Ray r, const Intersection i)
     float eta = etai/etat;
     float k = 1 - eta * eta * (1 - cosi * cosi); 
     vec3 dir =  k < 0.f ? vec3(0) : eta * idir + (eta * cosi - glm::sqrt(k)) * norm;  
-    vec4 dir_end = vec4(dir.x,dir.y,dir.z, 1);
-    return Ray(i.position, dir_end);
+    dir = glm::normalize(dir);
+    return Ray(i.position, dir);
 }
 
 void fresnel(const Ray r, const Intersection i, float &kr)
@@ -115,14 +119,15 @@ void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
             colour += (refl_color * kr + refr_color * (1-kr))
                 * lightColor
                 * intersect.colour
-                * c_ray.prevReflectance;
+                * c_ray.prevReflectance
+                * 1.f/2.f;
             
             if (c_ray.depth + 1 < RAY_DEPTH)
             {
                 ray_stack.push(Ray_t(r1,
                             c_ray.depth + 1,
                             c_ray.prevReflectance *(1- intersect.refract_ratio)));
-                //ray_stack.push(Ray_t(r2, c_ray.depth+1, c_ray.prevReflectance));
+                ray_stack.push(Ray_t(r2, c_ray.depth+1, c_ray.prevReflectance));
             }
         }
     }

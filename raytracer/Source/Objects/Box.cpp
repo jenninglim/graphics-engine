@@ -8,6 +8,7 @@
 void scale_volume(vector<Triangle> &triangles);
 vec3 triangleMin(Triangle triangle);
 vec3 triangleMax(Triangle triangle);
+
 Box::Box()
 {
     this->reflect_ratio = 0.f;
@@ -45,14 +46,34 @@ Box::Box(vector<Triangle> object, float reflectance, float refract_index)
     this->ior = refract_index;
 }
 
+vec3 solveLinearEq(Triangle triangle, vec4 start, vec4 dir)
+{
+    vec4 v0 = triangle.v0;
+    vec4 v1 = triangle.v1;
+    vec4 v2 = triangle.v2;
+    vec3 s = glm::vec3(start.x, start.y, start.z);
+    vec3 d = glm::vec3(dir.x, dir.y, dir.z);
+
+    vec3 e1 = vec3(v1.x-v0.x,v1.y-v0.y,v1.z-v0.z);
+    vec3 e2 = vec3(v2.x-v0.x,v2.y-v0.y,v2.z-v0.z);
+    vec3 b = vec3(s.x-v0.x,s.y-v0.y,s.z-v0.z);
+
+    mat3 A( -d, e1, e2 );
+    //if (determinant(A) != 0)
+    //{
+        return glm::inverse( A ) * b;
+    //}
+    //return vec3(0,0,0);
+}
+
 bool Box::intersection(const Ray r, Intersection &closestI) 
 {
     bool intersectionFound = false;
     vec3 x_value;
-
+    vec4 dir = vec4(r.direction,0);
     for (int i=0; i < triangles.size(); i++)
     {
-        x_value = solveLinearEq(triangles[i], r.initial, r.direction);
+        x_value = solveLinearEq(triangles[i], r.initial, dir);
         if(x_value.y >= 0
                 && x_value.z >= 0
                 && x_value.y + x_value.z <= 1 + EPSILON
@@ -61,7 +82,7 @@ bool Box::intersection(const Ray r, Intersection &closestI)
             //Valid Intersection found
             intersectionFound = true;
             if(x_value.x < closestI.distance){
-                closestI.position = r.initial + x_value.x * r.direction;
+                closestI.position = r.initial + x_value.x * dir;
                 closestI.distance = x_value.x;
                 closestI.colour = triangles[i].color;
                 closestI.normal = triangles[i].normal;
