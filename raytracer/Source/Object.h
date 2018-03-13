@@ -25,12 +25,13 @@ class Object
     public:
         vector<Triangle> triangles;
         BoundingVolume bv;
-        double reflect;
-        double refract;
+        float reflect_ratio;
+        float refract_ratio;
+        float ior;
         Object();
         Object(vector<Triangle> object);
-        Object(vector<Triangle> object, double reflectance);
-        Object(vector<Triangle> object, double reflectance, double refract_index );
+        Object(vector<Triangle> object, float reflectance);
+        Object(vector<Triangle> object, float reflectance, float refract_index );
         void computeBoundingVolume();
 };
 #endif 

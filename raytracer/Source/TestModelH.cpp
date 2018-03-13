@@ -56,22 +56,18 @@ void LoadTestModel( std::vector<Object>& objects )
 	// Floor:
 	triangles.push_back( Triangle( C, B, A, green ) );
 	triangles.push_back( Triangle( C, D, B, green ) );
-    push_object(objects, triangles, WALL_REFLECTANCE);
 
 	// Left wall
 	triangles.push_back( Triangle( A, E, C, purple ) );
 	triangles.push_back( Triangle( C, E, G, purple ) );
-    push_object(objects, triangles, WALL_REFLECTANCE);
 
 	// Right wall
 	triangles.push_back( Triangle( F, B, D, yellow ) );
 	triangles.push_back( Triangle( H, F, D, yellow ) );
-    push_object(objects, triangles, WALL_REFLECTANCE);
 
 	// Ceiling
 	triangles.push_back( Triangle( E, F, G, cyan ) );
 	triangles.push_back( Triangle( F, H, G, cyan ) );
-    push_object(objects, triangles, WALL_REFLECTANCE);
 
 	// Back wall
 	triangles.push_back( Triangle( G, D, C, white ) );
@@ -110,7 +106,7 @@ void LoadTestModel( std::vector<Object>& objects )
 	// TOP
 	triangles.push_back( Triangle(G,F,E,red) );
 	triangles.push_back( Triangle(G,H,F,red) );
-    push_object(objects, triangles, BOX_REFLECTANCE);
+    push_object(objects, triangles, BOX_REFLECTANCE, 1.2f);
 
 	// ---------------------------------------------------------------------------
 	// Tall block
@@ -144,5 +140,5 @@ void LoadTestModel( std::vector<Object>& objects )
 	// TOP
 	triangles.push_back( Triangle(G,F,E,blue) );
 	triangles.push_back( Triangle(G,H,F,blue) );
-    push_object(objects, triangles,BOX_REFLECTANCE, 2.8f);
+    push_object(objects, triangles,BOX_REFLECTANCE, 1.2f);
 }

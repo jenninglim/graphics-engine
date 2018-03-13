@@ -61,8 +61,9 @@ bool collision(BVH bvh, vec4 initial, vec4 direction, Intersection &closestI)
                         closestI.distance = x_value.x;
                         closestI.colour = bvh.object.triangles[i].color;
                         closestI.normal = bvh.object.triangles[i].normal;
-                        closestI.reflect = bvh.object.reflect;
-                        closestI.refract = bvh.object.refract;
+                        closestI.reflect_ratio = bvh.object.reflect_ratio;
+                        closestI.refract_ratio = bvh.object.refract_ratio;
+                        closestI.ior = bvh.object.ior;
                     }
                 }
             }

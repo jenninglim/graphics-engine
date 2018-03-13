@@ -58,7 +58,7 @@ int main( int argc, char* argv[] )
 /*Place your drawing here*/
 void Draw(screen* screen, Camera cam, BVH bvh, Light light)
 {
-    vec3 color, lightColor = vec3(1);
+    vec3 color;
     vec4 rayFromOrigin, rayFromCam, d = vec4();
     Ray r;
      /* Clear buffer */
@@ -85,6 +85,7 @@ void Draw(screen* screen, Camera cam, BVH bvh, Light light)
 
             d = glm::normalize(rayFromCam);
             closestIntersection.distance = std::numeric_limits<float>::max();
+
             r.initial = cam.position;
             r.direction = d;
             

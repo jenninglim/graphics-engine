@@ -1,9 +1,12 @@
 #include <limits>
 #include <glm/glm.hpp>
 #include "Object.h"
+#include "Config.h"
 
-#include <iostream>
-#include "glm/ext.hpp"
+#ifdef DEBUG
+    #include <iostream>
+    #include "glm/ext.hpp"
+#endif
 
 using namespace std;
 using glm::vec3;
@@ -25,26 +28,29 @@ Object::Object(vector<Triangle> object)
     scale_volume(object);
     triangles = object;
     computeBoundingVolume();
-    this->reflect = 0.6;
-    this->refract= 0;
+    this->reflect_ratio = 0.6;
+    this->ior= DEF_IOR;
+    this->refract_ratio = 1.f;
 }
 
-Object::Object(vector<Triangle> object, double reflectance)
+Object::Object(vector<Triangle> object, float reflectance)
 {
     scale_volume(object);
     this->triangles = object;
     computeBoundingVolume();
-    this->reflect = reflectance;
-    this->refract= 1;
+    this->reflect_ratio = reflectance;
+    this->ior= DEF_IOR; 
+    this->refract_ratio = 1.f;
 }
 
-Object::Object(vector<Triangle> object, double reflectance, double refract_index)
+Object::Object(vector<Triangle> object, float reflectance, float refract_index)
 {
     scale_volume(object);
     this->triangles = object;
     computeBoundingVolume();
-    this->reflect = reflectance;
-    this->refract= refract_index;
+    this->reflect_ratio = reflectance;
+    this->refract_ratio= DEF_REFRACT_RATIO;
+    this->ior = refract_index;
 }
 
 

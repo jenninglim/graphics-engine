@@ -1,6 +1,27 @@
 #include "Ray.h"
 #include "Config.h"
 #include "BVH.h"
+#include <stack>
+
+#ifdef DEBUG
+#include "glm/ext.hpp"
+#include <iostream>
+#endif
+
+using namespace std;
+
+typedef struct Ray_t
+{
+    Ray r;    
+    int depth;
+    float prevReflectance;
+    Ray_t():r(),depth(0), prevReflectance(1.0f)
+    {
+    }
+    Ray_t(Ray r, int d, double acc):
+        r(r), depth(d), prevReflectance(acc)
+    {}
+} Ray_t;
 
 Ray reflect(const Ray I, const Intersection i) 
 { 
@@ -16,11 +37,12 @@ Ray refract(const Ray r, const Intersection i)
     vec3 norm = vec3(i.normal.x,
             i.normal.y,
             i.normal.z);
+
     float cosi = glm::clamp(glm::dot(idir, norm),- 1.f, 1.f );
-    float etat = 1.f, etai = i.refract;
+    float etai = 1.f, etat = i.ior;
     vec4 n = i.normal;
     if (cosi < 0) { cosi = - cosi;} 
-    else{ std::swap(etai, etat);n = -n; }
+    else{ std::swap(etai, etat); n = -n;  }
     float eta = etai/etat;
     float k = 1 - eta * eta * (1 - cosi * cosi); 
     vec3 dir =  k < 0.f ? vec3(0) : eta * idir + (eta * cosi - glm::sqrt(k)) * norm;  
@@ -30,17 +52,20 @@ Ray refract(const Ray r, const Intersection i)
 
 void fresnel(const Ray r, const Intersection i, float &kr)
 {
-    float cosi = glm::clamp(glm::dot(r.direction, i.normal), -1.f, 1.f);
-    float etai = 1, etat = i.refract;
-    if (cosi > 0) { std::swap(etai, etat); }
+    vec3 dir = glm::normalize(vec3(r.direction[0], r.direction[1], r.direction[2]));
+    vec3 norm = vec3(i.normal[0], i.normal[1], i.normal[2]);
+    float cosi = glm::clamp(glm::dot(dir, norm), -1.f, 1.f);
+    float etai = 1, etat = i.ior;
+    if (cosi > 0) {  std::swap(etai, etat); }
     // Compute sini using Snell's law
-    float sint = etai / etat * sqrtf(std::max(0.f, 1 - cosi * cosi));
+    float sint = etai / etat * glm::sqrt(glm::max(0.f, 1 - cosi * cosi));
     // Total internal reflection
     if (sint >= 1) {
         kr = 1;
     }
-    else {
-        float cost = sqrtf(std::max(0.f, 1 - sint * sint));
+    else
+    {
+        float cost = glm::sqrt(glm::max(0.f, 1 - sint * sint));
         cosi = fabsf(cosi);
         float Rs = ((etat * cosi) - (etai * cost)) / ((etat * cosi) + (etai * cost));
         float Rp = ((etai * cosi) - (etat * cost)) / ((etai * cosi) + (etat * cost));
@@ -50,51 +75,52 @@ void fresnel(const Ray r, const Intersection i, float &kr)
     // kt = 1 - kr;
 }
 
-void shootRay(Ray r, Intersection &intersect, vec3 &colour, BVH bvh, Light light)
+void shootRay(const Ray r, Intersection &intersect, vec3 &colour, BVH bvh, Light light)
 {
-    vec3 refl_color, refr_color, lightColor;
-    float prevReflectance = 1;
+    float refl_color, refr_color;
+    vec3 lightColor;
     float kr;
-    for (int i=0; i < RAY_DEPTH; i++)
+    Ray r1, r2;
+
+    stack<Ray_t> ray_stack = stack<Ray_t>();
+    Ray_t c_ray;
+
+    ray_stack.push(Ray_t(r,0,1.0f));
+    colour = vec3(0);
+    while (!ray_stack.empty())
     {
+        c_ray = ray_stack.top();
+        ray_stack.pop();
         if (collision(bvh,
-                    r.initial,
-                    r.direction, intersect))
+                    c_ray.r.initial,
+                    c_ray.r.direction, intersect))
         {
-            //fresnel(r, closestIntersection, kr);
-            r = reflect(r, intersect);
-
-            /*
-               if (kr < 1)
-               {
-               r1 = refract(r, closestIntersection);
-               collision(bvh,r,closestIntersection);
-               refr_color = prevReflectance
-             * (float) closestIntersection.reflect
-             * closestIntersection.colour
-             * lightColor;
-             }
-             */
-
+            fresnel(c_ray.r, intersect, kr);
             lightColor = DirectLight(intersect,
                     bvh,
                     light);
 
-            refl_color = prevReflectance
-                * (float) intersect.reflect
+            if (kr < 1)
+            {
+                r1 = refract(c_ray.r, intersect);
+                refr_color = (float) intersect.refract_ratio;
+            }
+
+            r2 = reflect(c_ray.r, intersect);
+            refl_color = intersect.reflect_ratio;
+
+            colour += (refl_color * kr + refr_color * (1-kr))
+                * lightColor
                 * intersect.colour
-                * lightColor;
-
-            prevReflectance *= (1 - intersect.reflect);
-
-            colour += refl_color;
-
+                * c_ray.prevReflectance;
+            
+            if (c_ray.depth + 1 < RAY_DEPTH)
+            {
+                ray_stack.push(Ray_t(r1,
+                            c_ray.depth + 1,
+                            c_ray.prevReflectance *(1- intersect.refract_ratio)));
+                //ray_stack.push(Ray_t(r2, c_ray.depth+1, c_ray.prevReflectance));
+            }
         }
-        else
-        {
-            break;
-        }
-
     }
-
 }
