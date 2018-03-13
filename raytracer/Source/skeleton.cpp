@@ -58,12 +58,10 @@ int main( int argc, char* argv[] )
 /*Place your drawing here*/
 void Draw(screen* screen, Camera cam, BVH bvh, Light light)
 {
-    vec3 color, lightColor = vec3(1);
+    vec3 color;
     vec4 rayFromOrigin, rayFromCam, d = vec4();
     Ray r;
-    float prevReflectance = 1;
-
-    /* Clear buffer */
+     /* Clear buffer */
     //std::cout<<glm::to_string(cam.cameraPos)<<std::endl;
     memset(screen->buffer, 0, screen->height*screen->width*sizeof(uint32_t));
 
@@ -87,32 +85,12 @@ void Draw(screen* screen, Camera cam, BVH bvh, Light light)
 
             d = glm::normalize(rayFromCam);
             closestIntersection.distance = std::numeric_limits<float>::max();
+
             r.initial = cam.position;
             r.direction = d;
-            prevReflectance=1;
-            for (int i=0; i < RAY_DEPTH; i++)
-            {
-                if (collision(bvh,
-                            r,
-                            closestIntersection))
-                {
-                    r = reflect(r, closestIntersection);
-                    lightColor = DirectLight(closestIntersection,
-                            bvh,
-                            light);
-
-                    color += prevReflectance
-                        * (float) closestIntersection.reflect
-                        * closestIntersection.colour
-                        * lightColor;
-                    
-                    prevReflectance *= (1- closestIntersection.reflect);
-
-                }
-
-                //color *= light.indirect_light;
-                PutPixelSDL(screen, x, y, color);
-            }
+            
+            shootRay(r, closestIntersection, color, bvh, light);
+            PutPixelSDL(screen, x, y, color);
 
         }
     }

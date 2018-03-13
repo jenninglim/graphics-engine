@@ -13,7 +13,9 @@ struct Intersection
     glm ::vec3 colour;
     float distance;
     vec4 normal;
-    float reflect;
+    float reflect_ratio;
+    float refract_ratio;
+    float ior;
 };
 
 vec3 solveLinearEq(Triangle triangle, vec4 start, vec4 dir);

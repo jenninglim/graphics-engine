@@ -3,7 +3,6 @@
 
 #include <glm/glm.hpp>
 #include "Object.h"
-#include "Ray.h"
 #include "Intersection.h"
 
 using namespace std;
@@ -24,6 +23,6 @@ class BVH
         BVH(vector<Object> objects);
 };
 
-bool collision(BVH bvh, Ray r, Intersection &i);
+bool collision(BVH bvh, vec4 initial, vec4 direction, Intersection &i);
 
 #endif
