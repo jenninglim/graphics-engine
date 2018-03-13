@@ -1,9 +1,7 @@
 #ifndef RAY_H
 #define RAY_H
 
-#include "BVH.h"
 #include "Intersection.h"
-#include "Light.h"
 
 using namespace glm;
 // Ray

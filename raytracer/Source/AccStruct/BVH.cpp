@@ -9,9 +9,9 @@
 
 using namespace std;
 
-BoundingVolume computeBoundingVolume(vector<Object> objects);
-vector<vector<Object> > partitionObject(vector<Object> objects);
-bool IntersectRayBoundingVolume(vec4 initial, vec4 direction,
+BoundingVolume computeBoundingVolume(vector<Object *> objects);
+vector<vector<Object *> > partitionObject(vector<Object *> objects);
+bool IntersectRayBoundingVolume(Ray r,
         BoundingVolume bv);
 
 BVH::BVH()
@@ -20,7 +20,7 @@ BVH::BVH()
     right = NULL;
 }
 
-BVH::BVH(vector<Object> objects)
+BVH::BVH(vector<Object *> objects)
 {
     assert(objects.size() > 0);
     bv = computeBoundingVolume(objects);
@@ -33,45 +33,25 @@ BVH::BVH(vector<Object> objects)
     else
     {
         isLeaf = false;
-        vector<vector<Object> > partitioning = partitionObject(objects);        
+        vector<vector<Object *> > partitioning = partitionObject(objects);        
         left = new BVH(partitioning[0]);
         right = new BVH(partitioning[1]);
     }
 }
 
-bool collision(BVH bvh, vec4 initial, vec4 direction, Intersection &closestI)
+bool collision(BVH bvh, Ray r, Intersection &closestI)
 {
     bool intersectionFound = false;
-    if (IntersectRayBoundingVolume(initial, direction, bvh.bv))
+    if (IntersectRayBoundingVolume(r, bvh.bv))
     {
         if (bvh.isLeaf == true)
         {
-            for (int i=0; i < bvh.object.triangles.size(); i++)
-            {
-                vec3 x_value = solveLinearEq(bvh.object.triangles[i],initial, direction);
-                if(x_value.y >= 0
-                        && x_value.z >= 0
-                        && x_value.y + x_value.z <= 1 + EPSILON
-                        && x_value.x > EPSILON)
-                {
-                    //Valid Intersection found
-                    intersectionFound = true;
-                    if(x_value.x < closestI.distance){
-                        closestI.position = initial + x_value.x * direction;
-                        closestI.distance = x_value.x;
-                        closestI.colour = bvh.object.triangles[i].color;
-                        closestI.normal = bvh.object.triangles[i].normal;
-                        closestI.reflect_ratio = bvh.object.reflect_ratio;
-                        closestI.refract_ratio = bvh.object.refract_ratio;
-                        closestI.ior = bvh.object.ior;
-                    }
-                }
-            }
+           intersectionFound |= bvh.object->intersection(r, closestI); 
         }
         else
         {
-            intersectionFound |= collision(*bvh.left, initial, direction, closestI);
-            intersectionFound |= collision(*bvh.right, initial, direction, closestI);
+            intersectionFound |= collision(*bvh.left, r, closestI);
+            intersectionFound |= collision(*bvh.right, r, closestI);
         }
     }
     else
@@ -81,14 +61,14 @@ bool collision(BVH bvh, vec4 initial, vec4 direction, Intersection &closestI)
     return intersectionFound;
 }
 
-vector<vector<Object> > partitionObject(vector<Object> objects)
+vector<vector<Object *> > partitionObject(vector<Object *> objects)
 {
     // Naive median parititoning.
     //
     //
     int index = objects.size()/2;
-    vector<Object> left, right;
-    vector<vector<Object> >  result = vector<vector<Object> >();
+    vector<Object*> left, right;
+    vector<vector<Object*> >  result = vector<vector<Object*> >();
     for (int i = 0; i < index; i++)
     {
         left.push_back(objects[i]);
@@ -103,40 +83,39 @@ vector<vector<Object> > partitionObject(vector<Object> objects)
 }
 
 
-BoundingVolume computeBoundingVolume(const vector<Object> objects)
+BoundingVolume computeBoundingVolume(const vector<Object *> objects)
 {
     vec3 max = vec3(std::numeric_limits<float>::min());
     vec3 min = vec3(std::numeric_limits<float>::max());
 
     for (int i = 0; i < objects.size(); i ++)
     {
-        if (objects[i].bv.min.x < min.x) { min.x=objects[i].bv.min.x; }
-        if (objects[i].bv.min.y < min.y) { min.y=objects[i].bv.min.y; }
-        if (objects[i].bv.min.z < min.z) { min.z=objects[i].bv.min.z; }
-        if (objects[i].bv.max.x > max.x) { max.x=objects[i].bv.max.x; }
-        if (objects[i].bv.max.y > max.y) { max.y=objects[i].bv.max.y; }
-        if (objects[i].bv.max.z > max.z) { max.z=objects[i].bv.max.z; }
+        if (objects[i]->bv.min.x < min.x) { min.x=objects[i]->bv.min.x; }
+        if (objects[i]->bv.min.y < min.y) { min.y=objects[i]->bv.min.y; }
+        if (objects[i]->bv.min.z < min.z) { min.z=objects[i]->bv.min.z; }
+        if (objects[i]->bv.max.x > max.x) { max.x=objects[i]->bv.max.x; }
+        if (objects[i]->bv.max.y > max.y) { max.y=objects[i]->bv.max.y; }
+        if (objects[i]->bv.max.z > max.z) { max.z=objects[i]->bv.max.z; }
         //cout << glm::to_string(max) << endl;
     }
     //cout <<  endl;
     return BoundingVolume(min,max);
 }
 
-bool IntersectRayBoundingVolume(vec4 initial, vec4 direction,
-        BoundingVolume bv)
+bool IntersectRayBoundingVolume(Ray r, BoundingVolume bv)
 {
     vec3 tmin, tmax;
     for (int i = 0; i < 3; i++)
     {
-        if (direction[i] >= 0)
+        if (r.direction[i] >= 0)
         {
-            tmin[i] = (bv.min[i] - initial[i]) / direction[i];
-            tmax[i] = (bv.max[i] - initial[i]) / direction[i];
+            tmin[i] = (bv.min[i] - r.initial[i]) / r.direction[i];
+            tmax[i] = (bv.max[i] - r.initial[i]) / r.direction[i];
         }
         else
         {
-            tmin[i] = (bv.max[i] - initial[i]) / direction[i];
-            tmax[i] = (bv.min[i] - initial[i]) / direction[i];
+            tmin[i] = (bv.max[i] - r.initial[i]) / r.direction[i];
+            tmax[i] = (bv.min[i] - r.initial[i]) / r.direction[i];
         }
     }
 

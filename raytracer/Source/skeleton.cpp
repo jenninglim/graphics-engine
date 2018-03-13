@@ -32,7 +32,7 @@ void Draw(screen* screen,
 int main( int argc, char* argv[] )
 {
   screen *screen = InitializeSDL( SCREEN_WIDTH, SCREEN_HEIGHT, FULLSCREEN_MODE );
-  vector<Object> objects;
+  vector<Object *> objects;
   Light light(vec4(0, -0.5, -0.7, 1), 14.f* vec3(1,1,1));
 
   vec4 camPos(0,0,-3,1);

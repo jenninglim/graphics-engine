@@ -3,6 +3,8 @@
 
 #include "Object.h"
 #include <glm/glm.hpp>
+#include "Ray.h"
+
 using namespace glm;
 
 class Sphere : public Object
@@ -11,6 +13,7 @@ class Sphere : public Object
         float radius;
         vec4 centre;
     Sphere(const vec4 c, const float r);
+    bool intersection(const Ray r, Intersection &closestI) override;
 };
 
 #endif

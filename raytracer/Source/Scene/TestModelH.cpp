@@ -1,17 +1,23 @@
 #include "TestModelH.h"
 #include "Object.h"
+#include "Box.h"
 
-void push_object(vector<Object> &objects, vector<Triangle> &object_tri, float reflectance)
+void push_box(vector<Object *> &objects,
+        vector<Triangle> &object_tri,
+        const float reflectance)
 {
-    Object object = Object(object_tri, reflectance);
+    Object * object = new Box(object_tri, reflectance);
     objects.push_back(object);
     object_tri.clear();
 }
 
 
-void push_object(vector<Object> &objects, vector<Triangle> &object_tri, float reflectance, float refract)
+void push_box(vector<Object *> &objects,
+        vector<Triangle> &object_tri,
+        const float reflectance,
+        const float refract)
 {
-    Object object = Object(object_tri, reflectance, refract);
+    Object * object = new Box(object_tri, reflectance, refract);
     objects.push_back(object);
     object_tri.clear();
 }
@@ -19,7 +25,7 @@ void push_object(vector<Object> &objects, vector<Triangle> &object_tri, float re
 // -1 <= x <= +1
 // -1 <= y <= +1
 // -1 <= z <= +1
-void LoadTestModel( std::vector<Object>& objects )
+void LoadTestModel( std::vector<Object *>& objects )
 {
 	using glm::vec3;
 	using glm::vec4;
@@ -72,7 +78,7 @@ void LoadTestModel( std::vector<Object>& objects )
 	// Back wall
 	triangles.push_back( Triangle( G, D, C, white ) );
 	triangles.push_back( Triangle( G, H, D, white ) );
-    push_object(objects, triangles,WALL_REFLECTANCE);
+    push_box(objects, triangles,WALL_REFLECTANCE);
 
 	// ---------------------------------------------------------------------------
 	// Short block
@@ -106,7 +112,7 @@ void LoadTestModel( std::vector<Object>& objects )
 	// TOP
 	triangles.push_back( Triangle(G,F,E,red) );
 	triangles.push_back( Triangle(G,H,F,red) );
-    push_object(objects, triangles, BOX_REFLECTANCE, 1.2f);
+    push_box(objects, triangles, BOX_REFLECTANCE, 1.2f);
 
 	// ---------------------------------------------------------------------------
 	// Tall block
@@ -140,5 +146,5 @@ void LoadTestModel( std::vector<Object>& objects )
 	// TOP
 	triangles.push_back( Triangle(G,F,E,blue) );
 	triangles.push_back( Triangle(G,H,F,blue) );
-    push_object(objects, triangles,BOX_REFLECTANCE, 1.2f);
+    push_box(objects, triangles,BOX_REFLECTANCE, 1.2f);
 }

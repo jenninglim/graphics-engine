@@ -1,10 +1,13 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
-#include <glm/glm.hpp>
-#include <vector>
-#include "Triangle.h"
 #include "Intersection.h"
+#include "Ray.h"
+#include "Config.h"
+
+#ifdef DEBUG
+#include <iostream>
+#endif
 
 using namespace std;
 using glm::vec3;
@@ -24,16 +27,21 @@ class BoundingVolume
 class Object
 {
     public:
-        vector<Triangle> triangles;
         BoundingVolume bv;
         float reflect_ratio;
         float refract_ratio;
         float ior;
-        Object();
-        Object(vector<Triangle> object);
-        Object(vector<Triangle> object, float reflectance);
-        Object(vector<Triangle> object, float reflectance, float refract_index );
-        void computeBoundingVolume();
-        //Intersection intersection(
+        virtual ~Object() {};
+        virtual void computeBoundingVolume()
+        {
+            cout << "computeBV virtual called" << endl;
+            assert(0 > 1);
+        };
+        virtual bool intersection(const Ray r, Intersection &i)
+        {
+            cout << "intersection virtual called" <<endl;
+            assert(0 > 1);
+        };
 };
 #endif 
+

@@ -96,8 +96,7 @@ void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
         c_ray = ray_stack.top();
         ray_stack.pop();
         if (collision(bvh,
-                    c_ray.r.initial,
-                    c_ray.r.direction, intersect))
+                    c_ray.r, intersect))
         {
             fresnel(c_ray.r, intersect, kr);
             lightColor = DirectLight(intersect,

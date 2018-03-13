@@ -1,7 +1,7 @@
 #include "Light.h"
 #include "glm/ext.hpp"
-#include "BVH.h"
 #include "Camera.h"
+#include "Ray.h"
 
 using namespace std;
 using glm::vec3;
@@ -22,7 +22,7 @@ vec3 DirectLight(const Intersection& i, BVH bvh, Light light)
                 std::numeric_limits<float>::max(),
                 vec4(0)};
 
-    if (collision(bvh, i.position, r_hat, closestIntersection))
+    if (collision(bvh, Ray(i.position, r_hat), closestIntersection))
     {
          if (closestIntersection.distance < glm::length(light.position - i.position) &&
                  closestIntersection.distance > EPSILON)
