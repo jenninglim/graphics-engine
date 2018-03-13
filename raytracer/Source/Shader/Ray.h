@@ -24,8 +24,4 @@ class Ray
 
 };
 
-Ray reflect(const Ray I, const Intersection i);
-Ray refract(const Ray I, const Intersection i);
-void shootRay(const Ray r, Intersection &i, vec3 &colour, BVH bvh, Light light);
-
 #endif

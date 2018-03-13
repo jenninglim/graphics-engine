@@ -1,6 +1,4 @@
-#include "Ray.h"
-#include "Config.h"
-#include "BVH.h"
+#include "Shader.h"
 #include <stack>
 
 #ifdef DEBUG
@@ -75,7 +73,7 @@ void fresnel(const Ray r, const Intersection i, float &kr)
     // kt = 1 - kr;
 }
 
-void shootRay(const Ray r, Intersection &intersect, vec3 &colour, BVH bvh, Light light)
+void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
 {
     float refl_color, refr_color;
     vec3 lightColor;
@@ -84,6 +82,12 @@ void shootRay(const Ray r, Intersection &intersect, vec3 &colour, BVH bvh, Light
 
     stack<Ray_t> ray_stack = stack<Ray_t>();
     Ray_t c_ray;
+
+    Intersection intersect = {
+                vec4(0),
+                vec3(0),
+                std::numeric_limits<float>::max(),
+                vec4(0)};
 
     ray_stack.push(Ray_t(r,0,1.0f));
     colour = vec3(0);

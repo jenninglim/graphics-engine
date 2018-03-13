@@ -9,9 +9,8 @@
 #include "glm/ext.hpp"
 #include <math.h>
 #include "Light.h"
-#include "Ray.h"
-#include "Intersection.h"
 #include "BVH.h"
+#include "Shader.h"
 
 using namespace std;
 using glm::vec3;
@@ -65,13 +64,6 @@ void Draw(screen* screen, Camera cam, BVH bvh, Light light)
     //std::cout<<glm::to_string(cam.cameraPos)<<std::endl;
     memset(screen->buffer, 0, screen->height*screen->width*sizeof(uint32_t));
 
-    Intersection closestIntersection = {
-                cam.position,
-                vec3(0),
-                std::numeric_limits<float>::max(),
-                vec4(0)
-                };
-
     for(int y = 0; y < SCREEN_HEIGHT; y++){
         for(int x = 0; x < SCREEN_WIDTH; x++){
             rayFromOrigin.x = x - SCREEN_WIDTH/2;
@@ -84,12 +76,11 @@ void Draw(screen* screen, Camera cam, BVH bvh, Light light)
             rayFromCam = cam.R * rayFromOrigin;
 
             d = glm::normalize(rayFromCam);
-            closestIntersection.distance = std::numeric_limits<float>::max();
 
             r.initial = cam.position;
             r.direction = d;
             
-            shootRay(r, closestIntersection, color, bvh, light);
+            shootRay(r, color, bvh, light);
             PutPixelSDL(screen, x, y, color);
 
         }

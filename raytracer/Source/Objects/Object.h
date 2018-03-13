@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include "Triangle.h"
+#include "Intersection.h"
 
 using namespace std;
 using glm::vec3;
@@ -33,5 +34,6 @@ class Object
         Object(vector<Triangle> object, float reflectance);
         Object(vector<Triangle> object, float reflectance, float refract_index );
         void computeBoundingVolume();
+        //Intersection intersection(
 };
 #endif 
