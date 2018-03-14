@@ -97,6 +97,7 @@ void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
     colour = vec3(0);
     while (!ray_stack.empty())
     {
+        intersect.distance = std::numeric_limits<float>::max();
         c_ray = ray_stack.top();
         ray_stack.pop();
         if (collision(bvh,
@@ -122,7 +123,7 @@ void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
                 * c_ray.prevReflectance
                 * 1.f/2.f;
             
-            if (c_ray.depth + 1 < RAY_DEPTH)
+            if (0)//(c_ray.depth + 1 < RAY_DEPTH)
             {
                 ray_stack.push(Ray_t(r1,
                             c_ray.depth + 1,

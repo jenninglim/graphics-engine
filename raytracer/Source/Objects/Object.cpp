@@ -17,8 +17,8 @@ using glm::mat4;
 
 BoundingVolume::BoundingVolume()
 {
-    this->max = vec3(std::numeric_limits<float>::max());
-    this->min = vec3(std::numeric_limits<float>::min());
+    this->max = vec3(20);
+    this->min = vec3(-20);
 }
 
 BoundingVolume::BoundingVolume(vec3 min, vec3 max)

@@ -3,6 +3,7 @@
 
 #ifdef DEBUG
 #include <iostream>
+#include <glm/ext.hpp>
 #endif
 
 void scale_volume(vector<Triangle> &triangles);
@@ -69,27 +70,40 @@ vec3 solveLinearEq(Triangle triangle, vec4 start, vec4 dir)
 bool Box::intersection(const Ray r, Intersection &closestI) 
 {
     bool intersectionFound = false;
-    vec3 x_value;
-    vec4 dir = vec4(r.direction,0);
+    vec3 e1,e2, s, h, q;
+    float a,f,u,v,t;
     for (int i=0; i < triangles.size(); i++)
     {
-        x_value = solveLinearEq(triangles[i], r.initial, dir);
-        if(x_value.y >= 0
-                && x_value.z >= 0
-                && x_value.y + x_value.z <= 1 + EPSILON
-                && x_value.x > EPSILON)
-        {
-            //Valid Intersection found
-            intersectionFound = true;
-            if(x_value.x < closestI.distance){
-                closestI.position = r.initial + x_value.x * dir;
-                closestI.distance = x_value.x;
-                closestI.colour = triangles[i].color;
-                closestI.normal = triangles[i].normal;
-                closestI.reflect_ratio = this->reflect_ratio;
-                closestI.refract_ratio = this->refract_ratio;
-                closestI.ior = this->ior;
-            }
+        t = 100;
+        e1 = (vec3(triangles[i].v1 - triangles[i].v0));
+        e2 = (vec3(triangles[i].v2 - triangles[i].v0));
+        h = glm::cross(e2, r.direction);
+        a = glm::dot(h, e1);
+        
+        f = 1/a;
+        s = vec3(r.initial - triangles[i].v0);
+        u = f * (glm::dot(s,h));
+        
+        q = glm::cross(e1, s);
+        v = f * glm::dot(r.direction, q);
+        
+        if ((v > 0.f -EPSILON && u + v < 1.f + EPSILON)
+            && (u > 0.f - EPSILON && u < 1.f + EPSILON)
+            && (a < -EPSILON || a > EPSILON))
+                {
+                    intersectionFound = true;
+                    t = f * glm::dot(e2,q); 
+                }
+
+        //Valid Intersection found
+        if( t < closestI.distance){
+            closestI.position = r.initial + vec4(t * r.direction,0);
+            closestI.distance = t;
+            closestI.colour = triangles[i].color;
+            closestI.normal = triangles[i].normal;
+            closestI.reflect_ratio = this->reflect_ratio;
+            closestI.refract_ratio = this->refract_ratio;
+            closestI.ior = this->ior;
         }
     }
     return intersectionFound;
@@ -98,6 +112,7 @@ bool Box::intersection(const Ray r, Intersection &closestI)
 void Box::computeBoundingVolume()
 {
     vec3 max = vec3(std::numeric_limits<float>::min());
+
     vec3 min = vec3(std::numeric_limits<float>::max());
     vec3 tri_min;
     vec3 tri_max;

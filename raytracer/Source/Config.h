@@ -13,7 +13,7 @@
 // Auxillary Variables
 #define EPSILON 1e-3
 #define DEBUG 1
-#define RAY_DEPTH 2
+#define RAY_DEPTH 1
 
 // SCENE SETTINGS
 #define WALL_REFLECTANCE 1
