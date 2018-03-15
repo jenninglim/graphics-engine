@@ -1,4 +1,5 @@
 #include "Sphere.h"
+#include "Config.h"
 
 #ifdef DEBUG
 #include <iostream>
@@ -9,52 +10,18 @@ Sphere :: Sphere(const vec4 c, const float r)
 {
     this->centre = c;
     this->radius = r;
-    this->reflect_ratio = 1.0f;
-    this->refract_ratio = 1.f;
+    this->reflect_ratio = SPHERE_REFLECTANCE;
+    this->refract_ratio = SPHERE_REFRACT;
     this->ior = DEF_IOR;
     this->colour = vec3(1.0f,1.0f,1.0f);
-}
-
-bool solveQuadratic(const float &a,
-        const float &b,
-        const float &c,
-        float &x0,
-        float &x1)
-{
-    float discr = b * b - 4 * a * c;
-    if (discr < 0) 
-    {
-        return false;
-    }
-    else if (discr == 0)
-    {
-        x0 = x1 = - 0.5 * b / a;
-    }
-    else
-    {
-        float q = (b > 0) ?
-            -0.5 * (b + sqrt(discr)) :
-            -0.5 * (b - sqrt(discr));
-        x0 = q / a;
-        x1 = c / q;
-    }
-    if (x0 > x1) std::swap(x0, x1);
-
-    return true;
 }
 
 bool Sphere::intersection(const Ray r, Intersection &closestI)
 {
     bool intersectionFound = true;
-    vec3 cent = vec3(this->centre[0],
-            this->centre[1],
-            this->centre[2]);
-    vec3 dir = vec3(r.direction[0],
-            r.direction[1],
-            r.direction[2]);
-    vec3 init = vec3(r.initial[0],
-            r.initial[1],
-            r.initial[2]);
+    vec3 cent = vec3(this->centre);
+    vec3 dir = vec3(r.direction);
+    vec3 init = vec3(r.initial);
     float t, t0, t1;
 
     // analytic solution
@@ -78,7 +45,7 @@ bool Sphere::intersection(const Ray r, Intersection &closestI)
     } 
     t = t0; 
 
-    if (t < closestI.distance)
+    if (t > EPSILON && t < closestI.distance)
     {
         closestI.position = t * vec4(r.direction,0) + r.initial;
         closestI.distance = t;

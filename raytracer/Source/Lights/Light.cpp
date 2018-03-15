@@ -7,15 +7,11 @@ using namespace std;
 using glm::vec3;
 using glm::vec4;
 
-vec3 DirectLight(const Intersection& i, BVH bvh, Light light)
+vec3 DirectLight(const Intersection i, BVH bvh, Light light)
 {
-    vec3 norm = vec3(i.normal[0],
-            i.normal[1],
-            i.normal[2]);
-    vec4 r_hat4 = glm::normalize(light.position - i.position);
-    vec3 r_hat = vec3(r_hat4[0],
-            r_hat4[1],
-            r_hat4[2]);
+    vec3 norm = vec3(i.normal);
+    vec3 r_hat = vec3(glm::normalize(light.position - i.position));
+
     float dist = glm::length(light.position - i.position);
     vec3 n_hat = glm::normalize(norm);
 

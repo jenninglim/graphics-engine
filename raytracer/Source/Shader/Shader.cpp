@@ -23,9 +23,7 @@ typedef struct Ray_t
 
 Ray reflect(const Ray I, const Intersection i) 
 { 
-    vec3 norm = vec3(i.normal[0],
-            i.normal[1],
-            i.normal[2]);
+    vec3 norm = vec3(i.normal);
     vec3 dir = I.direction - 2 * glm::dot(I.direction, norm) * norm;
     dir = glm::normalize(dir);
     return  Ray(i.position, dir);
@@ -33,12 +31,8 @@ Ray reflect(const Ray I, const Intersection i)
 
 Ray refract(const Ray r, const Intersection i)
 {
-    vec3 idir = vec3(r.direction.x,
-            r.direction.y,
-            r.direction.z);
-    vec3 norm = vec3(i.normal.x,
-            i.normal.y,
-            i.normal.z);
+    vec3 idir = vec3(r.direction);
+    vec3 norm = vec3(i.normal);
 
     float cosi = glm::clamp(glm::dot(idir, norm),- 1.f, 1.f );
     float etai = 1.f, etat = i.ior;
@@ -123,12 +117,14 @@ void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
                 * c_ray.prevReflectance
                 * 1.f/2.f;
             
-            if (0)//(c_ray.depth + 1 < RAY_DEPTH)
+            if (c_ray.depth + 1 < RAY_DEPTH)
             {
                 ray_stack.push(Ray_t(r1,
                             c_ray.depth + 1,
-                            c_ray.prevReflectance *(1- intersect.refract_ratio)));
-                ray_stack.push(Ray_t(r2, c_ray.depth+1, c_ray.prevReflectance));
+                            c_ray.prevReflectance * (1- intersect.refract_ratio)));
+                ray_stack.push(Ray_t(r2,
+                            c_ray.depth+1,
+                            c_ray.prevReflectance * (1- intersect.reflect_ratio)));
             }
         }
     }
