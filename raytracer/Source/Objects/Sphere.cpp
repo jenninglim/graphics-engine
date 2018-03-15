@@ -13,7 +13,7 @@ Sphere :: Sphere(const vec4 c, const float r)
     this->reflect_ratio = SPHERE_REFLECTANCE;
     this->refract_ratio = SPHERE_REFRACT;
     this->ior = DEF_IOR;
-    this->colour = vec3(1.0f,1.0f,1.0f);
+    this->colour = vec3(0.5,1.0f,1.0f);
 }
 
 bool Sphere::intersection(const Ray r, Intersection &closestI)
@@ -39,9 +39,9 @@ bool Sphere::intersection(const Ray r, Intersection &closestI)
     t1 = tca + thc;
     if (t0 > t1) std::swap(t0, t1); 
 
-    if (t0 < 0) { 
+    if (t0 < -EPSILON) { 
         t0 = t1; // if t0 is negative, let's use t1 instead 
-        if (t0 < 0) intersectionFound = false; // both t0 and t1 are negative 
+        if (t0 < -EPSILON) intersectionFound = false; // both t0 and t1 are negative 
     } 
     t = t0; 
 

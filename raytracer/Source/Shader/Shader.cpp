@@ -13,11 +13,12 @@ typedef struct Ray_t
     Ray r;    
     int depth;
     float prevReflectance;
+    glm::vec3 original_colour;
     Ray_t():r(),depth(0), prevReflectance(1.0f)
     {
     }
-    Ray_t(Ray r, int d, double acc):
-        r(r), depth(d), prevReflectance(acc)
+    Ray_t(Ray r, int d, double acc, glm::vec3 color):
+        r(r), depth(d), prevReflectance(acc), original_colour(color)
     {}
 } Ray_t;
 
@@ -87,7 +88,7 @@ void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
                 std::numeric_limits<float>::max(),
                 vec4(0)};
 
-    ray_stack.push(Ray_t(r,0,1.0f));
+    ray_stack.push(Ray_t(r,0,1.0f, vec3(0)));
     colour = vec3(0);
     while (!ray_stack.empty())
     {
@@ -97,6 +98,10 @@ void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
         if (collision(bvh,
                     c_ray.r, intersect))
         {
+            if (c_ray.depth ==0)
+            {
+                c_ray.original_colour = intersect.colour;
+            }
             fresnel(c_ray.r, intersect, kr);
             lightColor = DirectLight(intersect,
                     bvh,
@@ -121,11 +126,14 @@ void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
             {
                 ray_stack.push(Ray_t(r1,
                             c_ray.depth + 1,
-                            c_ray.prevReflectance * (1- intersect.refract_ratio)));
+                            c_ray.prevReflectance * (1- intersect.refract_ratio),
+                            c_ray.original_colour));
                 ray_stack.push(Ray_t(r2,
                             c_ray.depth+1,
-                            c_ray.prevReflectance * (1- intersect.reflect_ratio)));
+                            c_ray.prevReflectance * (1- intersect.reflect_ratio),
+                            c_ray.original_colour));
             }
         }
     }
+    colour += c_ray.original_colour * c_ray.prevReflectance;
 }
