@@ -10,9 +10,6 @@
 
 using namespace std;
 
-// Helper function to push objects
-void push_object(vector<Object> &objects, vector<Triangle> &object_tri);
-
-void LoadTestModel( std::vector<Object>& objects );
+void LoadTestModel( std::vector<Object*>& objects );
 
 #endif

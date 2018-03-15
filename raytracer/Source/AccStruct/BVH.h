@@ -4,12 +4,7 @@
 #include <glm/glm.hpp>
 #include "Object.h"
 #include "Intersection.h"
-
-using namespace std;
-using glm::vec3;
-using glm::vec4;
-using glm::mat3;
-using glm::mat4;
+#include "Ray.h"
 
 class BVH
 {
@@ -17,12 +12,12 @@ class BVH
         BVH* left;
         BVH* right;
         bool isLeaf;
-        Object object;
+        Object * object;
         BoundingVolume bv;
         BVH();
-        BVH(vector<Object> objects);
+        BVH(vector<Object*> objects);
 };
 
-bool collision(BVH bvh, vec4 initial, vec4 direction, Intersection &i);
+bool collision(BVH bvh, Ray r, Intersection &i);
 
 #endif

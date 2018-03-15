@@ -3,9 +3,9 @@
 
 #include <glm/glm.hpp>
 #include <vector>
-#include "Object.h"
+#include "Triangle.h"
 
-using namespace std;
+using namespace glm;
 // Intersection
 struct Intersection
 {
@@ -17,7 +17,5 @@ struct Intersection
     float refract_ratio;
     float ior;
 };
-
-vec3 solveLinearEq(Triangle triangle, vec4 start, vec4 dir);
 
 #endif

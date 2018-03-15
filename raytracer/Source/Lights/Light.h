@@ -1,9 +1,9 @@
 #ifndef LIGHT_H
 #define LIGHT_H
 
-#include "Intersection.h"
 #include <glm/glm.hpp>
 #include "BVH.h"
+#include "Intersection.h"
 
 using namespace std;
 using glm::vec4;
@@ -29,7 +29,7 @@ class Light
     }
 };
 
-vec3 DirectLight(const Intersection& i,
+vec3 DirectLight(const Intersection i,
         BVH bvh,
         Light light);
 #endif

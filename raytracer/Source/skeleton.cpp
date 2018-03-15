@@ -9,9 +9,8 @@
 #include "glm/ext.hpp"
 #include <math.h>
 #include "Light.h"
-#include "Ray.h"
-#include "Intersection.h"
 #include "BVH.h"
+#include "Shader.h"
 
 using namespace std;
 using glm::vec3;
@@ -33,7 +32,7 @@ void Draw(screen* screen,
 int main( int argc, char* argv[] )
 {
   screen *screen = InitializeSDL( SCREEN_WIDTH, SCREEN_HEIGHT, FULLSCREEN_MODE );
-  vector<Object> objects;
+  vector<Object *> objects;
   Light light(vec4(0, -0.5, -0.7, 1), 14.f* vec3(1,1,1));
 
   vec4 camPos(0,0,-3,1);
@@ -59,18 +58,12 @@ int main( int argc, char* argv[] )
 void Draw(screen* screen, Camera cam, BVH bvh, Light light)
 {
     vec3 color;
-    vec4 rayFromOrigin, rayFromCam, d = vec4();
+    vec4 rayFromOrigin, rayFromCam;
+    vec3 d = vec3();
     Ray r;
      /* Clear buffer */
     //std::cout<<glm::to_string(cam.cameraPos)<<std::endl;
     memset(screen->buffer, 0, screen->height*screen->width*sizeof(uint32_t));
-
-    Intersection closestIntersection = {
-                cam.position,
-                vec3(0),
-                std::numeric_limits<float>::max(),
-                vec4(0)
-                };
 
     for(int y = 0; y < SCREEN_HEIGHT; y++){
         for(int x = 0; x < SCREEN_WIDTH; x++){
@@ -83,13 +76,14 @@ void Draw(screen* screen, Camera cam, BVH bvh, Light light)
 
             rayFromCam = cam.R * rayFromOrigin;
 
-            d = glm::normalize(rayFromCam);
-            closestIntersection.distance = std::numeric_limits<float>::max();
+            d = glm::normalize(vec3(rayFromCam[0],
+                        rayFromCam[1],
+                        rayFromCam[2]));
 
             r.initial = cam.position;
             r.direction = d;
             
-            shootRay(r, closestIntersection, color, bvh, light);
+            shootRay(r, color, bvh, light);
             PutPixelSDL(screen, x, y, color);
 
         }
