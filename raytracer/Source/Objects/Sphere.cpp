@@ -41,7 +41,7 @@ bool Sphere::intersection(const Ray r, Intersection &closestI)
 
     if (t0 < -EPSILON) { 
         t0 = t1; // if t0 is negative, let's use t1 instead 
-        if (t0 < -EPSILON) intersectionFound = false; // both t0 and t1 are negative 
+        if (t0 < -EPSILON) return false; // both t0 and t1 are negative 
     } 
     t = t0; 
 
@@ -55,6 +55,5 @@ bool Sphere::intersection(const Ray r, Intersection &closestI)
         closestI.refract_ratio = this->refract_ratio;
         closestI.ior = this->ior;
     }
-
     return intersectionFound;
 }

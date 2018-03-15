@@ -14,7 +14,9 @@ class Sphere : public Object
         float radius;
         vec4 centre;
     Sphere(const vec4 c, const float r);
-    bool intersection(const Ray r, Intersection &closestI) override;
+    bool intersection(
+            const Ray r,
+            Intersection &closestI);
 };
 
 #endif
