@@ -1,7 +1,14 @@
 #include "Scene.h"
 #include "TestModelH.h"
+#include "Post.h"
 
 using namespace glm;
+using glm::vec3;
+
+static vec3 pixels[SCREEN_WIDTH][SCREEN_HEIGHT];
+
+void drawPixels(screen * screen);
+
 Scene::Scene()
 {
     vec4 camPos(0,0,-3,1);
@@ -59,7 +66,20 @@ void Scene::Draw(screen* screen)
             r.direction = d;
 
             shootRay(r, color, bvh, light);
-            PutPixelSDL(screen, x, y, color);
+            pixels[x][y] = color;
+        }
+    }
+    post_processing(pixels);
+    drawPixels(screen);
+}
+
+void drawPixels(screen * screen)
+{
+    for (int i = 0; i < SCREEN_WIDTH; i++)
+    {
+        for (int j = 0; j < SCREEN_HEIGHT; j ++)
+        {
+            PutPixelSDL(screen, i, j, pixels[i][j]);
         }
     }
 

@@ -13,6 +13,7 @@ using glm::vec4;
 using glm::mat4;
 
 #define _USE_MATH_DEFINES
+
 /* ----------------------------------------------------------------------------*/
 /* FUNCTIONS                                                                   */
 
