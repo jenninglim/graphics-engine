@@ -1,16 +1,10 @@
 #include <iostream>
 #include <stdio.h>
 #include <glm/glm.hpp>
-#include <SDL.h>
-#include "SDLauxiliary.h"
-#include "TestModelH.h"
-#include "Camera.h"
 #include <stdint.h>
 #include "glm/ext.hpp"
 #include <math.h>
-#include "Light.h"
-#include "BVH.h"
-#include "Shader.h"
+#include "Scene.h"
 
 using namespace std;
 using glm::vec3;
@@ -22,101 +16,48 @@ using glm::mat4;
 /* ----------------------------------------------------------------------------*/
 /* FUNCTIONS                                                                   */
 
-void Update(Camera &cam);
+void Update(Scene &scene);
 
 void Draw(screen* screen,
-        Camera cam,
-        BVH bvh,
-        Light light);
+        Scene scene);
 
 int main( int argc, char* argv[] )
 {
-  screen *screen = InitializeSDL( SCREEN_WIDTH, SCREEN_HEIGHT, FULLSCREEN_MODE );
-  vector<Object *> objects;
-  Light light(vec4(0, -0.5, -0.7, 1), 14.f* vec3(1,1,1));
+    screen *screen = InitializeSDL( SCREEN_WIDTH, SCREEN_HEIGHT, FULLSCREEN_MODE );
 
-  vec4 camPos(0,0,-3,1);
-  Camera cam(CAM_FOCAL_LENGTH, camPos);
-  LoadTestModel(objects);
-  BVH bvh = BVH(objects);
-  objects.clear(); 
-
-  while( NoQuitMessageSDL() )
+    Scene scene = Scene();
+    while( NoQuitMessageSDL() )
     {
-      Update(cam);
-      Draw(screen, cam, bvh, light);
-      SDL_Renderframe(screen);
+        Update(scene);
+        Draw(screen, scene);
+        SDL_Renderframe(screen);
     }
 
-  SDL_SaveImage( screen, "screenshot.bmp" );
+    SDL_SaveImage( screen, "screenshot.bmp" );
 
-  KillSDL(screen);
-  return 0;
+    KillSDL(screen);
+    return 0;
 }
 
 /*Place your drawing here*/
-void Draw(screen* screen, Camera cam, BVH bvh, Light light)
+void Draw(screen* screen, Scene scene)
 {
-    vec3 color;
-    vec4 rayFromOrigin, rayFromCam;
-    vec3 d = vec3();
-    Ray r;
-     /* Clear buffer */
-    //std::cout<<glm::to_string(cam.cameraPos)<<std::endl;
+   /* Clear buffer */
     memset(screen->buffer, 0, screen->height*screen->width*sizeof(uint32_t));
-
-    for(int y = 0; y < SCREEN_HEIGHT; y++){
-        for(int x = 0; x < SCREEN_WIDTH; x++){
-            rayFromOrigin.x = x - SCREEN_WIDTH/2;
-            rayFromOrigin.y = y - SCREEN_HEIGHT/2;
-            rayFromOrigin.z = cam.focalLength;
-            rayFromOrigin[3] = 1;
-            
-            color = vec3(0);
-
-            rayFromCam = cam.R * rayFromOrigin;
-
-            d = glm::normalize(vec3(rayFromCam[0],
-                        rayFromCam[1],
-                        rayFromCam[2]));
-
-            r.initial = cam.position;
-            r.direction = d;
-            
-            shootRay(r, color, bvh, light);
-            PutPixelSDL(screen, x, y, color);
-
-        }
-    }
+    scene.Draw(screen);
 }
 
 /*Place updates of parameters here*/
-void Update(Camera &cam)
+void Update(Scene &scene)
 {
-  static int t = SDL_GetTicks();
-  /* Compute frame time */
-  int t2 = SDL_GetTicks();
-  float dt = float(t2-t);
-  t = t2;
-  /*Good idea to remove this*/
-  std::cout << "Render time: " << dt << " ms." << std::endl;
-  /* Update variables*/
-
-  const uint8_t* keystate = SDL_GetKeyboardState( 0 );
-	if ( keystate[SDL_SCANCODE_UP] )
-	{
-        cam.forward();
-	}
-	if ( keystate[SDL_SCANCODE_DOWN] )
-	{
-		cam.backward();
-	}
-	if ( keystate[SDL_SCANCODE_LEFT] )
-	{
-	    cam.left();
-	}
-	if ( keystate[SDL_SCANCODE_RIGHT] )
-	{
-	    cam.right ();
-	}
+    static int t = SDL_GetTicks();
+    /* Compute frame time */
+    int t2 = SDL_GetTicks();
+    float dt = float(t2-t);
+    t = t2;
+    /*Good idea to remove this*/
+    std::cout << "Render time: " << dt << " ms." << std::endl;
+    /* Update variables*/
+    KeyStroke_t * keystate = SDL_GetKeyboardState( 0 );
+    scene.Update(keystate);
 }

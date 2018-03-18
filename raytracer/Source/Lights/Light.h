@@ -16,6 +16,13 @@ class Light
         vec3 power;
         vec3 indirect_light;
 
+    Light()
+    {
+        this->indirect_light = vec3(1,1,1) * 0.5f;
+        this->position = vec4(0, -0.5, -0.7, 1);
+        this->indirect_light = 14.f * vec3(1,1,1);
+    }
+
     Light(vec4 position, vec3 pow)
         :position(position), power(pow)
     {
