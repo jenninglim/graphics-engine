@@ -13,7 +13,7 @@
 // Auxillary Variables
 #define EPSILON 1e-3
 #define DEBUG 1
-#define RAY_DEPTH 5
+#define RAY_DEPTH 1
 
 //// SCENE SETTINGS
 // REFLECT
@@ -22,8 +22,8 @@
 #define BOX_REFLECTANCE 0.8
 #define BOX_REFRACT 0.4f
 
-#define SPHERE_REFLECTANCE 0.6f
-#define SPHERE_REFRACT 0.2f
+#define SPHERE_REFLECTANCE 1.0f
+#define SPHERE_REFRACT 0.0f
 
 #define DEF_IOR 1000000.f
 

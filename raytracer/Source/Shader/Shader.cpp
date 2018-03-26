@@ -124,12 +124,14 @@ void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
             
             if (c_ray.depth + 1 < RAY_DEPTH)
             {
+                c_ray.prevReflectance *= (1-intersect.refract_ratio) +
+                    (1-intersect.reflect_ratio);
                 ray_stack.push(Ray_t(r1,
                             c_ray.depth + 1,
-                            c_ray.prevReflectance * (1- intersect.refract_ratio),
+                            c_ray.prevReflectance * (1 - intersect.refract_ratio),
                             c_ray.original_colour));
                 ray_stack.push(Ray_t(r2,
-                            c_ray.depth+1,
+                            c_ray.depth + 1,
                             c_ray.prevReflectance * (1- intersect.reflect_ratio),
                             c_ray.original_colour));
             }
