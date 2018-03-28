@@ -21,7 +21,7 @@ SDL_LDFLAGS := $(shell sdl2-config --libs)
 CPPFLAGS ?= $(INC_FLAGS) -pipe -Wall -Wno-switch -ggdb -g3 -O3
 
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
-	$(CC) $(OBJS) -o $@ $(LDFLAGS) $(SDL_LDFLAGS)
+	$(CC) $(CPPFLAGS) $(OBJS) -o $@ $(LDFLAGS) $(SDL_LDFLAGS)
 
 # assembly
 $(BUILD_DIR)/%.s.o: %.s

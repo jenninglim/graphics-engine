@@ -20,14 +20,16 @@
 #define WALL_REFLECTANCE 1
 
 #define BOX_REFLECTANCE 0.8
-#define BOX_REFRACT 0.4f
+#define BOX_REFRACT 0.8f
 
-#define SPHERE_REFLECTANCE 0.6f
-#define SPHERE_REFRACT 0.2f
-
+#define SPHERE_REFLECTANCE 1.0f
+#define SPHERE_REFRACT 0.3f
 #define DEF_IOR 1000000.f
 
 // Lighting
 #define LIGHT_POWER
+
+// AA
+#define THRESHOLD 0.5
 #endif
 
