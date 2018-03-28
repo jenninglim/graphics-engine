@@ -12,7 +12,7 @@ Sphere :: Sphere(const vec4 c, const float r)
     this->radius = r;
     this->reflect_ratio = SPHERE_REFLECTANCE;
     this->refract_ratio = SPHERE_REFRACT;
-    this->ior = DEF_IOR;
+    this->ior = 1.;
     this->colour = vec3(0.5,1.0f,1.0f);
 }
 
