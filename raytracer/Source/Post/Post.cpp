@@ -17,12 +17,16 @@ static float sobely[3][3] = {{-1, -2, -1},
                              {0, 0, 0},
                              {1, 2, 1}};
 
+static float g_blur[3][3] = {{1, 2, 1},
+                             {2, 4, 2},
+                             {1, 2, 1}};
+
 void mark_disk(vec3 pixel[SCREEN_WIDTH][SCREEN_HEIGHT],
-               vec3 disc[SCREEN_WIDTH][SCREEN_HEIGHT]);
+               bool disc[SCREEN_WIDTH][SCREEN_HEIGHT]);
 
 void post_processing(vec3 pixel[SCREEN_WIDTH][SCREEN_HEIGHT])
 {
-    vec3 disc[SCREEN_WIDTH][SCREEN_HEIGHT];
+    bool disc[SCREEN_WIDTH][SCREEN_HEIGHT];
     mark_disk(pixel,disc);
     return;
 }
@@ -33,10 +37,10 @@ float average(vec3 v3)
 }
 
 void mark_disk(vec3 pixel[SCREEN_WIDTH][SCREEN_HEIGHT],
-               vec3 disc[SCREEN_WIDTH][SCREEN_HEIGHT])
+               bool disc[SCREEN_WIDTH][SCREEN_HEIGHT])
 {
     int xn, yn;
-    vec3 magX, magY;
+    vec3 magX, magY, magP;
     for (int i = 1; i < SCREEN_WIDTH-1; i++)
     {
         for (int j = 1; j < SCREEN_HEIGHT-1; j++)
@@ -56,7 +60,7 @@ void mark_disk(vec3 pixel[SCREEN_WIDTH][SCREEN_HEIGHT],
                     magY = magY + pixel[xn][yn] * sobely[a][b];
                 }
             }
-            disc[i][j] = (glm::abs(magX + magY));
+            disc[i][j] = average(glm::abs(magX + magY))  > 0.5 ? true : false;
         }
     }
     
@@ -64,7 +68,20 @@ void mark_disk(vec3 pixel[SCREEN_WIDTH][SCREEN_HEIGHT],
     {
         for (int j = 1; j < SCREEN_HEIGHT-1; j++)
         {
-            pixel[i][j] = disc[i][j];
+            if (disc[i][j])
+            {
+                magP = vec3(0);
+                for (int a = 0; a < 3; a++)
+                {
+                    for(int b = 0; b < 3; b++)
+                    {
+                        xn = i + a - 1;
+                        yn = j + b - 1;
+                        magP += pixel[xn][yn] * g_blur[a][b] * 1.f/16.f;
+                    }
+                }
+                pixel[i][j] = magP;
+            }
         }
     }
 }
