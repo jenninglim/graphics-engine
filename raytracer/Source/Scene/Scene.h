@@ -2,6 +2,7 @@
 #define SCENE_H
 
 #include <SDL.h>
+#include <vector>
 #include "Object.h"
 #include "BVH.h"
 #include "Light.h"

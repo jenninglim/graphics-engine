@@ -22,4 +22,9 @@ class Ray
 
 };
 
+class Cone : Ray
+{
+    public:
+        float theta;
+};
 #endif

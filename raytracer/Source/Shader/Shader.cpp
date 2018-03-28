@@ -1,4 +1,6 @@
 #include "Shader.h"
+#include "Collision.h"
+
 #include <stack>
 
 #ifdef DEBUG
@@ -103,9 +105,14 @@ void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
                 c_ray.original_colour = intersect.colour;
             }
             fresnel(c_ray.r, intersect, kr);
+
             lightColor = DirectLight(intersect,
                     bvh,
-                    light);
+                    light)* ShadowLight(intersect,
+                        bvh,
+                        light);
+
+            
 
             if (kr < 1)
             {
