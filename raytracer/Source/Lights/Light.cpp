@@ -4,6 +4,11 @@
 #include "Collision.h"
 #include "Ray.h"
 
+#ifdef DEBUG
+#include <iostream>
+#include "glm/ext.hpp"
+#endif
+
 using namespace std;
 using glm::vec3;
 using glm::vec4;
@@ -26,7 +31,7 @@ vec3 DirectLight(const Intersection i, BVH bvh, Light light)
 vec3 ShadowLight(const Intersection i, BVH bvh, Light
         light)
 {
-    vec3 r_hat = vec3(glm::normalize(light.position - i.position));
+    vec3 r_hat = glm::normalize(vec3(light.position - i.position));
     vec3 shadowMult = vec3(1);
     Intersection closestIntersection = {
                 light.position,
@@ -34,13 +39,16 @@ vec3 ShadowLight(const Intersection i, BVH bvh, Light
                 std::numeric_limits<float>::max(),
                 vec4(0)};
 
-    if (collision(bvh, Ray(i.position, r_hat), closestIntersection))
+    if (collision(bvh, Cone(i.position, r_hat, CONE_SIZE), closestIntersection))
     {
-         if (closestIntersection.distance < glm::length(light.position - i.position) &&
-                 closestIntersection.distance > EPSILON)
-            {
-                shadowMult =  vec3(0,0,0);
-            }
+        float dist =glm::l2Norm(vec3(light.position- i.position));
+        if (closestIntersection.distance > dist)
+        {
+            return vec3(1);
+        }
+        float vol = glm::pi<float>() * dist/3 * glm::pow(dist * glm::tan(CONE_SIZE),2);
+        return  vec3(glm::pow((1 - closestIntersection.area/vol),2)) ;
+
     }
     return shadowMult;
 }

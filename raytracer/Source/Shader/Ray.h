@@ -22,9 +22,22 @@ class Ray
 
 };
 
-class Cone : Ray
+class Cone
 {
     public:
+        vec4 initial;
+        vec3 direction;
         float theta;
+        Cone()
+    {
+        initial = vec4(0);
+        direction = vec3(0);
+    }
+
+        Cone(glm::vec4 start, glm::vec3 dir, float theta)
+        :initial(start), direction(dir), theta(theta)
+    {}
+
+
 };
 #endif

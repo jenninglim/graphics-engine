@@ -12,6 +12,7 @@ struct Intersection
     float reflect_ratio;
     float refract_ratio;
     float ior;
+    float area;
 };
 
 

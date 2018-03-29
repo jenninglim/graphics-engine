@@ -29,6 +29,12 @@ class Object
             cout << "intersection virtual called" <<endl;
             assert(0 > 1);
         };
+        virtual bool intersection(const Cone r, Intersection &i)
+        {
+            cout << "intersection virtual called" <<endl;
+            assert(0 > 1);
+        };
+
 };
 #endif 
 

@@ -17,6 +17,10 @@ class Sphere : public Object
     bool intersection(
             const Ray r,
             Intersection &closestI);
+    bool intersection(
+            const Cone r,
+            Intersection &closestI);
+
 };
 
 #endif

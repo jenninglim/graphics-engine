@@ -112,8 +112,6 @@ void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
                         bvh,
                         light);
 
-            
-
             if (kr < 1)
             {
                 r1 = refract(c_ray.r, intersect);
@@ -144,5 +142,5 @@ void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
             }
         }
     }
-    colour += c_ray.original_colour * c_ray.prevReflectance;
+    //colour += c_ray.original_colour * c_ray.prevReflectance;
 }
