@@ -2,6 +2,7 @@
 #include "TestModelH.h"
 #include "Post.h"
 
+#define SCALE 0.3f
 using namespace glm;
 using glm::vec3;
 
@@ -38,7 +39,24 @@ void Scene::Update(KeyStroke_t * keystate)
 	{
 	    this->cam.right();
 	}
+    if ( keystate[SDL_SCANCODE_A] )
+	{
+	    this->light.position += SCALE * vec4(-1,0,0,0);
+	}
+    if ( keystate[SDL_SCANCODE_W] )
+	{
+        this->light.position += SCALE * vec4(0,0,-1,0);
+	}
+    if ( keystate[SDL_SCANCODE_D] )
+	{
+        this->light.position += SCALE * vec4(1,0,0,0);
+	}
+    if ( keystate[SDL_SCANCODE_S] )
+	{
+        this->light.position += SCALE * vec4(0,0,1,0);
+	}
 }
+
 
 void Scene::Draw(screen* screen)
 {
