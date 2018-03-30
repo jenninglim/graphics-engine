@@ -72,26 +72,24 @@ bool Sphere::intersection(const Cone r, Intersection &closestI)
     float SEP = glm::l2Norm(closestPoint -  vec3(this->centre));
     if (d > SEP)
     {
-        if (closestI.distance < T);
+        if (closestI.distance > T)
         {
             closestI.distance = T;
         }
         float area = 0;
-        vec3 nextCircle = closestPoint - r.direction * this->radius;
         float r1, r2;
         vec3 v1 = glm::normalize(vec3(1,0,-r.direction[0] / r.direction[2]));
         vec3 v2 = glm::normalize(vec3(0,1,-r.direction[1] / r.direction[2]));
         vec2 proj_circ1;
         vec2 proj_circ2;
         //determine v1 and v2
+        proj_circ1 = projection(vec3(r.initial), v1,v2);
+        proj_circ2 = projection(vec3(this->centre), v1,v2);
         for (float i = 0; i < this->radius * 2; i += VOL_APPROX_INT)
         {
-            proj_circ1 = projection(nextCircle, v1,v2);
-            proj_circ2 = projection(vec3(this->centre) - (i - this->radius) * r.direction, v1,v2);
             area += circcircArea(proj_circ1, r1, proj_circ2, r2) * VOL_APPROX_INT;
-            nextCircle = closestPoint - (this->radius + i) * r.direction;
             r1 = (glm::tan(r.theta) * (T + i - this->radius));
-            r2 = glm::abs(this->radius-i)*glm::tan(glm::acos(glm::abs(this->radius - i)/this->radius));
+            r2 = this->radius*glm::sin(glm::acos(glm::abs(this->radius - i)/this->radius));
         }
         closestI.area = area;
         return true;

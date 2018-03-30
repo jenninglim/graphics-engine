@@ -48,7 +48,6 @@ vec3 ShadowLight(const Intersection i, BVH bvh, Light
         }
         float vol = glm::pi<float>() * dist/3 * glm::pow(dist * glm::tan(CONE_SIZE),2);
         return  vec3(glm::pow((1 - closestIntersection.area/vol),2)) ;
-
     }
     return shadowMult;
 }
