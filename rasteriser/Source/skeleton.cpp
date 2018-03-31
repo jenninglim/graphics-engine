@@ -7,9 +7,10 @@
 #include "TestModelH.h"
 #include "Camera.h"
 #include "Light.h"
-//? TODO:why not imported in glm
 #include <glm/gtc/matrix_access.hpp>
 #include <glm/gtx/string_cast.hpp>
+#include <Config.h>
+
 using namespace std;
 using namespace glm;
 using glm::vec3;
@@ -17,16 +18,11 @@ using glm::mat3;
 using glm::vec4;
 using glm::mat4;
 
-#define SCREEN_WIDTH 500
-#define SCREEN_HEIGHT SCREEN_WIDTH
-#define CAM_FOCAL_LENGTH SCREEN_WIDTH
-#define FULLSCREEN_MODE false
-#define EPSILON 1e-2
 
 /* ----------------------------------------------------------------------------*/
 /* FUNCTIONS                                                                   */
 
-void Update();
+void Update(Camera* cam, Light* light);
 void Draw(screen* screen, vector<Triangle> &triangles,Camera cam, Light light);
 
 void Interpolate(Pixel a, Pixel b, vector<Pixel>& result){
@@ -77,10 +73,13 @@ void PixelShader(screen* screen, const Pixel& p, float (&depthBuffer)[SCREEN_HEI
 {
   int x = p.x;
   int y = p.y;
-  if( p.zinv > depthBuffer[y][x] )
-  {
-    depthBuffer[y][x] = p.zinv;
-    PutPixelSDL( screen, x, y, p.illumination* currentColor );
+  
+  if(x >= 0 && y >= 0 && x < SCREEN_WIDTH && y < SCREEN_HEIGHT){
+    if( p.zinv > depthBuffer[y][x] )
+    {
+      depthBuffer[y][x] = p.zinv;
+      PutPixelSDL( screen, x, y, p.illumination* currentColor );
+    }
   }
 }
 
@@ -94,21 +93,7 @@ void DrawLineSDL(screen* screen, Pixel a, Pixel b, vec3 color){
     PutPixelSDL(screen, line[pixel_num].x, line[pixel_num].y, color);
   } 
 }
-/*
-void DrawPolygonEdges(screen* screen, const vector<Vertex>& vertices, Camera cam){
-  int V = vertices.size(); 
-  vector<Pixel> projectedVertices(V); 
-  for(int i = 0; i < V; ++i){
-    VertexShader(vertices[i], projectedVertices[i], cam);
-  }
-  for(int i=0; i < V; ++i)
-  {
-    int j = (i+1)%V; 
-    vec3 color(1,1,1);
-    DrawLineSDL(screen, projectedVertices[i], projectedVertices[j], color);
-  }
-}
-*/
+
 void ComputePolygonRows(const vector<Pixel>& vertexPixels, vector<Pixel>& leftPixels, vector<Pixel>& rightPixels)
 {
   int minY =glm::min(vertexPixels[0].y,glm::min(vertexPixels[1].y,vertexPixels[2].y));
@@ -198,15 +183,15 @@ int main( int argc, char* argv[] )
   vector<Triangle> triangles;
   LoadTestModel(triangles);  
 
-  //create camera
-  vec4 camPos(0,0,-3.001,1);
-  Camera cam(CAM_FOCAL_LENGTH, camPos); 
-
-  //create light
-  Light light(vec4(0,-0.5,-0.7, 1), 100.1f*vec3(1,1,1));
+  //create camera/light
+  Camera cam;
+  //vec4 camPos(0,0,-3.001,1);
+  //Camera cam(CAM_FOCAL_LENGTH, camPos); 
+  //Light light(vec4(0,-0.5,-0.7, 1), 14.1f*vec3(1,1,1), 0.5f*vec3(1,1,1)); 
+  Light light;
   while( NoQuitMessageSDL() )
     {
-      Update();
+      Update(&cam, &light);
       Draw(screen,triangles,cam,light);
       SDL_Renderframe(screen);
     }
@@ -244,23 +229,12 @@ void Draw(screen* screen, vector<Triangle> &triangles, Camera cam, Light light)
     vertices[2].normal = glm::normalize(triangles[i].normal);
     vertices[2].reflectance = vec2 (1,1);
     DrawPolygon(screen, vertices, triangles[i].color, cam, depthBuffer, light);
-    //DrawPolygonEdges(screen, vertices,cam);
-    /*
-    for(int v=0; v<3; ++v){
-      ivec2 projPos;
-      VertexShader(vertices[v], projPos,cam); 
-      
-      std::cout << glm::to_string(projPos) << std::endl;
-      vec3 color(1,1,1);
-      PutPixelSDL(screen, projPos.x, projPos.y, color);
-    }
-    */
   }  
 
 }
 
 /*Place updates of parameters here*/
-void Update()
+void Update(Camera* cam, Light* light)
 {
   static int t = SDL_GetTicks();
   /* Compute frame time */
@@ -270,4 +244,40 @@ void Update()
   /*Good idea to remove this*/
   std::cout << "Render time: " << dt << " ms." << std::endl;
   /* Update variables*/
+  const uint8_t * keystate = SDL_GetKeyboardState( 0 );
+  if ( keystate[SDL_SCANCODE_UP] )
+  {
+	  cam->forward();
+  }
+  if ( keystate[SDL_SCANCODE_DOWN] )
+  {
+	  cam->backward();
+  }
+  if ( keystate[SDL_SCANCODE_LEFT] )
+  {
+	  cam->left();
+  }
+  if ( keystate[SDL_SCANCODE_RIGHT] )
+  {
+	  cam->right();
+  }
+
+  if ( keystate[SDL_SCANCODE_W] )
+  {
+	  std::cout << "Forward light" << std::endl; 
+	  light->forward();
+  }
+  if ( keystate[SDL_SCANCODE_S] )
+  {
+	  std::cout << "Backlight  light" << std::endl; 
+	  light->backward();
+  }
+  if ( keystate[SDL_SCANCODE_A] )
+  {
+	  light->left();
+  }
+  if ( keystate[SDL_SCANCODE_D] )
+  {
+	  light->right();
+  }
 }

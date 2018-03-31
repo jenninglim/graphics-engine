@@ -1,49 +1,49 @@
-FILE=skeleton
+TARGET_EXEC ?= skeleton.out
+
+BUILD_DIR ?= Build
+SRC_DIRS ?= Source
+
+SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
+OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
+DEPS := $(OBJS:.o=.d)
+CXX := g++
+CC := g++
+
+INC_DIRS := $(shell find $(SRC_DIRS) -type d)
+INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 ########
-#   Directories
-S_DIR=Source
-B_DIR=Build
-
-########
-#   Output
-EXEC=$(B_DIR)/$(FILE)
-
-# default build settings
-CC_OPTS=-c -pipe -Wall -Wno-switch -ggdb -g3 
-LN_OPTS=
-CC=g++
-
-########
-#       SDL options
+#SDL options
 SDL_CFLAGS := $(shell sdl2-config --cflags)
 GLM_CFLAGS := -I../glm/
 SDL_LDFLAGS := $(shell sdl2-config --libs)
 
+CPPFLAGS ?= $(INC_FLAGS) -pipe -Wall -Wno-switch -ggdb -g3 -O3
+
+$(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
+	$(CC) $(CPPFLAGS) $(OBJS) -o $@ $(LDFLAGS) $(SDL_LDFLAGS)
+
+# assembly
+$(BUILD_DIR)/%.s.o: %.s
+	$(MKDIR_P) $(dir $@)
+	$(AS) $(ASFLAGS) -c $< -o $@
+
+# c source
+$(BUILD_DIR)/%.c.o: %.c
+	$(MKDIR_P) $(dir $@)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+# c++ source
+$(BUILD_DIR)/%.cpp.o: %.cpp
+	$(MKDIR_P) $(dir $@)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@ $(SDL_CFLAGS) $(GLM_CFLAGS)
 
 
-########
-#   This is the default action
-all:Build
-
-
-########
-#   Object list
-#
-OBJ = $(B_DIR)/$(FILE).o
-
-
-########
-#   Objects
-$(B_DIR)/$(FILE).o : $(S_DIR)/$(FILE).cpp $(S_DIR)/SDLauxiliary.h $(S_DIR)/TestModelH.h
-	$(CC) $(CC_OPTS) -o $(B_DIR)/$(FILE).o $(S_DIR)/$(FILE).cpp $(SDL_CFLAGS) $(GLM_CFLAGS)
-
-
-########
-#   Main build rule     
-Build : $(OBJ) Makefile
-	$(CC) $(LN_OPTS) -o $(EXEC) $(OBJ) $(SDL_LDFLAGS)
-
+.PHONY: clean
 
 clean:
-	rm -f $(B_DIR)/* 
+	$(RM) -r $(BUILD_DIR)
+
+-include $(DEPS)
+
+MKDIR_P ?= mkdir -p
