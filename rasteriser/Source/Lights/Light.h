@@ -3,7 +3,6 @@
 
 #include <Config.h>
 
-
 using namespace glm;
 using glm::vec4;
 using glm::vec3;
@@ -25,11 +24,11 @@ class Light
     Light(vec4 position, vec3 power, vec3 indirect_light)
         :position(position), power(power), indirect_light(indirect_light)
     {
-        
+
     }
 
     void forward(){
-        this->position = this->position + vec4(0,0,1,0); 	
+        this->position = this->position + vec4(0,0,1,0);
     }
     void backward(){
         this->position = this->position + vec4(0,0,-1,0);

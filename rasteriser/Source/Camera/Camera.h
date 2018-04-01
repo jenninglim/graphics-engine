@@ -8,6 +8,7 @@ using namespace glm;
 //Camera
 class Camera
 {
+
     public:
         float focalLength;
         glm::vec4 cameraPos;
@@ -15,10 +16,11 @@ class Camera
         float yaw; // rotation of the camera
         float distance;
         mat4 increR;
-    
+        float depthBuffer[SCREEN_HEIGHT][SCREEN_WIDTH];
+
     Camera()
     {
-        this->cameraPos =  vec4(0,0,-3,1);
+        this->cameraPos =  vec4(0,0,-4,1);
         this->focalLength = CAM_FOCAL_LENGTH;
         yaw = 0;
         R = mat4(1.0);
@@ -41,25 +43,23 @@ class Camera
 
     void forward(){
         this->cameraPos = this->cameraPos + glm::vec4(0,0,1,0);
-	
-	std::cout<<glm::to_string(this->cameraPos)<<std::endl;
     }
     void backward(){
         this->cameraPos = this->cameraPos + glm::vec4(0,0,-1,0);
-	std::cout<<glm::to_string(this->cameraPos)<<std::endl;
+
     }
     void left(){
         this->yaw = yaw + ROTATION_SPEED;
         updateRotation();
         this->cameraPos = this->increR * this->cameraPos;
 
-	std::cout<<glm::to_string(this->cameraPos)<<std::endl;
+
     }
     void right(){
         this->yaw = yaw - ROTATION_SPEED;
         updateRotation();
         this->cameraPos = glm::inverse(this->increR) * this->cameraPos;
-	std::cout<<glm::to_string(this->cameraPos)<<std::endl;
+
     }
 
     private:
@@ -72,7 +72,6 @@ class Camera
     }
 
 };
-
 
 
 #endif
