@@ -2,7 +2,12 @@
 
 void push_box(std::vector<Object *> &objects, std::vector<Triangle> &object_tri){
   Box *object = new Box(object_tri);
-  printf("end result %f\n", object->triangles[0].v0.x);
+  objects.push_back(object);
+  object_tri.clear();
+}
+
+void push_bunny(std::vector<Object *> &objects, std::vector<Triangle> &object_tri){
+  Bunny *object = new Bunny(object_tri);
   objects.push_back(object);
   object_tri.clear();
 }
@@ -128,4 +133,29 @@ void LoadObjects(std::vector<Object *>& objects )
 	triangles.push_back( Triangle(G,H,F,blue) );
 
   push_box(objects, triangles);
+
+
+  //Stanford Bunny
+
+  vector<vec4> out_vertices;
+  vector<vec3> out_faces;
+  vector<Triangle> bunnytriangles;
+
+  loadObj("./Source/bunny.obj",out_vertices,out_faces);
+  cout << out_vertices.size() << endl;
+  cout << out_faces.size() << endl;
+
+  for(int i = 0; i<out_faces.size(); i++){
+    vec3 face = out_faces[i];
+    int vertex1 =  face.x > 0 ? face.x-1 : face.x + out_vertices.size();
+    int vertex2 =  face.y > 0 ? face.y-1 : face.y + out_vertices.size();
+    int vertex3 =  face.z > 0 ? face.z-1 : face.z + out_vertices.size();
+    std::cout<<glm::to_string(face)<<std::endl;
+    bunnytriangles.push_back( Triangle(
+            1.0f*out_vertices[face.x-1],
+            1.0f*out_vertices[face.y-1],
+            1.0f*out_vertices[face.z-1], vec3( 0.75f, 0.15f, 0.15f )));
+  }
+
+  push_bunny(objects, bunnytriangles);
 }

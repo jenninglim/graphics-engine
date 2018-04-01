@@ -8,6 +8,8 @@
 #include "Config.h"
 #include "Object.h"
 #include "Box.h"
+#include "ObjLoader.h"
+#include "Bunny.h"
 
 using glm::vec3;
 using glm::vec4;
