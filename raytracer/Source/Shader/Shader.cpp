@@ -100,7 +100,7 @@ void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
         if (collision(bvh,
                     c_ray.r, intersect))
         {
-            if (c_ray.depth ==0)
+            if (c_ray.depth == 0)
             {
                 c_ray.original_colour = intersect.colour;
             }
@@ -108,7 +108,7 @@ void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
 
             lightColor = DirectLight(intersect,
                     bvh,
-                    light)* ShadowLight(intersect,
+                    light) * ShadowLight(intersect,
                         bvh,
                         light);
 

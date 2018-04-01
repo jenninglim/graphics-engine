@@ -2,8 +2,8 @@
 #define CONFIG_H
 //Intersection Tests
 #define MAX_DIST 5
-#define CONE_SIZE 0.1
-#define VOL_APPROX_INT 0.001
+#define CONE_SIZE 0.01/ 2.f
+#define VOL_APPROX_INT 0.01
 
 // Screen Setup
 #define SCREEN_WIDTH 500

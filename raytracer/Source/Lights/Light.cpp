@@ -28,26 +28,25 @@ vec3 DirectLight(const Intersection i, BVH bvh, Light light)
     return lightColour;
 }
 
-vec3 ShadowLight(const Intersection i, BVH bvh, Light
+float ShadowLight(const Intersection i, BVH bvh, Light
         light)
 {
     vec3 r_hat = glm::normalize(vec3(light.position - i.position));
-    vec3 shadowMult = vec3(1);
     Intersection closestIntersection = {
                 light.position,
                 vec3(0),
                 std::numeric_limits<float>::max(),
                 vec4(0)};
-
-    if (collision(bvh, Cone(i.position, r_hat, CONE_SIZE), closestIntersection))
+    float cone_size = glm::atan(0.01f/glm::l2Norm(vec3(light.position - i.position)));
+    if (collision(bvh, Cone(i.position, r_hat, cone_size), closestIntersection))
     {
         float dist =glm::l2Norm(vec3(light.position- i.position));
         if (closestIntersection.distance > dist)
         {
-            return vec3(1);
+            return 1.f;
         }
-        float vol = glm::pi<float>() * dist/3 * glm::pow(dist * glm::tan(CONE_SIZE),2);
-        return  vec3(glm::pow((1 - closestIntersection.area/vol),2)) ;
+        float vol = glm::pi<float>() * dist/3 * glm::pow(dist * glm::tan(cone_size),2);
+        return  glm::pow((1 - closestIntersection.area/vol),1) ;
     }
-    return shadowMult;
+    return 1.f;
 }
