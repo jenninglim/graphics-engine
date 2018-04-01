@@ -1,5 +1,4 @@
 #include "Light.h"
-#include "glm/ext.hpp"
 #include "Camera.h"
 #include "Collision.h"
 #include "Ray.h"
@@ -37,16 +36,16 @@ float ShadowLight(const Intersection i, BVH bvh, Light
                 vec3(0),
                 std::numeric_limits<float>::max(),
                 vec4(0)};
-    float cone_size = glm::atan(0.01f/glm::l2Norm(vec3(light.position - i.position)));
+    float cone_size = glm::atan(0.1f/glm::l2Norm(vec3(light.position - i.position)));
     if (collision(bvh, Cone(i.position, r_hat, cone_size), closestIntersection))
     {
-        float dist =glm::l2Norm(vec3(light.position- i.position));
+        float dist = glm::l2Norm(vec3(light.position- i.position));
         if (closestIntersection.distance > dist)
         {
             return 1.f;
         }
-        float vol = glm::pi<float>() * dist/3 * glm::pow(dist * glm::tan(cone_size),2);
-        return  glm::pow((1 - closestIntersection.area/vol),1) ;
+        return glm::pow(1.f - closestIntersection.area,2);
     }
+
     return 1.f;
 }

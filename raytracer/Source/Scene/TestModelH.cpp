@@ -156,8 +156,7 @@ void LoadTestModel( std::vector<Object *>& objects )
 	triangles.push_back( Triangle(G,F,E,blue) );
 	triangles.push_back( Triangle(G,H,F,blue) );
     //push_box(objects, triangles,BOX_REFLECTANCE, 1.2f);
-    //push_sphere(objects, vec4(0.5f,0.f,-0.3f,0), 0.2f);
-    //push_sphere(objects, vec4(-0.5f,0.f,-0.3f,0), 0.2f);
-    push_sphere(objects, vec4(0.0f,0.f,-0.3f,0), 0.2f);
+    push_sphere(objects, vec4(0.5f,0.f,-0.3f,0), 0.2f);
+    push_sphere(objects, vec4(-0.5f,0.f,-0.3f,0), 0.2f);
 }
 

@@ -15,7 +15,7 @@ Scene::Scene()
     vec4 camPos(0,0,-3,1);
     this->cam = Camera(CAM_FOCAL_LENGTH, camPos);
     this-> light = Light(
-            vec4(0, 0.5, -0.2, 1),
+            vec4(0, -0.5, -0.2, 1),
             14.f * vec3(1,1,1));
     LoadTestModel(this->objects);
     this->bvh = BVH(objects);

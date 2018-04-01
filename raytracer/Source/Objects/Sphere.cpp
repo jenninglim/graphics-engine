@@ -1,10 +1,13 @@
 #include "Sphere.h"
 #include "Config.h"
+#include <glm/glm.hpp>
 
 #ifdef DEBUG
 #include <iostream>
 #include "glm/ext.hpp"
 #endif
+
+using namespace glm;
 
 double circcircArea(vec2 pos1, float r1,
                    vec2 pos2, float r2);
@@ -84,17 +87,20 @@ bool Sphere::intersection(const Cone r, Intersection &closestI)
 
         vec2 proj_circ1;
         vec2 proj_circ2;
+        float radius_max;
         
         //determine v1 and v2
         proj_circ1 = projection(vec3(r.initial), v1,v2);
         proj_circ2 = projection(vec3(this->centre), v1,v2);
+        closestI.area = 0.f;
         for (double i = 0; i < this->radius * 2; i += VOL_APPROX_INT)
         {
             r1 = glm::tan(r.theta) * (T + i - this->radius);
             r2 = this->radius * glm::sin(glm::acos(glm::abs(this->radius - i)/this->radius));
-            area += circcircArea(proj_circ1, r1, proj_circ2, r2) * VOL_APPROX_INT;
+            area = circcircArea(proj_circ1, r1, proj_circ2, r2);
+            radius_max = glm::pi<float>() * glm::max<float>(r1 * r1, r2 * r2);
+            closestI.area = glm::max<float>(closestI.area, area / radius_max);
         }
-        closestI.area = area;
         return true;
     }
     return false;
@@ -115,6 +121,10 @@ double circcircArea(vec2 pos1, float r1,
     {
         return 0.;
     }
+    if (d < glm::abs(r2 - r1))
+    {
+        return glm::pi<float>() * glm::min(r1 * r1, r2 * r2);
+    }
     if (d < r1 + r2)
     {
        float a = r1 * r1;
@@ -123,10 +133,7 @@ double circcircArea(vec2 pos1, float r1,
        float x =(a - b + d * d) / (2 * d); 
        float y =(d * d - a + b) / (2 * d); 
        float z = (-d + r1 +r2) * (d + r1 - r2) * (d - r1 + r2) * (d + r1 + r2);
-       if (d < glm::abs(r2 - r1)) {
-           return glm::pi<float>() * glm::min(a, b);
-       }
-       
+      
        return a * glm::acos(x / r1)
             + b * glm::acos(y / r2)
             - 0.5f * (glm::sqrt(z));
