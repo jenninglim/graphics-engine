@@ -49,3 +49,13 @@ float ShadowLight(const Intersection i, BVH bvh, Light
 
     return 1.f;
 }
+
+vec3 diffuseLight(const Intersection i, Light light)
+{
+
+}
+
+vec3 specularLight(const Intersection i, Light light)
+{
+
+}
