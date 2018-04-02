@@ -17,6 +17,7 @@ bool loadObj(
     FILE * file = fopen(path, "r");
     vec3 v, f;
 
+
     vector<vec4> temp_vertices;
     vector<vec3> temp_faces;
     if (path != NULL)
@@ -34,7 +35,7 @@ bool loadObj(
             }
             if (strcmp(lineHeader, "v") == 0)
             {
-                fscanf(file,
+                res = fscanf(file,
                         "%f %f %f\n",
                         &v[0],
                         &v[1],
@@ -43,7 +44,7 @@ bool loadObj(
             }
             else if (strcmp(lineHeader, "f") == 0)
             {
-               fscanf(file,
+               res = fscanf(file,
                        "%f %f %f\n",
                        &f[0],
                        &f[1],

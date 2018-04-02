@@ -14,7 +14,7 @@ class Bunny : public Object
 public:
 	Bunny(vector<Triangle>& tri) : Object(tri)
 	{
-
+		Rotate(triangles, 1.3);
 	}
 
 public:
@@ -29,5 +29,13 @@ public:
 	    vertices[2].position = triangles[i].v2;
 	    DrawPolygonRasterisation(screen, vertices, triangles[i].color, cam, light, currentNormal, currentReflectance);
 	  }
+	}
+
+	void Rotate(vector<Triangle> &triangles, float radians){
+		for(size_t i = 0; i < triangles.size(); i++){
+			//std::cout<<glm::to_string(triangles[i].v0)<<std::endl;
+			triangles[i].RotateXAxis(radians);
+			//std::cout<<glm::to_string(triangles[i].v0)<<std::endl;
+		}
 	}
 };

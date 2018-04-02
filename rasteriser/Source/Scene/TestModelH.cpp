@@ -145,12 +145,8 @@ void LoadObjects(std::vector<Object *>& objects )
   cout << out_vertices.size() << endl;
   cout << out_faces.size() << endl;
 
-  for(int i = 0; i<out_faces.size(); i++){
+  for(size_t i = 0; i<out_faces.size(); i++){
     vec3 face = out_faces[i];
-    int vertex1 =  face.x > 0 ? face.x-1 : face.x + out_vertices.size();
-    int vertex2 =  face.y > 0 ? face.y-1 : face.y + out_vertices.size();
-    int vertex3 =  face.z > 0 ? face.z-1 : face.z + out_vertices.size();
-    std::cout<<glm::to_string(face)<<std::endl;
     bunnytriangles.push_back( Triangle(
             1.0f*out_vertices[face.x-1],
             1.0f*out_vertices[face.y-1],

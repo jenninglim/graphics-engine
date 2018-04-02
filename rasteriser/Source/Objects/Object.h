@@ -12,7 +12,7 @@ public:
   vector<Triangle> triangles;
 
 public:
-  Object(vector<Triangle> triangles) : triangles(triangles)
+  Object(vector<Triangle>& triangles) : triangles(triangles)
   {
   }
 

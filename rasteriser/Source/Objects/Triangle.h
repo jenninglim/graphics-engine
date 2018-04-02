@@ -1,3 +1,6 @@
+#include <iostream>
+
+
 class Triangle
 {
 public:
@@ -22,5 +25,18 @@ public:
 	  normal.y = normal3.y;
 	  normal.z = normal3.z;
 	  normal.w = 1.0;
+		//std::cout<<glm::to_string(normal)<<std::endl;
+	}
+
+public:
+	void RotateXAxis(float radians){
+		glm::vec4 v0(0, glm::cos(radians), -glm::sin(radians),0);
+		glm::vec4 v1(0, glm::sin(radians), glm::cos(radians),0);
+		glm::vec4 v2(1, 0, 0,0);
+		glm::mat4 R = glm::mat4(v2,v0,v1,glm::vec4(0,0,0,1));
+		v0 = R*v0;
+		v1 = R*v1;
+		v2 = R*v2;
+		ComputeNormal();
 	}
 };
