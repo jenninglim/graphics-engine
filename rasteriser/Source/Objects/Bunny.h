@@ -14,7 +14,8 @@ class Bunny : public Object
 public:
 	Bunny(vector<Triangle>& tri) : Object(tri)
 	{
-		Rotate(triangles, 2.3);
+		BunnyRotate(triangles, 2.3);
+		BunnyTranslate(triangles, vec4(0.3,0.4,-0.5,0));
 	}
 
 public:
@@ -31,11 +32,15 @@ public:
 	  }
 	}
 
-	void Rotate(vector<Triangle> &triangles, float radians){
+	void BunnyRotate(vector<Triangle> &triangles, float radians){
 		for(size_t i = 0; i < triangles.size(); i++){
-			//std::cout<<glm::to_string(triangles[i].v0)<<std::endl;
 			triangles[i].RotateXAxis(radians);
-			//std::cout<<glm::to_string(triangles[i].v0)<<std::endl;
+		}
+	}
+
+	void BunnyTranslate(vector<Triangle> &triangles, vec4 translation){
+		for(size_t i = 0; i < triangles.size(); i++){
+			triangles[i].Translate(translation);
 		}
 	}
 };

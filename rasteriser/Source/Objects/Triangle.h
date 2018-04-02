@@ -1,6 +1,7 @@
 #include <iostream>
 
 
+
 class Triangle
 {
 public:
@@ -25,7 +26,6 @@ public:
 	  normal.y = normal3.y;
 	  normal.z = normal3.z;
 	  normal.w = 1.0;
-		//std::cout<<glm::to_string(normal)<<std::endl;
 	}
 
 public:
@@ -38,5 +38,11 @@ public:
 		v1 = R*v1;
 		v2 = R*v2;
 		ComputeNormal();
+	}
+
+	void Translate(glm::vec4 translation){
+		v0 = v0 + translation;
+		v1 = v1 + translation;
+		v2 = v2 + translation;
 	}
 };

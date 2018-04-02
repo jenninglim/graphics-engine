@@ -148,7 +148,7 @@ void LoadObjects(std::vector<Object *>& objects )
     bunnytriangles.push_back( Triangle(
             1.0f*out_vertices[face.x-1],
             1.0f*out_vertices[face.y-1],
-            1.0f*out_vertices[face.z-1], vec3( 0.75f, 0.15f, 0.15f )));
+            1.0f*out_vertices[face.z-1], green));
   }
 
   push_bunny(objects, bunnytriangles);
