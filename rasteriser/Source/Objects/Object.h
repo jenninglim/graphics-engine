@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <iostream>
 #include "Util.h"
+#include "Edge.h"
 
 using namespace std;
 
