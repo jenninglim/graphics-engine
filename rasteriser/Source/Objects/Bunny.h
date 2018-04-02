@@ -14,7 +14,7 @@ class Bunny : public Object
 public:
 	Bunny(vector<Triangle>& tri) : Object(tri)
 	{
-		Rotate(triangles, 1.3);
+		Rotate(triangles, 2.3);
 	}
 
 public:

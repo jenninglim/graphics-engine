@@ -133,8 +133,6 @@ void LoadObjects(std::vector<Object *>& objects )
 	triangles.push_back( Triangle(G,H,F,blue) );
 
   push_box(objects, triangles);
-
-
   //Stanford Bunny
 
   vector<vec4> out_vertices;
