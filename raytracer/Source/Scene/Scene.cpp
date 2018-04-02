@@ -2,6 +2,7 @@
 #include "TestModelH.h"
 #include "Post.h"
 
+#define SCALE 0.3f
 using namespace glm;
 using glm::vec3;
 
@@ -14,7 +15,7 @@ Scene::Scene()
     vec4 camPos(0,0,-3,1);
     this->cam = Camera(CAM_FOCAL_LENGTH, camPos);
     this-> light = Light(
-            vec4(0, -0.5, -0.7, 1),
+            vec4(0, -0.5, -0.2, 1),
             14.f * vec3(1,1,1));
     LoadTestModel(this->objects);
     this->bvh = BVH(objects);
@@ -38,7 +39,24 @@ void Scene::Update(KeyStroke_t * keystate)
 	{
 	    this->cam.right();
 	}
+    if ( keystate[SDL_SCANCODE_A] )
+	{
+	    this->light.position += SCALE * vec4(-1,0,0,0);
+	}
+    if ( keystate[SDL_SCANCODE_W] )
+	{
+        this->light.position += SCALE * vec4(0,0,-1,0);
+	}
+    if ( keystate[SDL_SCANCODE_D] )
+	{
+        this->light.position += SCALE * vec4(1,0,0,0);
+	}
+    if ( keystate[SDL_SCANCODE_S] )
+	{
+        this->light.position += SCALE * vec4(0,0,1,0);
+	}
 }
+
 
 void Scene::Draw(screen* screen)
 {

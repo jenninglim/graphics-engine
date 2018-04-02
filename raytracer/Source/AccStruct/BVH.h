@@ -3,8 +3,7 @@
 
 #include <glm/glm.hpp>
 #include "Object.h"
-#include "Intersection.h"
-#include "Ray.h"
+#include "BoundingVolume.h"
 
 class BVH
 {
@@ -17,7 +16,5 @@ class BVH
         BVH();
         BVH(vector<Object*> objects);
 };
-
-bool collision(BVH bvh, Ray r, Intersection &i);
 
 #endif

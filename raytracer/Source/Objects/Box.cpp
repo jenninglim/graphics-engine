@@ -108,6 +108,10 @@ bool Box::intersection(const Ray r, Intersection &closestI)
     }
     return intersectionFound;
 }
+bool Box::intersection(const Cone r, Intersection &i)
+{
+    return false;
+}
 
 void Box::computeBoundingVolume()
 {

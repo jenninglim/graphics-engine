@@ -1,6 +1,7 @@
 #include "BVH.h"
 #include "Config.h"
 #include <assert.h>
+#include <vector>
 
 #ifdef DEBUG
 #include <iostream>
@@ -11,8 +12,6 @@ using namespace std;
 
 BoundingVolume computeBoundingVolume(vector<Object *> objects);
 vector<vector<Object *> > partitionObject(vector<Object *> objects);
-bool IntersectRayBoundingVolume(Ray r,
-        BoundingVolume bv);
 
 BVH::BVH()
 {
@@ -39,27 +38,7 @@ BVH::BVH(vector<Object *> objects)
     }
 }
 
-bool collision(BVH bvh, Ray r, Intersection &closestI)
-{
-    bool intersectionFound = false;
-    if (IntersectRayBoundingVolume(r, bvh.bv))
-    {
-        if (bvh.isLeaf == true)
-        {
-           intersectionFound |= bvh.object->intersection(r, closestI); 
-        }
-        else
-        {
-            intersectionFound |= collision(*bvh.left, r, closestI);
-            intersectionFound |= collision(*bvh.right, r, closestI);
-        }
-    }
-    else
-    {
-        return false;
-    }
-    return intersectionFound;
-}
+
 
 vector<vector<Object *> > partitionObject(vector<Object *> objects)
 {
@@ -82,7 +61,6 @@ vector<vector<Object *> > partitionObject(vector<Object *> objects)
     return result;
 }
 
-
 BoundingVolume computeBoundingVolume(const vector<Object *> objects)
 {
     vec3 max = vec3(std::numeric_limits<float>::min());
@@ -100,30 +78,5 @@ BoundingVolume computeBoundingVolume(const vector<Object *> objects)
     }
     //cout <<  endl;
     return BoundingVolume(min,max);
-}
-
-bool IntersectRayBoundingVolume(Ray r, BoundingVolume bv)
-{
-    vec3 tmin, tmax;
-    for (int i = 0; i < 3; i++)
-    {
-        if (r.direction[i] >= 0)
-        {
-            tmin[i] = (bv.min[i] - r.initial[i]) / r.direction[i];
-            tmax[i] = (bv.max[i] - r.initial[i]) / r.direction[i];
-        }
-        else
-        {
-            tmin[i] = (bv.max[i] - r.initial[i]) / r.direction[i];
-            tmax[i] = (bv.min[i] - r.initial[i]) / r.direction[i];
-        }
-    }
-
-    if ((tmin[0] > tmax[1]) || (tmin[1] > tmax[0] )) {return false;}
-    if (glm::max(tmin[0], tmin[1]) > tmax[2] || tmin[2] > glm::min(tmax[0], tmax[1]))
-    {
-     return false;
-    }
-    return true;
 }
 

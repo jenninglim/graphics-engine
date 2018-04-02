@@ -1,9 +1,9 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
-#include "Intersection.h"
 #include "Ray.h"
 #include "Config.h"
+#include "BoundingVolume.h"
 
 #ifdef DEBUG
 #include <iostream>
@@ -15,14 +15,6 @@ using glm::vec4;
 using glm::mat3;
 using glm::mat4;
 
-class BoundingVolume
-{
-    public:
-        vec3 min;
-        vec3 max;
-        BoundingVolume();
-        BoundingVolume(vec3 min, vec3 max);
-};
 
 class Object
 {
@@ -32,16 +24,17 @@ class Object
         float refract_ratio;
         float ior;
         virtual ~Object() {};
-        virtual void computeBoundingVolume()
-        {
-            cout << "computeBV virtual called" << endl;
-            assert(0 > 1);
-        };
         virtual bool intersection(const Ray r, Intersection &i)
         {
             cout << "intersection virtual called" <<endl;
             assert(0 > 1);
         };
+        virtual bool intersection(const Cone r, Intersection &i)
+        {
+            cout << "intersection virtual called" <<endl;
+            assert(0 > 1);
+        };
+
 };
 #endif 
 

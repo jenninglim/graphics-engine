@@ -1,9 +1,13 @@
 #ifndef CONFIG_H
 #define CONFIG_H
+//Intersection Tests
+#define MAX_DIST 5
+#define CONE_SIZE 0.01/ 2.f
+#define VOL_APPROX_INT 0.01
 
 // Screen Setup
-#define SCREEN_WIDTH 500
-#define SCREEN_HEIGHT 500
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 800
 #define FULLSCREEN_MODE false
 
 // Camera
@@ -13,7 +17,7 @@
 // Auxillary Variables
 #define EPSILON 1e-3
 #define DEBUG 1
-#define RAY_DEPTH 5
+#define RAY_DEPTH 3
 
 //// SCENE SETTINGS
 // REFLECT

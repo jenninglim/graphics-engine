@@ -1,4 +1,6 @@
 #include "Shader.h"
+#include "Collision.h"
+
 #include <stack>
 
 #ifdef DEBUG
@@ -98,14 +100,17 @@ void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
         if (collision(bvh,
                     c_ray.r, intersect))
         {
-            if (c_ray.depth ==0)
+            if (c_ray.depth == 0)
             {
                 c_ray.original_colour = intersect.colour;
             }
             fresnel(c_ray.r, intersect, kr);
+
             lightColor = DirectLight(intersect,
                     bvh,
-                    light);
+                    light) * ShadowLight(intersect,
+                        bvh,
+                        light);
 
             if (kr < 1)
             {
@@ -137,5 +142,5 @@ void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
             }
         }
     }
-    colour += c_ray.original_colour * c_ray.prevReflectance;
+    //colour += c_ray.original_colour * c_ray.prevReflectance;
 }

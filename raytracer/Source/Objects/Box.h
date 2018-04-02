@@ -19,5 +19,6 @@ class Box : public Object{
     Box(vector<Triangle> object, float reflectance, float refract_index );
     void computeBoundingVolume() ;
     bool intersection(const Ray r, Intersection &i) ;
+    bool intersection(const Cone r, Intersection &i);
 };
 #endif

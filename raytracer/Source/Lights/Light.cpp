@@ -1,7 +1,12 @@
 #include "Light.h"
-#include "glm/ext.hpp"
 #include "Camera.h"
+#include "Collision.h"
 #include "Ray.h"
+
+#ifdef DEBUG
+#include <iostream>
+#include "glm/ext.hpp"
+#endif
 
 using namespace std;
 using glm::vec3;
@@ -18,20 +23,39 @@ vec3 DirectLight(const Intersection i, BVH bvh, Light light)
     vec3 lightColour = light.power * glm::max(glm::dot(r_hat, n_hat), 0.0f) /
         (float) (4.0f * glm::pi<float>() * glm::pow<float>(dist,2));
 
+   lightColour += light.indirect_light;
+    return lightColour;
+}
+
+float ShadowLight(const Intersection i, BVH bvh, Light
+        light)
+{
+    vec3 r_hat = glm::normalize(vec3(light.position - i.position));
     Intersection closestIntersection = {
                 light.position,
                 vec3(0),
                 std::numeric_limits<float>::max(),
                 vec4(0)};
-
-    if (collision(bvh, Ray(i.position, r_hat), closestIntersection))
+    float cone_size = glm::atan(0.1f/glm::l2Norm(vec3(light.position - i.position)));
+    if (collision(bvh, Cone(i.position, r_hat, cone_size), closestIntersection))
     {
-         if (closestIntersection.distance < glm::length(light.position - i.position) &&
-                 closestIntersection.distance > EPSILON)
-            {
-                lightColour =  vec3(0,0,0);
-            }
+        float dist = glm::l2Norm(vec3(light.position- i.position));
+        if (closestIntersection.distance > dist)
+        {
+            return 1.f;
+        }
+        return glm::pow(1.f - closestIntersection.area,2);
     }
-    lightColour += light.indirect_light;
-    return lightColour;
+
+    return 1.f;
+}
+
+vec3 diffuseLight(const Intersection i, Light light)
+{
+
+}
+
+vec3 specularLight(const Intersection i, Light light)
+{
+
 }
