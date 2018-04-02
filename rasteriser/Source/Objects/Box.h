@@ -55,7 +55,7 @@ private:
 		    triangles[i].v0.w = 1.0;
 		    triangles[i].v1.w = 1.0;
 		    triangles[i].v2.w = 1.0;
-		    triangles[0].ComputeNormal();
+		    triangles[i].ComputeNormal();
 		}
 	}
 };

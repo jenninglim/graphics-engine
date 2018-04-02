@@ -152,4 +152,5 @@ void LoadObjects(std::vector<Object *>& objects )
   }
 
   push_bunny(objects, bunnytriangles);
+
 }

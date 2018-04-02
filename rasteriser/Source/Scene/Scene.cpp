@@ -60,33 +60,56 @@ void Scene::Draw(screen* screen){
   for(size_t i = 0; i<objects.size(); i++){
     //FIRST IS CORNELL BOX
     objects[i]->DrawPolygon(screen,cam,light);
-    /*if(i != 0){
+
+
+    if(i ==2){
+      //TODO: change
       //OBJECTS IN SCENE
       vector<Edge> silhouetteEdges;
+      vector<Triangle> backfaces;
       for(size_t j = 0; j < objects[i]->triangles.size(); j++){
         vec4 face_normal = glm::normalize(objects[i]->triangles[j].normal);
-        if(glm::dot(face_normal,objects[i]->triangles[j].v0 - light->position ) >= 0){
-          //Front facing to light
+        vec4 averageTriPos = objects[i]->triangles[j].getAveragePosition();
+        if(glm::dot(face_normal,averageTriPos - light->position ) >= 0){
+          backfaces.push_back(objects[i]->triangles[j]);
+
+          //Back facing to light
           vector<Edge> trianglesEdges;
           trianglesEdges.push_back(Edge(objects[i]->triangles[j].v0, objects[i]->triangles[j].v1));
           trianglesEdges.push_back(Edge(objects[i]->triangles[j].v1, objects[i]->triangles[j].v2));
           trianglesEdges.push_back(Edge(objects[i]->triangles[j].v2, objects[i]->triangles[j].v0));
 
           for(size_t k = 0; k < trianglesEdges.size(); k++){
+
             auto it = std::find_if(silhouetteEdges.begin(), silhouetteEdges.end(),
                       [&] (const Edge &otherEdge){
                         return otherEdge.CompareEdges(trianglesEdges[k]);
                       });
             if( it !=  silhouetteEdges.end()){
+
               silhouetteEdges.erase(it);
             }else{
               silhouetteEdges.push_back(trianglesEdges[k]);
             }
           }
         }
+      }
+      cout << silhouetteEdges.size() << endl;
 
-        */
-      
+      vector<Triangle> shadowVolume;
+
+      float extrudeMagnitude = numeric_limits<float>::max() - 2.0f;
+
+      for(vector<Edge>::iterator it = silhouetteEdges.begin(); it != silhouetteEdges.end(); it++){
+        shadowVolume.push_back(Triangle((*it).vertex1, (*it).vertex2, (*it).vertex1 + extrudeMagnitude * ((*it).vertex1 - light->position), vec3(1,1,1)));
+        shadowVolume.push_back(Triangle((*it).vertex2, (*it).vertex1 + extrudeMagnitude * ((*it).vertex1 - light->position),
+                                        (*it).vertex2 + extrudeMagnitude * ((*it).vertex2 - light->position), vec3(1,1,1)));
+      }
+      shadowVolume.insert(shadowVolume.end(), backfaces.begin(), backfaces.end());
+
+
+
+
+    }
   }
-
 }
