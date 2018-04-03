@@ -26,7 +26,8 @@ public:
     return ((vertex1 == e.vertex1 && vertex2 == e.vertex2) || (vertex1 == e.vertex2 && vertex2 == e.vertex1));
   }
 };
-
+/*
 std::ostream& operator<<(std::ostream &strm, const Edge &edge) {
   return strm << "Edge(" << glm::to_string(edge.vertex1) << ", " << glm::to_string(edge.vertex2) << ")";
 }
+*/

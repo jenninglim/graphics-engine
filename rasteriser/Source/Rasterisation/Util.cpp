@@ -1,7 +1,7 @@
 #include "Util.h"
-
 using namespace std;
 using namespace glm;
+
 
 void Interpolate(Pixel a, Pixel b, vector<Pixel>& result){
 
@@ -47,22 +47,49 @@ void PixelShader(screen* screen,
                  Camera *cam,
                  Light* light,
                  vec4 currentNormal,
-                 vec3 currentReflectance)
+                 vec3 currentReflectance,
+                 Draw type)
 {
-  vec4 r_hat = glm::normalize(light->position - (p.pos3d/p.zinv));
-  float dist = glm::length(light->position - (p.pos3d/p.zinv));
-  vec3 lightColour = light->power * glm::max(glm::dot(r_hat, currentNormal), 0.0f) /
-    (float) (4.0f * glm::pi<float>() * glm::pow<float>(dist,2));
-  //Diffuse surface
-  vec3 finalColour = currentReflectance * (lightColour + light->indirect_light);
+  if(type == Draw::SCENE_AMBIENT){
+    vec3 finalColour = currentReflectance * (/*lightColour +*/ light->indirect_light);
+    int x = p.x ;
+    int y = p.y ;
+    if(x >= 0 && y >= 0 && x < SCREEN_WIDTH && y < SCREEN_HEIGHT){
+      if( p.zinv > cam->depthBuffer[y][x] )
+      {
+        cam->depthBuffer[y][x] = p.zinv;
+        PutPixelSDL( screen, x, y, finalColour* currentColor );
+      }
+    }
+  }
+  if(type == Draw::SCENE_SHADOW){
+    int x = p.x ;
+    int y = p.y ;
+    if(x >= 0 && y >= 0 && x < SCREEN_WIDTH && y < SCREEN_HEIGHT){
+      if( p.zinv > cam->depthBuffer[y][x] && cam->stencilBuffer[y][x] == 0)
+      {
+        vec4 r_hat = glm::normalize(light->position - (p.pos3d/p.zinv));
+        float dist = glm::length(light->position - (p.pos3d/p.zinv));
+        vec3 lightColour = light->power * glm::max(glm::dot(r_hat, currentNormal), 0.0f) /
+          (float) (4.0f * glm::pi<float>() * glm::pow<float>(dist,2));
+        vec3 finalColour = currentReflectance * (lightColour + light->indirect_light);
+        PutPixelSDL( screen, x, y, finalColour* currentColor );
+      }
+    }
+  }
 
-  int x = p.x ;
-  int y = p.y ;
-  if(x >= 0 && y >= 0 && x < SCREEN_WIDTH && y < SCREEN_HEIGHT){
-    if( p.zinv > cam->depthBuffer[y][x] )
-    {
-      cam->depthBuffer[y][x] = p.zinv;
-      PutPixelSDL( screen, x, y, finalColour* currentColor );
+  else if(type == Draw::SHADOW){
+    int x = p.x;
+    int y = p.y;
+    if(x >= 0 && y >= 0 && x < SCREEN_WIDTH && y < SCREEN_HEIGHT){
+      if(p.zinv > cam->depthBuffer[y][x]){
+        if(cam->stencilWritten[y][x] == 1){
+          //HAS BEEN WRITTEN FOR THIS OBJECT
+          cam->stencilBuffer[y][x] = (cam->stencilBuffer[y][x] - 1.0f);
+        }else{
+          cam->stencilBuffer[y][x] = (cam->stencilBuffer[y][x] + 1.0f);
+        }
+      }
     }
   }
 }
@@ -113,7 +140,8 @@ void DrawPolygonRows(screen* screen,
         Camera* cam,
         Light* light,
         vec4 currentNormal,
-        vec3 currentReflectance)
+        vec3 currentReflectance,
+        Draw type)
 {
 
     for(unsigned int row = 0; row < leftPixels.size(); row++)
@@ -122,7 +150,7 @@ void DrawPolygonRows(screen* screen,
       Interpolate(leftPixels[row], rightPixels[row], pixxes);
       for (size_t i = 0; i < pixxes.size(); i++)
       {
-        PixelShader(screen,pixxes[i],color,cam, light, currentNormal,currentReflectance);
+        PixelShader(screen,pixxes[i],color,cam, light, currentNormal,currentReflectance, type);
       }
     }
 }
@@ -133,12 +161,12 @@ void DrawPolygonRasterisation(screen* screen,
         Camera* cam,
         Light* light,
         vec4 currentNormal,
-        vec3 currentReflectance)
+        vec3 currentReflectance,
+        Draw type)
 {
 
   int V = vertices.size();
   vector<Pixel> vertexPixels(V);
-
 
   for(int i = 0; i<V; ++i){
     VertexShader(vertices[i], vertexPixels[i], cam, light);
@@ -146,6 +174,5 @@ void DrawPolygonRasterisation(screen* screen,
   vector<Pixel> leftPixels;
   vector<Pixel> rightPixels;
   ComputePolygonRows(vertexPixels, leftPixels, rightPixels);
-  DrawPolygonRows(screen,leftPixels, rightPixels, color, cam, light, currentNormal, currentReflectance);
-
+  DrawPolygonRows(screen,leftPixels, rightPixels, color, cam, light, currentNormal, currentReflectance, type);
 }

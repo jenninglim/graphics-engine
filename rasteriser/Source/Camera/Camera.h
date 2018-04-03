@@ -17,6 +17,10 @@ class Camera
         float distance;
         mat4 increR;
         float depthBuffer[SCREEN_HEIGHT][SCREEN_WIDTH];
+        float stencilBuffer[SCREEN_HEIGHT][SCREEN_WIDTH];
+        bool stencilWritten[SCREEN_HEIGHT][SCREEN_WIDTH];
+        vec4 pixelPoint3d[SCREEN_HEIGHT][SCREEN_WIDTH];
+
 
     Camera()
     {

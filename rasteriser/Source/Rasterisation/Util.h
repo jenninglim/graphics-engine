@@ -10,6 +10,7 @@
 #include <Camera.h>
 #include <Light.h>
 
+enum Draw {SCENE_AMBIENT, SCENE_SHADOW, SHADOW};
 typedef struct Pixel
 {
     int x;
@@ -29,5 +30,6 @@ void DrawPolygonRasterisation(screen* screen,
         Camera* cam,
         Light* light,
         vec4 currentNormal,
-        vec3 currentReflectance);
+        vec3 currentReflectance,
+        Draw type);
 #endif

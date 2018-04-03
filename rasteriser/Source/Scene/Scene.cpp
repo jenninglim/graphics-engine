@@ -54,17 +54,25 @@ void Scene::Draw(screen* screen){
     for (int j = 0; j < SCREEN_WIDTH; j++)
     {
       cam->depthBuffer[i][j] = 0.0f;
+      cam->stencilBuffer[i][j] = 0.0f;
+      cam->pixelPoint3d[i][j] = vec4(0);
     }
   }
   //DRAW THE POLYGONS
   for(size_t i = 0; i<objects.size(); i++){
     //FIRST IS CORNELL BOX
-    objects[i]->DrawPolygon(screen,cam,light);
-
-
-    if(i ==2){
-      //TODO: change
-      //OBJECTS IN SCENE
+    objects[i]->DrawPolygonAmbient(screen,cam,light);
+  }
+  for(size_t i = 0; i<objects.size(); i++){
+    //OBJECT IN SCENE
+    if(i > 0){
+      for (int i = 0 ; i < SCREEN_HEIGHT; i++)
+      {
+        for (int j = 0; j < SCREEN_WIDTH; j++)
+        {
+          cam->stencilWritten[i][j] = 0.0f;
+        }
+      }
       vector<Edge> silhouetteEdges;
       vector<Triangle> backfaces;
       for(size_t j = 0; j < objects[i]->triangles.size(); j++){
@@ -98,7 +106,7 @@ void Scene::Draw(screen* screen){
 
       vector<Triangle> shadowVolume;
 
-      float extrudeMagnitude = numeric_limits<float>::max() - 2.0f;
+      float extrudeMagnitude = 2.0f;
 
       for(vector<Edge>::iterator it = silhouetteEdges.begin(); it != silhouetteEdges.end(); it++){
         shadowVolume.push_back(Triangle((*it).vertex1, (*it).vertex2, (*it).vertex1 + extrudeMagnitude * ((*it).vertex1 - light->position), vec3(1,1,1)));
@@ -106,10 +114,15 @@ void Scene::Draw(screen* screen){
                                         (*it).vertex2 + extrudeMagnitude * ((*it).vertex2 - light->position), vec3(1,1,1)));
       }
       shadowVolume.insert(shadowVolume.end(), backfaces.begin(), backfaces.end());
-
-
-
-
+      objects[i]->shadowVolume = shadowVolume;
+      objects[i]->DrawShadowVolume(screen,cam,light);
     }
   }
+  //DRAW THE POLYGONS
+  for(size_t i = 0; i<objects.size(); i++){
+    //FIRST IS CORNELL BOX
+    objects[i]->DrawPolygonShadow(screen,cam,light);
+  }
+
+
 }

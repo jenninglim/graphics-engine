@@ -46,8 +46,8 @@ public:
 		v2 = v2 + translation;
 	}
 
-	vec4 getAveragePosition(){
-		vec4 ap = (v0 + v1 + v2) / 3.0f;
+	glm::vec4 getAveragePosition(){
+		glm::vec4 ap = (v0 + v1 + v2) / 3.0f;
 		return ap;
 	}
 };

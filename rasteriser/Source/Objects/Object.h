@@ -11,6 +11,7 @@ class Object
 {
 public:
   vector<Triangle> triangles;
+  vector<Triangle> shadowVolume;
 
 public:
   Object(vector<Triangle>& triangles) : triangles(triangles)
@@ -18,9 +19,17 @@ public:
   }
 
 public:
-  virtual void DrawPolygon(screen* screen, Camera *cam, Light* light){
+  virtual void DrawPolygonAmbient(screen* screen, Camera *cam, Light* light){
     std::cout << "Test Object Draw" << std::endl;
   };
+
+  virtual void DrawShadowVolume(screen* screen, Camera *cam, Light* light){
+      std::cout << "Test Object Shadow Volume" << std::endl;
+  }
+
+  virtual void DrawPolygonShadow(screen* screen, Camera *cam, Light* light){
+      std::cout << "Test Object Shadow Volume" << std::endl;
+  }
 
 private:
   void ScaleBox(vector<Triangle>& triangles){
