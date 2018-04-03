@@ -63,6 +63,7 @@ void Scene::Draw(screen* screen){
     //FIRST IS CORNELL BOX
     objects[i]->DrawPolygonAmbient(screen,cam,light);
   }
+
   for(size_t i = 0; i<objects.size(); i++){
     //OBJECT IN SCENE
     if(i > 0){
@@ -102,7 +103,7 @@ void Scene::Draw(screen* screen){
           }
         }
       }
-      cout << silhouetteEdges.size() << endl;
+
 
       vector<Triangle> shadowVolume;
 
@@ -118,11 +119,18 @@ void Scene::Draw(screen* screen){
       objects[i]->DrawShadowVolume(screen,cam,light);
     }
   }
+  //cout << "Print stencil Buffer" << endl;
+  //cout << cam->stencilBuffer[100][100] << endl;
   //DRAW THE POLYGONS
+
   for(size_t i = 0; i<objects.size(); i++){
     //FIRST IS CORNELL BOX
     objects[i]->DrawPolygonShadow(screen,cam,light);
   }
+
+
+
+
 
 
 }

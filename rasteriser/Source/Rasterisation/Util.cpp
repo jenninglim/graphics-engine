@@ -50,24 +50,28 @@ void PixelShader(screen* screen,
                  vec3 currentReflectance,
                  Draw type)
 {
+
   if(type == Draw::SCENE_AMBIENT){
     vec3 finalColour = currentReflectance * (/*lightColour +*/ light->indirect_light);
     int x = p.x ;
     int y = p.y ;
     if(x >= 0 && y >= 0 && x < SCREEN_WIDTH && y < SCREEN_HEIGHT){
-      if( p.zinv > cam->depthBuffer[y][x] )
+      if( p.zinv > cam->depthBuffer[y][x])
       {
         cam->depthBuffer[y][x] = p.zinv;
+        cam->pixelPoint3d[y][x] = p.pos3d;
         PutPixelSDL( screen, x, y, finalColour* currentColor );
       }
     }
   }
+
   if(type == Draw::SCENE_SHADOW){
     int x = p.x ;
     int y = p.y ;
     if(x >= 0 && y >= 0 && x < SCREEN_WIDTH && y < SCREEN_HEIGHT){
-      if( p.zinv > cam->depthBuffer[y][x] && cam->stencilBuffer[y][x] == 0)
+      if( p.zinv == cam->depthBuffer[y][x] && cam->stencilBuffer[y][x] == 0)
       {
+        cout << " stencil buffer 0" << endl;
         vec4 r_hat = glm::normalize(light->position - (p.pos3d/p.zinv));
         float dist = glm::length(light->position - (p.pos3d/p.zinv));
         vec3 lightColour = light->power * glm::max(glm::dot(r_hat, currentNormal), 0.0f) /
@@ -86,8 +90,11 @@ void PixelShader(screen* screen,
         if(cam->stencilWritten[y][x] == 1){
           //HAS BEEN WRITTEN FOR THIS OBJECT
           cam->stencilBuffer[y][x] = (cam->stencilBuffer[y][x] - 1.0f);
+          //cout << "stencil minus" << endl;
         }else{
           cam->stencilBuffer[y][x] = (cam->stencilBuffer[y][x] + 1.0f);
+          //cout << "stencil plus" << endl;
+          cam->stencilWritten[y][x] = 1;
         }
       }
     }
