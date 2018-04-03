@@ -4,8 +4,8 @@ using glm::vec3;
 
 BoundingVolume::BoundingVolume()
 {
-    this->max = vec3(20);
-    this->min = vec3(-20);
+    this->max = vec3(2);
+    this->min = vec3(-2);
 }
 
 BoundingVolume::BoundingVolume(vec3 min, vec3 max)

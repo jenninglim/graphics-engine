@@ -21,6 +21,7 @@ Box::Box()
 
 Box::Box(vector<Triangle> object)
 {
+    this->colour = object[0].color;
     scale_volume(object);
     triangles = object;
     computeBoundingVolume();
@@ -31,6 +32,7 @@ Box::Box(vector<Triangle> object)
 
 Box::Box(vector<Triangle> object, float reflectance)
 {
+this->colour = object[0].color;
     scale_volume(object);
     this->triangles = object;
     computeBoundingVolume();
@@ -41,6 +43,7 @@ Box::Box(vector<Triangle> object, float reflectance)
 
 Box::Box(vector<Triangle> object, float reflectance, float refract_index)
 {
+this->colour = object[0].color;
     scale_volume(object);
     this->triangles = object;
     computeBoundingVolume();
@@ -137,12 +140,13 @@ void Box::computeBoundingVolume()
     bv = BoundingVolume(min, max);
 }
 
-bool Box::boxOverlap(vec3 boxcenter, vec3 boxhalfsize)
+bool Box::boxOverlap(vec3 boxcenter, vec3 boxhalfsize, vec3 &colour)
 {
    for (int i = 0; i <  triangles.size(); i++)
    {
         if (trigBoxOverlap(boxcenter, boxhalfsize, this->triangles[i]))
         {
+            colour = this->triangles[i].color;
             return true;
         }
    }

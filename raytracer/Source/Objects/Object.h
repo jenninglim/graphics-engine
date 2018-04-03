@@ -22,6 +22,7 @@ class Object
     public:
         BoundingVolume bv;
         float reflect_ratio;
+        vec3 colour;
         float refract_ratio;
         float ior;
         virtual ~Object() {};
@@ -35,7 +36,7 @@ class Object
             cout << "intersection virtual called" <<endl;
             assert(0 > 1);
         };
-        virtual bool boxOverlap(vec3 boxcenter, vec3 boxhalfisze)
+        virtual bool boxOverlap(vec3 boxcenter, vec3 boxhalfisze, vec3 & colour)
         {
             cout << "boxOverlap virtual called" << endl;
             assert(0 > 1);
