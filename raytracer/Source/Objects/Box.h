@@ -20,6 +20,6 @@ class Box : public Object{
     void computeBoundingVolume() ;
     bool intersection(const Ray r, Intersection &i) ;
     bool intersection(const Cone r, Intersection &i);
-    bool boxOverlap(vec3 boxcenter, vec3 boxhalfsize, vec3 & colour);
+    bool boxOverlap(vec3 boxcenter, vec3 boxhalfsize, Intersection & i);
 };
 #endif

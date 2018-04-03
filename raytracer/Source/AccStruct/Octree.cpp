@@ -22,23 +22,19 @@ const static vec3 offsets[8] = { vec3(1,1,1),
 
 Octree::Octree()
 {
-    this->scaling = SCREEN_WIDTH * SCREEN_WIDTH * SCREEN_WIDTH;
 }
 
-Octree::Octree(vector<Object *> objects, BoundingVolume bv)
+Octree::Octree(vector<Object *> objects, BoundingVolume bv, Light l)
 {
     // Set up root tree.
     this->boxHalfSize = (bv.max - bv.min) / 2.f;
     this->centre = bv.min + boxHalfSize;
     this->bv = bv;
     this->depth = 0;
-    this->scaling = SCREEN_WIDTH * SCREEN_WIDTH * SCREEN_WIDTH;
-    cout << "box half size: " << glm::to_string(bv.max) << endl;
-
-    this->makeKids(objects); 
+    this->makeKids(objects, l); 
 }
 
-Octree::Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int depth)
+Octree::Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int depth, Light l)
 {
     // Set up root tree.
     this->depth = depth;
@@ -46,16 +42,12 @@ Octree::Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int dept
     this->centre = center;
     this->bv.max = center + boxhalfsize;
     this->bv.min = center - boxhalfsize;
-    this->scaling = SCREEN_WIDTH * SCREEN_WIDTH * SCREEN_WIDTH;
-    this->makeKids(objects); 
-    cout << this->depth << "centre: " << glm::to_string(this->centre) << endl;
-    cout << this->depth << "bvmax: " << glm::to_string(this->bv.max) << endl;
-    cout << this->depth << "bvmin: " << glm::to_string(this->bv.min) << endl;
+    this->makeKids(objects, l); 
 }
 
-void Octree::makeKids(vector<Object *> objects)
+void Octree::makeKids(vector<Object *> objects, Light l)
 {
-    if (toDivide(objects) && depth < 5)
+    if (toDivide(objects) && depth < 7)
     {
         this->depth++;
         this->type = NODE;
@@ -64,26 +56,35 @@ void Octree::makeKids(vector<Object *> objects)
             this->children[i] = new Octree(objects,
                     offsets[i] * this->boxHalfSize / 2.f + this->centre,
                     this->boxHalfSize/2.f,
-                    depth);
+                    depth,
+                    l);
+            this->directLight += 1.f/8.f * this->children[i]->directLight;
         }
+    }
+    else if (!toDivide(objects))
+    {
+        this->type = EMPTY;
     }
     else
     {
         this->type = LEAF;
+        this->directLight = DirectLight(vec4(this->centre,0), this->normal, l);
     }
 }
 
 bool Octree::toDivide(vector<Object *> objects)
 {
-
+    Intersection inter;
     for (int i = 0; i < objects.size(); i++)
     {
-        if (objects[i]->boxOverlap(this->centre, this->boxHalfSize, this->colour))
+        if (objects[i]->boxOverlap(this->centre, this->boxHalfSize, inter))
         {
+            this->normal = vec3(inter.normal);
+            this->colour = inter.colour;
             return true;
         }
     }
-    if (LESSTHAN(this->boxHalfSize,this->scaling))
+    if (LESSTHAN(this->boxHalfSize,SCALING))
     {
         return false;
     }
@@ -97,10 +98,7 @@ bool Octree::collision(Ray r, vec3 & colour)
     {
         if(IntersectBoundingVolume(r, this->bv))
         {
-            if (!(this->colour[0] < EPSILON && this->colour[1] < EPSILON && this->colour[2] < EPSILON))
-            {
-                colour = this->colour;
-            }
+            colour = this->colour * this->directLight;
             return true;
         }
         else

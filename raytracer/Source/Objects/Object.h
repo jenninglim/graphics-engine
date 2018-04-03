@@ -36,7 +36,7 @@ class Object
             cout << "intersection virtual called" <<endl;
             assert(0 > 1);
         };
-        virtual bool boxOverlap(vec3 boxcenter, vec3 boxhalfisze, vec3 & colour)
+        virtual bool boxOverlap(vec3 boxcenter, vec3 boxhalfisze, Intersection & i)
         {
             cout << "boxOverlap virtual called" << endl;
             assert(0 > 1);

@@ -12,18 +12,18 @@ using namespace std;
 using glm::vec3;
 using glm::vec4;
 
-vec3 DirectLight(const Intersection i, BVH bvh, Light light)
+vec3 DirectLight(vec4 position, vec3 normal, Light light)
 {
-    vec3 norm = vec3(i.normal);
-    vec3 r_hat = vec3(glm::normalize(light.position - i.position));
+    vec3 norm = normal;
+    vec3 r_hat = vec3(glm::normalize(light.position - position));
 
-    float dist = glm::length(light.position - i.position);
+    float dist = glm::length(light.position - position);
     vec3 n_hat = glm::normalize(norm);
 
     vec3 lightColour = light.power * glm::max(glm::dot(r_hat, n_hat), 0.0f) /
         (float) (4.0f * glm::pi<float>() * glm::pow<float>(dist,2));
 
-   lightColour += light.indirect_light;
+   //lightColour += light.indirect_light;
     return lightColour;
 }
 
@@ -48,14 +48,4 @@ float ShadowLight(const Intersection i, BVH bvh, Light
     }
 
     return 1.f;
-}
-
-vec3 diffuseLight(const Intersection i, Light light)
-{
-
-}
-
-vec3 specularLight(const Intersection i, Light light)
-{
-
 }

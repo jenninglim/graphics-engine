@@ -20,7 +20,7 @@ Scene::Scene()
             14.f * vec3(1,1,1));
     LoadTestModel(this->objects);
     this->bvh = BVH(objects);
-    this->octree = Octree(this->objects, bvh.bv);
+    this->octree = Octree(this->objects, bvh.bv, light);
 }
 
 void Scene::Draw(screen* screen)

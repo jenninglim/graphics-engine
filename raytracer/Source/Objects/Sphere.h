@@ -19,7 +19,7 @@ class Sphere : public Object
     bool intersection(
             const Cone r,
             Intersection &closestI);
-    bool boxOverlap(vec3 boxcenter, vec3 boxhalfisze);
+    bool boxOverlap(vec3 boxcenter, vec3 boxhalfisze, Intersection &i);
 
 };
 

@@ -36,8 +36,8 @@ class Light
     }
 };
 
-vec3 DirectLight(const Intersection i,
-        BVH bvh,
+vec3 DirectLight(vec4 position,
+        vec3 normal,
         Light light);
 
 float ShadowLight(const Intersection i,

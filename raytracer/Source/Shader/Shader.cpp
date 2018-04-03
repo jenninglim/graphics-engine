@@ -109,8 +109,8 @@ void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
             }
             fresnel(c_ray.r, intersect, kr);
 
-            lightColor = DirectLight(intersect,
-                    bvh,
+            lightColor = DirectLight(intersect.position,
+                    vec3(intersect.normal),
                     light) * ShadowLight(intersect,
                         bvh,
                         light);
