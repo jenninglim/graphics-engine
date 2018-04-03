@@ -1,6 +1,5 @@
 #include "Shader.h"
 #include "Collision.h"
-
 #include <stack>
 
 #ifdef DEBUG
@@ -72,6 +71,17 @@ void fresnel(const Ray r, const Intersection i, float &kr)
     }
     // As a consequence of the conservation of energy, transmittance is given by:
     // kt = 1 - kr;
+}
+void shootRay(const Ray r, vec3 &colour, Octree tree)
+{
+    if (tree.collision(r))
+    {
+        colour = vec3(1);
+    }
+    else
+    {
+        colour = vec3(0);
+    }
 }
 
 void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)

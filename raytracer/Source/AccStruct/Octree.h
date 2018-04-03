@@ -14,7 +14,7 @@ enum Type {
 };
 
 struct Data {
-    int dummy;
+    vec3 color;
 };
 
 class Octree
@@ -25,6 +25,7 @@ class Octree
         vec3 centre;
         vec3 boxHalfSize;
         vec3 minVoxelSize;
+        BoundingVolume bv;
         Data data;
         bool toDivide(vector<Object *> objects);
         void makeKids(vector<Object *> objects);
@@ -33,6 +34,7 @@ class Octree
         Octree();
         Octree(vector<Object *> objects, BoundingVolume bv);
         Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize);
+        bool collision(Ray r);
 
 };
 

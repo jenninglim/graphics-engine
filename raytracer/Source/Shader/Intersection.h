@@ -23,6 +23,4 @@ bool IntersectBoundingVolume(Ray r,
         BoundingVolume bv);
 
 bool IntersectBoundingVolume(Cone r, BoundingVolume bv);
-
-
 #endif

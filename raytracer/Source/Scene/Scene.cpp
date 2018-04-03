@@ -20,7 +20,52 @@ Scene::Scene()
             14.f * vec3(1,1,1));
     LoadTestModel(this->objects);
     this->bvh = BVH(objects);
-    Octree octree = Octree(this->objects, bvh.bv);
+    this->octree = Octree(this->objects, bvh.bv);
+}
+
+void Scene::Draw(screen* screen)
+{
+    vec3 color;
+    vec4 rayFromOrigin, rayFromCam;
+    vec3 d = vec3();
+    Ray r;
+ 
+    for(int y = 0; y < SCREEN_HEIGHT; y++){
+        for(int x = 0; x < SCREEN_WIDTH; x++){
+            rayFromOrigin.x = x - SCREEN_WIDTH/2;
+            rayFromOrigin.y = y - SCREEN_HEIGHT/2;
+            rayFromOrigin.z = cam.focalLength;
+            rayFromOrigin[3] = 1;
+
+            color = vec3(0);
+
+            rayFromCam = cam.R * rayFromOrigin;
+
+            d = glm::normalize(vec3(rayFromCam[0],
+                        rayFromCam[1],
+                        rayFromCam[2]));
+
+            r.initial = cam.position;
+            r.direction = d;
+
+            //shootRay(r, color, bvh, light);
+            shootRay(r, color, this->octree);
+            pixels[x][y] = color;
+        }
+    }
+    post_processing(pixels);
+    drawPixels(screen);
+}
+
+void drawPixels(screen * screen)
+{
+    for (int i = 0; i < SCREEN_WIDTH; i++)
+    {
+        for (int j = 0; j < SCREEN_HEIGHT; j ++)
+        {
+            PutPixelSDL(screen, i, j, pixels[i][j]);
+        }
+    }
 }
 
 void Scene::Update(KeyStroke_t * keystate)
@@ -60,47 +105,3 @@ void Scene::Update(KeyStroke_t * keystate)
 }
 
 
-void Scene::Draw(screen* screen)
-{
-    vec3 color;
-    vec4 rayFromOrigin, rayFromCam;
-    vec3 d = vec3();
-    Ray r;
- 
-    for(int y = 0; y < SCREEN_HEIGHT; y++){
-        for(int x = 0; x < SCREEN_WIDTH; x++){
-            rayFromOrigin.x = x - SCREEN_WIDTH/2;
-            rayFromOrigin.y = y - SCREEN_HEIGHT/2;
-            rayFromOrigin.z = cam.focalLength;
-            rayFromOrigin[3] = 1;
-
-            color = vec3(0);
-
-            rayFromCam = cam.R * rayFromOrigin;
-
-            d = glm::normalize(vec3(rayFromCam[0],
-                        rayFromCam[1],
-                        rayFromCam[2]));
-
-            r.initial = cam.position;
-            r.direction = d;
-
-            shootRay(r, color, bvh, light);
-            pixels[x][y] = color;
-        }
-    }
-    post_processing(pixels);
-    drawPixels(screen);
-}
-
-void drawPixels(screen * screen)
-{
-    for (int i = 0; i < SCREEN_WIDTH; i++)
-    {
-        for (int j = 0; j < SCREEN_HEIGHT; j ++)
-        {
-            PutPixelSDL(screen, i, j, pixels[i][j]);
-        }
-    }
-
-}

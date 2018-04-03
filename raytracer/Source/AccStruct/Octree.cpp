@@ -25,6 +25,7 @@ Octree::Octree(vector<Object *> objects, BoundingVolume bv)
     // Set up root tree.
     this->boxHalfSize = (bv.max - bv.min) / 2.f;
     this->centre = bv.min + boxHalfSize;
+    this->bv = bv;
     this->makeKids(objects); 
 }
 
@@ -33,6 +34,8 @@ Octree::Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize)
     // Set up root tree.
     this->boxHalfSize = boxhalfsize;
     this->centre = center;
+    this->bv.max = center + boxhalfsize;
+    this->bv.min = center - boxhalfsize;
     this->makeKids(objects); 
 }
 
@@ -69,21 +72,22 @@ bool Octree::toDivide(vector<Object *> objects)
     return false;
 }
 
-/*
-bool Octree::Intersection(Ray r)
+bool Octree::collision(Ray r)
 {
+    bool collision = false;
     if (this->type == LEAF)
     {
-        //return RayBoxIntersection(Ray r);
+        return IntersectBoundingVolume(r, this->bv);
     }
     if (this->type == NODE)
     {
-        //if (RayBoxIntersection)
-        for (int i = 0; i < 8; i ++)
+        if (IntersectBoundingVolume(r, this->bv))
         {
-            this->children->RayIntersection(r);
+            for (int i = 0; i < 8; i ++)
+            {
+                collision |= this->children[i]->collision(r);
+            }
         }
     }
-    return false;
+    return collision;
 }
-*/
