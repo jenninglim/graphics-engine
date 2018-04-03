@@ -38,6 +38,28 @@ BVH::BVH(vector<Object *> objects)
     }
 }
 
+bool BVH::collision(Ray r, Intersection &closestI)
+{
+    bool intersectionFound = false;
+    if (IntersectBoundingVolume(r, this->bv))
+    {
+        if (this->isLeaf == true)
+        {
+           intersectionFound |= this->object->intersection(r, closestI); 
+        }
+        else
+        {
+            intersectionFound |= this->left->collision(r, closestI);
+            intersectionFound |= this->right->collision(r, closestI);
+        }
+    }
+    else
+    {
+        return false;
+    }
+    return intersectionFound;
+}
+
 
 
 vector<vector<Object *> > partitionObject(vector<Object *> objects)

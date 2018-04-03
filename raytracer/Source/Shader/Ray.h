@@ -1,7 +1,7 @@
 #ifndef RAY_H
 #define RAY_H
 
-#include "Intersection.h"
+#include <glm/glm.hpp>
 
 using namespace glm;
 // Ray

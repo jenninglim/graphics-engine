@@ -69,4 +69,21 @@ bool Octree::toDivide(vector<Object *> objects)
     return false;
 }
 
-
+/*
+bool Octree::Intersection(Ray r)
+{
+    if (this->type == LEAF)
+    {
+        //return RayBoxIntersection(Ray r);
+    }
+    if (this->type == NODE)
+    {
+        //if (RayBoxIntersection)
+        for (int i = 0; i < 8; i ++)
+        {
+            this->children->RayIntersection(r);
+        }
+    }
+    return false;
+}
+*/

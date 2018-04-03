@@ -2,6 +2,7 @@
 #define OBJECT_H
 
 #include "Ray.h"
+#include "Intersection.h"
 #include "Config.h"
 #include "BoundingVolume.h"
 
