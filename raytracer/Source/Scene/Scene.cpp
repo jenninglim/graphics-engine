@@ -1,6 +1,7 @@
 #include "Scene.h"
 #include "TestModelH.h"
 #include "Post.h"
+#include "Octree.h"
 
 #define SCALE 0.3f
 using namespace glm;
@@ -19,6 +20,7 @@ Scene::Scene()
             14.f * vec3(1,1,1));
     LoadTestModel(this->objects);
     this->bvh = BVH(objects);
+    Octree octree = Octree(this->objects, bvh.bv);
 }
 
 void Scene::Update(KeyStroke_t * keystate)

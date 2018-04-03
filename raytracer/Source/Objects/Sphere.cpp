@@ -113,6 +113,11 @@ vec2 projection(vec3 point, vec3 e1, vec3 e2)
     return vec2(v1,v2);
 }
 
+bool Sphere::boxOverlap(vec3 boxcenter, vec3 boxhalfisze)
+{
+    return false;
+}
+
 double circcircArea(vec2 pos1, float r1,
                    vec2 pos2, float r2)
 {
