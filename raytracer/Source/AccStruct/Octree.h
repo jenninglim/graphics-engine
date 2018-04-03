@@ -2,6 +2,7 @@
 #define OCTREE_H
 
 #include "Object.h"
+#include "BoundingVolume.h"
 #include <vector>
 
 enum Type {
@@ -18,6 +19,7 @@ class Octree
     private:
         Type type;
         Octree * childern[8];
+        BoundingVolume bv;
         Data data;
 
     public:

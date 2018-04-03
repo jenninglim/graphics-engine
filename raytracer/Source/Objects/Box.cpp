@@ -1,6 +1,7 @@
 #include "Box.h"
 #include "Config.h"
 #include <limits>
+#include "Overlap.h"
 
 #ifdef DEBUG
 #include <iostream>
@@ -134,6 +135,18 @@ void Box::computeBoundingVolume()
         if (tri_max.z > max.z) { max.z=tri_max.z; }
     }
     bv = BoundingVolume(min, max);
+}
+
+bool Box::boxOverlap(vec3 boxcenter, vec3 boxhalfsize)
+{
+   for (int i = 0; i <  triangles.size(); i++)
+   {
+        if (trigBoxOverlap(boxcenter, boxhalfsize, this->triangles[i]))
+        {
+            return true;
+        }
+   }
+   return false;
 }
 
 vec3 triangleMin(Triangle triangle)
