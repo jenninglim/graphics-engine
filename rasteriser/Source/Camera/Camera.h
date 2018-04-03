@@ -3,6 +3,7 @@
 
 #include "Config.h"
 #include "glm/gtx/string_cast.hpp"
+#include "vector"
 using namespace glm;
 
 //Camera
@@ -20,7 +21,7 @@ class Camera
         float stencilBuffer[SCREEN_HEIGHT][SCREEN_WIDTH];
         bool stencilWritten[SCREEN_HEIGHT][SCREEN_WIDTH];
         vec4 pixelPoint3d[SCREEN_HEIGHT][SCREEN_WIDTH];
-
+        std::vector<float> stencilInvStore[SCREEN_HEIGHT][SCREEN_WIDTH];
 
     Camera()
     {

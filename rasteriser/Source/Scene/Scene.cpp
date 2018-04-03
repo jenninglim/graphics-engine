@@ -56,6 +56,7 @@ void Scene::Draw(screen* screen){
       cam->depthBuffer[i][j] = 0.0f;
       cam->stencilBuffer[i][j] = 0.0f;
       cam->pixelPoint3d[i][j] = vec4(0);
+      cam->stencilInvStore[i][j].clear();
     }
   }
   //DRAW THE POLYGONS

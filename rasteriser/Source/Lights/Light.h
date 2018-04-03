@@ -17,7 +17,7 @@ class Light
     Light()
     {
         this->indirect_light = (float)INDIRECT_LIGHT * vec3(1,1,1);
-        this->position = vec4(0, -0.5, -0.7, 1);
+        this->position = vec4(0, -0.8, -0.7, 1);
         this->power = (float)LIGHT_POWER * vec3(1,1,1);
     }
 

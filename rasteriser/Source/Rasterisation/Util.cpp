@@ -1,4 +1,5 @@
 #include "Util.h"
+#include <algorithm>
 using namespace std;
 using namespace glm;
 
@@ -69,9 +70,12 @@ void PixelShader(screen* screen,
     int x = p.x ;
     int y = p.y ;
     if(x >= 0 && y >= 0 && x < SCREEN_WIDTH && y < SCREEN_HEIGHT){
-      if( p.zinv == cam->depthBuffer[y][x] && cam->stencilBuffer[y][x] == 0)
+      if(cam->stencilBuffer[y][x] < 0){
+        cout << cam->stencilBuffer[y][x] << endl;
+      }
+      if( p.zinv == cam->depthBuffer[y][x] && cam->stencilBuffer[y][x] <= 0)
       {
-        cout << " stencil buffer 0" << endl;
+        //cout << " stencil buffer 0" << endl;
         vec4 r_hat = glm::normalize(light->position - (p.pos3d/p.zinv));
         float dist = glm::length(light->position - (p.pos3d/p.zinv));
         vec3 lightColour = light->power * glm::max(glm::dot(r_hat, currentNormal), 0.0f) /
@@ -87,14 +91,26 @@ void PixelShader(screen* screen,
     int y = p.y;
     if(x >= 0 && y >= 0 && x < SCREEN_WIDTH && y < SCREEN_HEIGHT){
       if(p.zinv > cam->depthBuffer[y][x]){
-        if(cam->stencilWritten[y][x] == 1){
-          //HAS BEEN WRITTEN FOR THIS OBJECT
-          cam->stencilBuffer[y][x] = (cam->stencilBuffer[y][x] - 1.0f);
-          //cout << "stencil minus" << endl;
+        auto it = std::find_if(cam->stencilInvStore[y][x].begin(), cam->stencilInvStore[y][x].end(),
+                    [=] (float value){
+                      return p.zinv == value;
+                    });
+        if(it == cam->stencilInvStore[y][x].end() ){
+
+          //Not contained in stencil inv store
+          if(cam->stencilWritten[y][x] == 1){
+              //HAS BEEN WRITTEN FOR THIS OBJECT
+            cam->stencilBuffer[y][x] = (cam->stencilBuffer[y][x] - 1.0f);
+              //cout << "stencil minus" << endl;
+            cam->stencilInvStore[y][x].push_back(p.zinv);
+          }else{
+            cam->stencilBuffer[y][x] = (cam->stencilBuffer[y][x] + 1.0f);
+              //cout << "stencil plus" << endl;
+            cam->stencilWritten[y][x] = 1;
+            cam->stencilInvStore[y][x].push_back(p.zinv);
+          }
         }else{
-          cam->stencilBuffer[y][x] = (cam->stencilBuffer[y][x] + 1.0f);
-          //cout << "stencil plus" << endl;
-          cam->stencilWritten[y][x] = 1;
+          cout << "Duplicate found" << endl;
         }
       }
     }

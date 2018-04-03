@@ -134,7 +134,7 @@ void LoadObjects(std::vector<Object *>& objects )
 
   push_box(objects, triangles);
   //Stanford Bunny
-
+  /*
   vector<vec4> out_vertices;
   vector<vec3> out_faces;
   vector<Triangle> bunnytriangles;
@@ -152,5 +152,5 @@ void LoadObjects(std::vector<Object *>& objects )
   }
 
   push_bunny(objects, bunnytriangles);
-
+  */
 }
