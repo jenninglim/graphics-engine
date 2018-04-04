@@ -37,6 +37,9 @@
 #define THRESHOLD 0.5
 
 // OCTREE
-#define OCT_DEPTH 10
+#define OCT_DEPTH 11
+
+// CONE ANGLES
+# define SHADOW_ANG 0.35
 #endif
 

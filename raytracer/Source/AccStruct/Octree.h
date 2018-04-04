@@ -35,17 +35,13 @@ class Octree
         Octree * children[8];
         vec3 centre;
         vec3 boxHalfSize;
-        BoundingVolume bv;
-        bool toDivide(vector<Object *> objects);
-        void makeKids(vector<Object *> objects, Light l, BVH * bvh);
-        float depth;
-
+        
         vec3 colour;
-        vec3 normal;
         vec3 directLight;
         float occlusion;
 
-        BVH * bvh;
+        bool toDivide(vector<Object *> objects);
+        void makeKids(vector<Object *> objects, Light l, BVH * bvh, int depth);
 
     public:
         Octree();

@@ -25,3 +25,15 @@ bool BoundingVolume::pointInside(vec3 point)
     }
     return true;
 }
+
+bool pointInsideAABB(const vec3 point, const vec3 min, const vec3 max)
+{
+     for (int i = 0; i < 3; i++)
+    {
+        if (point[i] > max[i] || point[i] < min[i])
+        {
+            return false;
+        }
+    }
+    return true;
+}
