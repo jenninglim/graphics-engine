@@ -33,7 +33,7 @@ Octree::Octree(vector<Object *> objects, BoundingVolume bv, Light l, BVH * bvh)
     this->depth = 0;
     this->bvh = bvh;
 
-    //this->makeKids(objects, l, bvh); 
+    this->makeKids(objects, l, bvh); 
 }
 
 Octree::Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int depth, Light l, BVH * bvh)
@@ -45,7 +45,6 @@ Octree::Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int dept
     this->bv.max = center + boxhalfsize;
     this->bv.min = center - boxhalfsize;
     this->bvh = bvh;
-
     this->makeKids(objects, l, bvh); 
 }
 
@@ -67,7 +66,7 @@ void Octree::makeKids(vector<Object *> objects, Light l, BVH* bvh)
             this->occlusion += 1.f/8.f * this->children[i]->occlusion;
         }
     }
-    else if (!toDivide(objects))
+    else if (depth < OCT_DEPTH)
     {
         this->type = EMPTY;
     }

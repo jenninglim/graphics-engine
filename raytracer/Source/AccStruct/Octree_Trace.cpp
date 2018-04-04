@@ -30,8 +30,8 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
     while (dist < maxDist)
     {
         point = vec3(r.initial) + dist * r.direction;
-        if (ClosestVoxel(root, point, dist * tantheta, voxel)) {
-
+        if (ClosestVoxel(root, point, dist * tantheta, voxel))
+        {
             c = a * c + (1 - a) * voxel->occlusion * voxel->colour;
             a += (1 - a) * voxel->occlusion;
             delta = glm::pow(dist,2);

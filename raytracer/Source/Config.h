@@ -37,6 +37,6 @@
 #define THRESHOLD 0.5
 
 // OCTREE
-#define OCT_DEPTH 12
+#define OCT_DEPTH 10
 #endif
 
