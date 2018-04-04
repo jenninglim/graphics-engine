@@ -22,10 +22,17 @@ struct Data {
     vec3 color;
 };
 
+struct Trace
+{
+    vec3 colour;
+    float occlusion;
+};
+
 class Octree
 {
-    private:
+    public:
         Type type;
+        Octree * root;
         Octree * children[8];
         vec3 centre;
         vec3 boxHalfSize;
@@ -48,5 +55,7 @@ class Octree
         Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int depth, Light light, BVH * bvh);
         bool collision(Ray r, Intersection &inter);
 };
+
+float castShadowCone(Octree * root, vec3 point, Light l, float theta);
 
 #endif

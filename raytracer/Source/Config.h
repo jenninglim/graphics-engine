@@ -17,7 +17,7 @@
 // Auxillary Variables
 #define EPSILON 1e-3
 #define DEBUG 1
-#define RAY_DEPTH 3
+#define RAY_DEPTH 1
 
 //// SCENE SETTINGS
 // REFLECT
@@ -35,5 +35,8 @@
 
 // AA
 #define THRESHOLD 0.5
+
+// OCTREE
+#define OCT_DEPTH 7
 #endif
 

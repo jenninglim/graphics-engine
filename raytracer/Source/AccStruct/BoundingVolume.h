@@ -12,6 +12,7 @@ class BoundingVolume
         vec3 max;
         BoundingVolume();
         BoundingVolume(vec3 min, vec3 max);
+        bool pointInside(vec3 point);
 };
 
 #endif

@@ -10,6 +10,6 @@
 Ray reflect(const Ray I, const Intersection i);
 Ray refract(const Ray I, const Intersection i);
 void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light);
-void shootRay(const Ray r, vec3 &colour, Octree tree);
+float shootRay(const Ray r, vec3 &colour, Octree tree, Light l);
 
 #endif

@@ -72,12 +72,13 @@ void fresnel(const Ray r, const Intersection i, float &kr)
     // As a consequence of the conservation of energy, transmittance is given by:
     // kt = 1 - kr;
 }
-void shootRay(const Ray r, vec3 &colour, Octree tree)
+float shootRay(const Ray r, vec3 &colour, Octree tree, Light l)
 {
     Intersection i;
     i.distance = 20;
     tree.collision(r, i);
-    colour = i.colour;
+    return castShadowCone(&tree, vec3(i.position), l, 0.5);
+    //colour = i.colour * (1- occ);
 }
 
 void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
