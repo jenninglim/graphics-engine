@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include "Light.h"
+#include "BVH.h"
 
 #define SCALING 5.f
 
@@ -31,18 +32,21 @@ class Octree
         BoundingVolume bv;
         Data data;
         bool toDivide(vector<Object *> objects);
-        void makeKids(vector<Object *> objects, Light l);
+        void makeKids(vector<Object *> objects, Light l, BVH * bvh);
         int depth;
+
         vec3 colour;
         vec3 normal;
         vec3 directLight;
+        float occlusion;
+
+        BVH * bvh;
 
     public:
         Octree();
-        Octree(vector<Object *> objects, BoundingVolume bv, Light light);
-        Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int depth, Light light);
-        bool collision(Ray r, vec3& colour);
-
+        Octree(vector<Object *> objects, BoundingVolume bv, Light light, BVH * bvh);
+        Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int depth, Light light, BVH * bvh);
+        bool collision(Ray r, Intersection &inter);
 };
 
 #endif
