@@ -33,7 +33,7 @@ Octree::Octree(vector<Object *> objects, BoundingVolume bv, Light l, BVH * bvh)
     this->depth = 0;
     this->bvh = bvh;
 
-    this->makeKids(objects, l, bvh); 
+    //this->makeKids(objects, l, bvh); 
 }
 
 Octree::Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int depth, Light l, BVH * bvh)
@@ -110,10 +110,6 @@ bool Octree::toDivide(vector<Object *> objects)
             return true;
         }
     }
-    if (LESSTHAN(this->boxHalfSize,SCALING))
-    {
-        return false;
-    }
     return false;
 }
 
@@ -138,7 +134,11 @@ bool Octree::collision(Ray r, Intersection &inter)
             return false;
         }
     }
-    if (this->type == NODE)
+    else if (this->type == EMPTY)
+    {
+        return false;
+    }
+    else if (this->type == NODE)
     {
         if (IntersectBoundingVolume(r, this->bv))
         {

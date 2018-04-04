@@ -3,20 +3,20 @@
 #include "Config.h"
 
 #define MAX_DEPTH OCT_DEPTH
-#define MAX_DIST 5
 
 bool ClosestVoxel(Octree * root, vec3 point, float threshold, Octree * & voxel);
-void singleConeTrace(Octree * root, Cone r, Trace &t);
+void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist);
 
 float castShadowCone(Octree * root, vec3 point, Light l, float theta)
 {
     Trace t;
-    Cone r(vec4(point,0), glm::normalize(vec3(l.position) - point), theta);
-    singleConeTrace(root, r,t);
+    vec3 ab = vec3(l.position) - point;
+    Cone r(vec4(point,0), glm::normalize(ab), theta);
+    singleConeTrace(root, r,t, glm::max(MAX_DIST, glm::l2Norm(ab)));
     return (t.occlusion > 1) ? 1 : t.occlusion;
 }
 
-void singleConeTrace(Octree * root, Cone r, Trace &t)
+void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
 {
     float tantheta = glm::tan(r.theta);
     float start = 1e-2;
@@ -27,7 +27,7 @@ void singleConeTrace(Octree * root, Cone r, Trace &t)
     float a = 0;
     float delta = 0;
     vec3 c = vec3(0);
-    while (dist < MAX_DIST)
+    while (dist < maxDist)
     {
         point = vec3(r.initial) + dist * r.direction;
         if (ClosestVoxel(root, point, dist * tantheta, voxel)) {

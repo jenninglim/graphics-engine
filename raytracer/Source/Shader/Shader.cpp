@@ -78,7 +78,6 @@ float shootRay(const Ray r, vec3 &colour, Octree tree, Light l)
     i.distance = 20;
     tree.collision(r, i);
     return castShadowCone(&tree, vec3(i.position), l, 0.5);
-    //colour = i.colour * (1- occ);
 }
 
 void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)

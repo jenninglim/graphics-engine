@@ -23,7 +23,6 @@ Scene::Scene()
     this->octree = Octree(this->objects, bvh.bv, light, &this->bvh);
 }
 
-
 void Scene::Draw(screen* screen)
 {
     vec3 color;
@@ -50,7 +49,7 @@ void Scene::Draw(screen* screen)
             r.direction = d;
 
             shootRay(r, color, bvh, light);
-            color *= 1 - shootRay(r, color, this->octree, light);
+            color *= 1- shootRay(r, color, this->octree, light);
             pixels[x][y] = color;
         }
     }

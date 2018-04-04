@@ -1,7 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 //Intersection Tests
-#define MAX_DIST 5
+#define MAX_DIST 5.f
 #define CONE_SIZE 0.01/ 2.f
 #define VOL_APPROX_INT 0.01
 
@@ -37,6 +37,6 @@
 #define THRESHOLD 0.5
 
 // OCTREE
-#define OCT_DEPTH 7
+#define OCT_DEPTH 12
 #endif
 
