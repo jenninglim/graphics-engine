@@ -44,6 +44,14 @@ void Scene::Update(const uint8_t* keystate){
     {
   	  light->right();
     }
+    if ( keystate[SDL_SCANCODE_Q] )
+    {
+      light->down();
+    }
+    if ( keystate[SDL_SCANCODE_E] )
+    {
+      light->up();
+    }
 }
 
 void Scene::Draw(screen* screen){

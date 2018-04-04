@@ -13,7 +13,9 @@
 #define CAM_FOCAL_LENGTH 500
 
 // Lighting
-#define LIGHT_POWER 20
-#define INDIRECT_LIGHT 0.5
+#define SPECULAR_INTENSITY 10
+#define DIFFUSE_INTENSITY 2
+#define AMBIENT_INTENSITY 0.2
+
 
 #endif

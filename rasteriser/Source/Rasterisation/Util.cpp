@@ -49,12 +49,19 @@ void PixelShader(screen* screen,
                  vec4 currentNormal,
                  vec3 currentReflectance)
 {
-  vec4 r_hat = glm::normalize(light->position - (p.pos3d/p.zinv));
+  vec4 l_hat = glm::normalize(light->position - (p.pos3d/p.zinv));
   float dist = glm::length(light->position - (p.pos3d/p.zinv));
-  vec3 lightColour = light->power * glm::max(glm::dot(r_hat, currentNormal), 0.0f) /
+  vec3 diffuseColor = light->diffuseLightIntensity * glm::max(glm::dot(l_hat, currentNormal), 0.0f) /
     (float) (4.0f * glm::pi<float>() * glm::pow<float>(dist,2));
+
+  vec4 r_hat = glm::normalize((2 * glm::max(glm::dot(l_hat, currentNormal), 0.0f) * currentNormal) - l_hat);
+  vec4 v_hat = glm::normalize(cam->cameraPos - (p.pos3d/p.zinv));
+  vec3 specularColor = light->specularLightIntensity * glm::pow(glm::max(glm::dot(r_hat, v_hat), 0.0f), 3.0f) /
+    (float) (4.0f * glm::pi<float>() * glm::pow<float>(dist,2));;
+
   //Diffuse surface
-  vec3 finalColour = currentReflectance * (lightColour + light->indirect_light);
+
+  vec3 finalColour = currentReflectance * ((diffuseColor != vec3(0) ? specularColor + diffuseColor : vec3(0)) + light->ambientLightIntensity);
 
   int x = p.x ;
   int y = p.y ;

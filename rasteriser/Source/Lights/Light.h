@@ -11,37 +11,43 @@ class Light
 {
     public:
         vec4 position;
-        vec3 power;
-        vec3 indirect_light;
+        vec3 diffuseLightIntensity;
+        vec3 ambientLightIntensity;
+        vec3 specularLightIntensity;
 
     Light()
     {
-        this->indirect_light = (float)INDIRECT_LIGHT * vec3(1,1,1);
+        this->ambientLightIntensity = (float)AMBIENT_INTENSITY * vec3(1,1,1);
         this->position = vec4(0, -0.5, -0.7, 1);
-        this->power = (float)LIGHT_POWER * vec3(1,1,1);
+        this->diffuseLightIntensity = (float)DIFFUSE_INTENSITY * vec3(1,1,1);
+        this->specularLightIntensity = (float)SPECULAR_INTENSITY * vec3(1,1,1);
     }
-
-    Light(vec4 position, vec3 power, vec3 indirect_light)
-        :position(position), power(power), indirect_light(indirect_light)
+    /*
+    Light(vec4 position, vec3 specularLightIntensity, vec3 ambientLightIntensity, vec3 diffuseLightIntensity)
+        :position(position), specularLightIntensity(specularLightIntensity),
+        ambientLightIntensity(ambientLightIntensity), diffuseLightIntensity(diffuseLightIntensity)
     {
 
     }
-
+    */
     void forward(){
-        this->position = this->position + vec4(0,0,1,0);
+        this->position = this->position + vec4(0,0,0.1,0);
     }
     void backward(){
-        this->position = this->position + vec4(0,0,-1,0);
+        this->position = this->position + vec4(0,0,-0.1,0);
     }
     void left(){
-        this->position = this->position + vec4 (1,0,0,0);
-
+        this->position = this->position + vec4 (-0.1,0,0,0);
     }
     void right(){
-        this->position = this->position + vec4(-1,0,0,0);
+        this->position = this->position + vec4(0.1,0,0,0);
     }
-
-
+    void down(){
+        this->position = this->position + vec4(0,0.1,0,0);
+    }
+    void up(){
+        this->position = this->position + vec4(0,-0.1,0,0);
+    }
 };
 
 #endif
