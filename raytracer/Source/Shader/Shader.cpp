@@ -73,12 +73,14 @@ void fresnel(const Ray r, const Intersection i, float &kr)
     // kt = 1 - kr;
 }
 
-float shootRay(const Ray r, vec3 &colour, Octree tree, Light l)
+vec3 shootRay(const Ray r, vec3 &colour, Octree tree, BVH bvh, Light l)
 {
     Intersection i;
     i.distance = 20;
-    tree.collision(r, i);
-    return castShadowCone(&tree, vec3(i.position), l, SHADOW_ANG);
+    bvh.collision(r, i);
+    //colour = i.colour;
+    return ambientOcclusion(&tree, vec3(i.position),vec3(i.normal), l);
+    //return castShadowCone(&tree, vec3(i.position), l, 0.5);
 }
 
 void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)

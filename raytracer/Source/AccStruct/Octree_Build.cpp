@@ -27,16 +27,20 @@ Octree::Octree()
 Octree::Octree(vector<Object *> objects, BoundingVolume bv, Light l, BVH * bvh)
 {
     // Set up root tree.
-    this->boxHalfSize = (bv.max - bv.min) / 2.f;
+    this->boxHalfSize = (bv.max - bv.min) / 2.f + vec3(EPSILON);
     this->centre = bv.min + boxHalfSize;
+    this->occlusion = 0;
+    this->directLight = vec3(0);
     this->makeKids(objects, l, bvh, 0.); 
 }
 
 Octree::Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int depth, Light l, BVH * bvh)
 {
     // Set up root tree.
-    this->boxHalfSize = boxhalfsize;
+    this->boxHalfSize = boxhalfsize + vec3( glm::l2Norm(boxhalfsize) * 0.0f);
     this->centre = center;
+    this->occlusion = 0;
+    this->directLight = vec3(0);
     this->makeKids(objects, l, bvh, depth); 
 }
 
@@ -45,17 +49,18 @@ void Octree::makeKids(vector<Object *> objects, Light l, BVH* bvh, int depth)
     if (toDivide(objects) && depth < OCT_DEPTH)
     {
         this->type = NODE;
+        this->children = new Octree[8];
         for (int i = 0; i < 8; i++)
         {
-            this->children[i] = new Octree(objects,
+            this->children[i] = Octree(objects,
                     offsets[i] * this->boxHalfSize / 2.f + this->centre,
                     this->boxHalfSize/2.f,
-                    depth++,
+                    depth+1,
                     l,
                     bvh);
-            this->directLight += 1.f/8.f * this->children[i]->directLight;
-            this->occlusion += 1.f/8.f * this->children[i]->occlusion;
-        }
+            this->directLight += 1.f/8.f * this->children[i].directLight;
+            this->occlusion += 1.f/8.f * this->children[i].occlusion;
+       }
     }
     else if (depth < OCT_DEPTH)
     {
@@ -138,7 +143,7 @@ bool Octree::collision(Ray r, Intersection &inter)
         {
             for (int i = 0; i < 8; i ++)
             {
-                didColide |= (this->children[i]->collision(r, inter));
+                didColide |= (this->children[i].collision(r, inter));
             }
         }
     }

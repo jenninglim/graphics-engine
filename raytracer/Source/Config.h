@@ -6,16 +6,16 @@
 #define VOL_APPROX_INT 0.01
 
 // Screen Setup
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 800
-#define FULLSCREEN_MODE false
+#define SCREEN_WIDTH 200
+#define SCREEN_HEIGHT 200
+#define FULLSCREEN_MODE true
 
 // Camera
 #define ROTATION_SPEED 0.1 // In radians
 #define CAM_FOCAL_LENGTH SCREEN_WIDTH
 
 // Auxillary Variables
-#define EPSILON 1e-3
+#define EPSILON 1e-3f
 #define DEBUG 1
 #define RAY_DEPTH 1
 
@@ -37,9 +37,8 @@
 #define THRESHOLD 0.5
 
 // OCTREE
-#define OCT_DEPTH 11
+#define OCT_DEPTH 10
 
 // CONE ANGLES
-# define SHADOW_ANG 0.35
+#define SHADOW_ANG 0.5
 #endif
-

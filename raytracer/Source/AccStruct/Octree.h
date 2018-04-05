@@ -32,7 +32,7 @@ class Octree
 {
     public:
         Type type;
-        Octree * children[8];
+        Octree * children;
         vec3 centre;
         vec3 boxHalfSize;
         
@@ -51,5 +51,6 @@ class Octree
 };
 
 float castShadowCone(Octree * root, vec3 point, Light l, float theta);
+vec3 ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l);
 
 #endif
