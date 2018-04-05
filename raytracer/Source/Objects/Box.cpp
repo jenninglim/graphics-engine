@@ -76,10 +76,11 @@ bool Box::intersection(const Ray r, Intersection &closestI)
             && (u > 0.f - EPSILON && u < 1.f + EPSILON))
             && (a < -EPSILON || a > EPSILON))
         {
-            intersectionFound = true;
             t = f * glm::dot(e2,q); 
             if (t>EPSILON && t < closestI.distance)
             {
+                intersectionFound = true;
+
                 closestI.position = r.initial + vec4(t * r.direction,0);
                 closestI.distance = t;
                 closestI.colour = triangles[i].color;
@@ -127,7 +128,7 @@ bool Box::boxOverlap(vec3 boxcenter, vec3 boxhalfsize, Intersection &inter)
         if (trigBoxOverlap(boxcenter, boxhalfsize, this->triangles[i]))
         {
             inter.colour = this->triangles[i].color;
-            inter.normal = this->triangles[i].normal;
+            inter.normal = this->triangles[i].normal; 
             return true;
         }
    }

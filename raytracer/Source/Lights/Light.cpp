@@ -15,11 +15,10 @@ using glm::vec4;
 vec3 DirectLight(vec4 position, vec3 normal, Light light)
 {
     vec3 norm = normal;
-    vec3 r_hat = vec3(glm::normalize(light.position - position));
+    vec3 r_hat = glm::normalize(vec3(light.position - position));
 
     float dist = glm::length(light.position - position);
     vec3 n_hat = glm::normalize(norm);
-
     vec3 lightColour = light.power * glm::max(glm::dot(r_hat, n_hat), 0.0f) /
         (float) (4.0f * glm::pi<float>() * glm::pow<float>(dist,2));
 

@@ -27,7 +27,7 @@ Octree::Octree()
 Octree::Octree(vector<Object *> objects, BoundingVolume bv, Light l, BVH * bvh)
 {
     // Set up root tree.
-    this->boxHalfSize = (bv.max - bv.min);
+    this->boxHalfSize = (bv.max - bv.min) / 2.f;
     this->centre = bv.min + boxHalfSize;
     this->occlusion = 0;
     this->directLight = vec3(0);
@@ -41,14 +41,14 @@ Octree::Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int dept
     this->boxHalfSize = boxhalfsize;
     this->centre = center;
     this->occlusion = 0;
-    this->colour = vec3(0);
     this->directLight = vec3(0);
+    this->colour = vec3(0);
     this->makeKids(objects, l, bvh, depth); 
 }
 
 void Octree::makeKids(vector<Object *> objects, Light l, BVH* bvh, int depth)
 {
-    if (toDivide(objects) && depth < OCT_DEPTH)
+    if (this->toDivide(objects, l) && depth < OCT_DEPTH)
     {
         this->type = NODE;
         this->children = new Octree[8];
@@ -65,7 +65,7 @@ void Octree::makeKids(vector<Object *> objects, Light l, BVH* bvh, int depth)
             this->colour += 1.f/8.f * this->children[i].colour;
        }
     }
-    else if (depth < OCT_DEPTH)
+    else if (!this->toDivide(objects, l)) //if (depth < OCT_DEPTH)
     {
         this->type = EMPTY;
     }
@@ -79,7 +79,6 @@ void Octree::makeKids(vector<Object *> objects, Light l, BVH* bvh, int depth)
         vec3 dir = vec3(l.position) - this->centre;
         if (bvh->collision(Ray(vec4(this->centre,0), glm::normalize(dir)), i))
         {
-            this->directLight = DirectLight(vec4(this->centre,0), vec3(i.normal), l);
             if (i.distance > glm::l2Norm(dir) && i.distance > EPSILON)
             {
                 this->occlusion = 0;
@@ -88,7 +87,6 @@ void Octree::makeKids(vector<Object *> objects, Light l, BVH* bvh, int depth)
             {
                 this->occlusion = 1;
             }
-            this->colour = i.colour;
         }
         else
         {
@@ -97,7 +95,7 @@ void Octree::makeKids(vector<Object *> objects, Light l, BVH* bvh, int depth)
     }
 }
 
-bool Octree::toDivide(vector<Object *> objects)
+bool Octree::toDivide(vector<Object *> objects, Light l)
 {
     Intersection inter;
     for (int i = 0; i < objects.size(); i++)
@@ -105,6 +103,7 @@ bool Octree::toDivide(vector<Object *> objects)
         if (objects[i]->boxOverlap(this->centre, this->boxHalfSize, inter))
         {
             this->colour = inter.colour;
+            this->directLight = DirectLight(vec4(this->centre,1), vec3(inter.normal), l);
             return true;
         }
     }
@@ -117,17 +116,19 @@ bool Octree::collision(Ray r, Intersection &inter)
     vec3 min, max;
     max = this->centre + this->boxHalfSize;
     min = this->centre - this->boxHalfSize;
+    float dist = 0;
+
     if (this->type == LEAF)
     {
         max = this->centre + this->boxHalfSize;
         min = this->centre - this->boxHalfSize;
         if(IntersectBoundingVolume(r, BoundingVolume(min,max)))
         {
-            float dist = glm::l2Norm(vec3(r.initial), this->centre);
+            dist = glm::l2Norm(vec3(r.initial), this->centre);
             if (dist < inter.distance)
             {
                 inter.position = vec4(this->centre,0);
-                inter.colour = this->colour;
+                inter.colour = vec3(this->directLight);
                 inter.distance = dist;
             }
             return true;

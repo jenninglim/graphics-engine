@@ -40,7 +40,7 @@ class Octree
         vec3 directLight;
         float occlusion;
 
-        bool toDivide(vector<Object *> objects);
+        bool toDivide(vector<Object *> objects, Light l);
         void makeKids(vector<Object *> objects, Light l, BVH * bvh, int depth);
 
     public:
