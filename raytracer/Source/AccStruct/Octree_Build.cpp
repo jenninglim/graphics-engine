@@ -27,19 +27,21 @@ Octree::Octree()
 Octree::Octree(vector<Object *> objects, BoundingVolume bv, Light l, BVH * bvh)
 {
     // Set up root tree.
-    this->boxHalfSize = (bv.max - bv.min) / 2.f + vec3(EPSILON);
+    this->boxHalfSize = (bv.max - bv.min);
     this->centre = bv.min + boxHalfSize;
     this->occlusion = 0;
     this->directLight = vec3(0);
+    this->colour = vec3(0);
     this->makeKids(objects, l, bvh, 0.); 
 }
 
 Octree::Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int depth, Light l, BVH * bvh)
 {
     // Set up root tree.
-    this->boxHalfSize = boxhalfsize + vec3( glm::l2Norm(boxhalfsize) * 0.0f);
+    this->boxHalfSize = boxhalfsize;
     this->centre = center;
     this->occlusion = 0;
+    this->colour = vec3(0);
     this->directLight = vec3(0);
     this->makeKids(objects, l, bvh, depth); 
 }
@@ -60,6 +62,7 @@ void Octree::makeKids(vector<Object *> objects, Light l, BVH* bvh, int depth)
                     bvh);
             this->directLight += 1.f/8.f * this->children[i].directLight;
             this->occlusion += 1.f/8.f * this->children[i].occlusion;
+            this->colour += 1.f/8.f * this->children[i].colour;
        }
     }
     else if (depth < OCT_DEPTH)
@@ -85,6 +88,7 @@ void Octree::makeKids(vector<Object *> objects, Light l, BVH* bvh, int depth)
             {
                 this->occlusion = 1;
             }
+            this->colour = i.colour;
         }
         else
         {

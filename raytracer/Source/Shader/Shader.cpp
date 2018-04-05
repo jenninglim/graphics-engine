@@ -77,10 +77,17 @@ vec3 shootRay(const Ray r, vec3 &colour, Octree tree, BVH bvh, Light l)
 {
     Intersection i;
     i.distance = 20;
-    bvh.collision(r, i);
+    tree.collision(r,i);
+    return i.colour;
+    /*
+    if (bvh.collision(r, i))
+    {
     //colour = i.colour;
     return ambientOcclusion(&tree, vec3(i.position),vec3(i.normal), l);
     //return castShadowCone(&tree, vec3(i.position), l, 0.5);
+    }
+    */
+    return vec3(0);
 }
 
 void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
