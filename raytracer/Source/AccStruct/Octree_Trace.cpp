@@ -20,42 +20,31 @@ vec3 ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
 {
     Intersection inter;
     CloseVox vox;
-    /*
-    if (ClosestVoxelLeaf(root, point1, vox))
-    {
-        return vec3(vox.voxel->colour);
-    }
-    */
-    return vec3(1);
-    
-    /*
     vec4 point(point1, 0);
     float theta = 0.5f;
-    float deg = glm::pi<float>()/6;
+    float deg = glm::pi<float>()/4;
     mat3 rotx(vec3(1,0,0), vec3(0,glm::cos(deg), glm::sin(deg)), vec3(0, -glm::sin(deg), glm::cos(deg)));
     mat3 rotz(vec3(cos(deg),sin(deg),0), vec3(-sin(deg),cos(deg),0), vec3(0,0,1));
 
     Cone r[AMB_RAY];
-    //r[0] = Cone(point, rotx * rotz * normal, theta); //0.03
+    r[0] = Cone(point, rotx * rotz * normal, theta); //0.03
     //r[1] = Cone(point, rotx * glm::inverse(rotz) * normal, theta); //0.025
     //r[2] = Cone(point, glm::inverse(rotx) * rotz *normal,theta);
     //r[0] = Cone(point, glm::inverse(rotx) * glm::inverse(rotz)*normal,theta);
-    r[0] = Cone(point, normal,theta);
+    //r[0] = Cone(point, normal,theta);
     Trace t;
     float acc = 0.f;
     vec3 colorAcc = vec3(0);
     for (int i = 0; i < AMB_RAY; i ++)
     {
-        
         singleConeTrace(root, r[i], t, 0.1);
-        acc += glm::pow(t.occlusion,1);
+        acc += glm::pow(1-t.occlusion,2);
         colorAcc += t.colour;
     }
     acc /= AMB_RAY;
     colorAcc /=AMB_RAY;
     
     return vec3(acc);
-    */
 }
 
 float castShadowCone(Octree * root, vec3 point, Light l, float theta)
@@ -87,8 +76,9 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
         if (ClosestVoxel(root, point, dist * tantheta, vox))
         {
             c = a * c + (1 - a) * vox.voxel->colour; // REPLACED
-            a += (1 - a) * vox.voxel->occlusion;
-            //a = 1 - glm::pow(1 - a, dist / glm::l2Norm(vox.voxel->boxHalfSize));
+            weight = 1/(1+dist);
+            a += weight *(1 - a) * vox.voxel->occlusion;
+            a = 1 - glm::pow(1 - a, dist / glm::l2Norm(vox.voxel->boxHalfSize));
             delta = glm::pow(dist,2);
         }
         else
