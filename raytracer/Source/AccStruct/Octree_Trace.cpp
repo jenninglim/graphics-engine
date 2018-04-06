@@ -16,7 +16,7 @@ bool ClosestVoxel(Octree * root, const vec3 point, const float threshold, CloseV
 void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist);
 bool ClosestVoxelLeaf(Octree * root, const vec3 point, CloseVox &vox);
 
-#define AMB_RAY 1
+#define AMB_RAY 5
 vec3 ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
 {
     Intersection inter;
@@ -24,7 +24,7 @@ vec3 ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     vec3 e1, e2;
     vec4 point(point1, 0);
 
-    float theta = DEG_TO_RAD(30);
+    float theta = DEG_TO_RAD(40);
     float deg = glm::pi<float>()/4;
 
     static const mat3 rotx(vec3(1,0,0), vec3(0,glm::cos(deg), glm::sin(deg)), vec3(0, -glm::sin(deg), glm::cos(deg)));
@@ -36,17 +36,23 @@ vec3 ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     mat3 projMat = projMatr(e1,normal,e2);
 
     Cone r[AMB_RAY];
-    //r[0] = Cone(point, rotx * rotz * projMat *normal, theta); //0.03
-    //r[1] = Cone(point, rotx * glm::inverse(rotz) * normal, theta); //0.025
-    //r[2] = Cone(point, glm::inverse(rotx) * rotz *normal,theta);
-    //r[0] = Cone(point, glm::inverse(rotx) * glm::inverse(rotz)*normal,theta);
-    r[0] = Cone(point, normal,theta);
+    r[0] = Cone(point, rotx * rotz * projMat *normal, theta); //0.03
+    r[1] = Cone(point, rotx * glm::inverse(rotz) * normal, theta); //0.025
+    r[2] = Cone(point, glm::inverse(rotx) * rotz *normal,theta);
+    r[3] = Cone(point, glm::inverse(rotx) * glm::inverse(rotz)*normal,theta);
+    r[4] = Cone(point, normal,theta);
+    
+    for (int i = 0; i < AMB_RAY; i++)
+    {
+        r[i].initial += vec4(0.001f * r[i].direction, 0);
+    }
+
     Trace t;
     float acc = 0.f;
     vec3 colorAcc = vec3(0);
     for (int i = 0; i < AMB_RAY; i ++)
     {
-        singleConeTrace(root, r[i], t, 0.1);
+        singleConeTrace(root, r[i], t, 2);
         acc += glm::pow(1-t.occlusion,2);
         colorAcc += t.colour;
     }
@@ -84,7 +90,7 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
         point = vec3(r.initial) + dist * r.direction;
         if (ClosestVoxel(root, point, dist * tantheta, vox))
         {
-            c = a * c + (1 - a) * vox.voxel->colour; // REPLACED
+            c = a * c + (1 - a) * vox.voxel->occlusion * vox.voxel->colour; // REPLACED
             weight = 1/(1+dist);
             a += weight *(1 - a) * vox.voxel->occlusion;
             a = 1 - glm::pow(1 - a, dist / glm::l2Norm(vox.voxel->boxHalfSize));
