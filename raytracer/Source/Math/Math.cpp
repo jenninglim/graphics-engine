@@ -1,8 +1,13 @@
-#include "Math.h"
+#include "MyMath.h"
 
 using namespace glm;
 
-vec3 findOthor(const vec3 vec);
+vec3 findOthor(const vec3 v1, const vec3 v2)
+{
+    return normalize(cross(v1,v2));
+}
+
+vec3 findOthor(const vec3 vec)
 {
     if (vec[2] > 0)
     {
