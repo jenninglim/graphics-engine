@@ -23,9 +23,9 @@ vec3 ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     CloseVox vox;
     vec3 e1, e2;
     vec4 point(point1, 0);
-
+    vox.diff = 20;
     float theta = DEG_TO_RAD(30);
-    float deg = glm::pi<float>()/4;
+    float deg = glm::pi<float>()/6;
 
     static const mat3 rotx(vec3(1,0,0),
             vec3(0,glm::cos(deg), glm::sin(deg)),
@@ -48,7 +48,7 @@ vec3 ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     
     for (int i = 0; i < AMB_RAY; i++)
     {
-        r[i].initial += vec4(0.01f * r[i].direction, 0);
+        r[i].initial += vec4(0.02f * r[i].direction, 0);
     }
 
     Trace t;
@@ -62,8 +62,7 @@ vec3 ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     }
     acc /= AMB_RAY;
     colorAcc /=AMB_RAY;
-    
-    return vec3(acc);
+    return  acc* 0.5f*colorAcc; //vec3(acc);
 }
 
 float castShadowCone(Octree * root, vec3 point, Light l, float theta)
@@ -94,8 +93,9 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
         point = vec3(r.initial) + dist * r.direction;
         if (ClosestVoxel(root, point, dist * tantheta, vox))
         {
-            c = a * c + (1 - a) * vox.voxel->occlusion * vox.voxel->colour; // REPLACED
-            weight = 1/(1+dist);
+            weight = 1/(1+3 *dist);
+            c += vox.voxel->colour * (1 -a) * weight;//vox.voxel->occlusion;
+            //c = a * c + (1 - a) * weight * vox.voxel->colour; // REPLACED
             a += weight *(1 - a) * vox.voxel->occlusion;
             a = 1 - glm::pow(1 - a, dist / glm::l2Norm(vox.voxel->boxHalfSize));
             delta = glm::pow(dist,2);
