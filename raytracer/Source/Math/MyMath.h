@@ -15,5 +15,6 @@ using namespace glm;
 // Find A Orthogonal unit vector
 vec3 findOthor(const vec3 v);
 vec3 findOthor(const vec3 v1, const vec3 v2);
+mat3 projMatr(const vec3 e1, const vec3 e2, const vec3 e3);
 
 #endif 

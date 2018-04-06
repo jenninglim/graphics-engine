@@ -24,7 +24,7 @@ vec3 ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     vec3 e1, e2;
     vec4 point(point1, 0);
 
-    float theta = DEG_TO_RAD(45);
+    float theta = DEG_TO_RAD(30);
     float deg = glm::pi<float>()/4;
 
     static const mat3 rotx(vec3(1,0,0), vec3(0,glm::cos(deg), glm::sin(deg)), vec3(0, -glm::sin(deg), glm::cos(deg)));
@@ -33,14 +33,14 @@ vec3 ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     // Find Basis Vectors
     e1 = findOthor(normal);
     e2 = findOthor(normal, e1);
-    
+    mat3 projMat = projMatr(e1,normal,e2);
 
     Cone r[AMB_RAY];
-    r[0] = Cone(point, rotx * rotz * normal, theta); //0.03
+    //r[0] = Cone(point, rotx * rotz * projMat *normal, theta); //0.03
     //r[1] = Cone(point, rotx * glm::inverse(rotz) * normal, theta); //0.025
     //r[2] = Cone(point, glm::inverse(rotx) * rotz *normal,theta);
     //r[0] = Cone(point, glm::inverse(rotx) * glm::inverse(rotz)*normal,theta);
-    //r[0] = Cone(point, normal,theta);
+    r[0] = Cone(point, normal,theta);
     Trace t;
     float acc = 0.f;
     vec3 colorAcc = vec3(0);
