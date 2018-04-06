@@ -10,7 +10,7 @@
 
 // Camera
 #define ROTATION_SPEED 0.1 // In radians
-#define CAM_FOCAL_LENGTH 500
+#define CAM_FOCAL_LENGTH  300
 
 // Lighting
 #define SPECULAR_INTENSITY 10

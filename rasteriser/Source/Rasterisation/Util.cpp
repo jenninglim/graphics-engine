@@ -1,5 +1,6 @@
 #include "Util.h"
 
+
 using namespace std;
 using namespace glm;
 
@@ -30,15 +31,44 @@ void TransformationMatrix(mat4 &M, vec4 cameraPosition, mat4 cameraRotation)
       column(mat4(1) ,3, vec4 (vec3(-1.0f * cameraPosition), 1));
 }
 
-void VertexShader(const Vertex& v, Pixel& p, Camera* cam, Light* light)
+void setProjectionMatrix(mat4 &P, float nearPlane, float  farPlane, float angleOfView){
+  float scale = 1 / glm::tan(angleOfView * 0.5 * glm::pi<float>() / 180);
+  P[0][0] = scale;
+  P[1][1] = scale;
+  P[2][2] = farPlane / (farPlane - nearPlane);
+  P[3][2] = (-1 *farPlane * nearPlane) / (farPlane - nearPlane);
+  P[2][3] = 1;
+  P[3][3] = 0;
+}
+
+void multiPointMatrix(vec4 &result, vec4 &v_in, mat4 &m_in){
+  result = v_in * m_in;
+  if(result.w != 1){
+    result.x /= result.w;
+    result.y /= result.w;
+    result.z /= result.w;
+    result.w = 1;
+  }
+
+}
+
+void VertexShader(const Vertex& v, Vertex& conicalv, Camera* cam, Light* light)
 {
   mat4 tMatrix(0);
   TransformationMatrix(tMatrix, cam->cameraPos,cam->R);
   vec4 tPosition = tMatrix * v.position;
-  p.x = cam->focalLength*tPosition.x / tPosition.z + SCREEN_WIDTH / 2 ;
-  p.y = cam->focalLength*tPosition.y / tPosition.z + SCREEN_HEIGHT /2;
-  p.zinv = 1 / tPosition.z;
-  p.pos3d = v.position * p.zinv;
+
+  float nearPlane = 0.1;
+  float farPlane = 20;
+  float angleOfView = 120;
+
+  mat4 projMatrix(0);
+  setProjectionMatrix(projMatrix, nearPlane, farPlane, angleOfView);
+  multiPointMatrix(conicalv.position, tPosition, projMatrix);
+
+  //p.x = cam->focalLength*tPosition.x / tPosition.z + SCREEN_WIDTH / 2 ;
+  //p.y = cam->focalLength*tPosition.y / tPosition.z + SCREEN_HEIGHT /2;
+
 }
 
 void PixelShader(screen* screen,
@@ -134,6 +164,43 @@ void DrawPolygonRows(screen* screen,
     }
 }
 
+vec4 ComputeLinePlaneIntersection( Vertex &S,  Vertex &E, vec4 clippingPlanePoint, vec4 clippingPlaneNormal){
+  vec3 l = (vec3(S.position) - vec3(E.position));
+  std::cout<<glm::to_string(l)<<std::endl;
+  //float d = glm::dot((clippingPlanePoint - E.position),clippingPlaneNormal) / (glm::dot(l, clippingPlaneNormal));
+  return  vec4(0);//(d * l + E.position);
+}
+
+void Sutherland_Hodgman(vector<Vertex> &outputVertex){
+  vector<vec4> clippingPlanes = {vec4(1,0,0,1), vec4(-1,0,0,1),vec4(0,1,0,1), vec4(0,-1,0,1), vec4(0,0,1,1), vec4(0,0,0,1)};
+  vector<vec4> clippingNormals ={vec4(-1,0,0,1), vec4(1,0,0,1),vec4(0,-1,0,1), vec4(0,1,0,1), vec4(0,0,-1,1), vec4(0,0,1,1)};
+  for(size_t planeindex = 0; planeindex < clippingPlanes.size(); planeindex++){
+    vector<Vertex> inputList = outputVertex;
+    outputVertex.clear();
+    Vertex S = inputList.back();
+
+    for(size_t vertexindex = 0; vertexindex < inputList.size(); vertexindex++){
+      Vertex E = inputList[vertexindex];
+      vec4 planenormal = clippingNormals[planeindex];
+      if(glm::dot(planenormal, E.position) >= 0){
+        //E Inside plane
+        if(glm::dot(planenormal, S.position) < 0){
+          //S Outside plane
+          //Vertex newIntersectionVertex;
+          ComputeLinePlaneIntersection(S,E,clippingPlanes[planeindex], planenormal);
+          //outputVertex.push_back(newIntersectionVertex);
+        }
+        outputVertex.push_back(E);
+      }else if(glm::dot(planenormal,S.position) >= 0){
+        //outputVertex.push_back(ComputeLinePlaneIntersection(S,E,clippingPlanes[planeindex], planenormal));
+      }
+      S = E;
+    }
+
+  }
+}
+
+
 void DrawPolygonRasterisation(screen* screen,
         const vector<Vertex>& vertices,
         vec3 color,
@@ -144,15 +211,23 @@ void DrawPolygonRasterisation(screen* screen,
 {
 
   int V = vertices.size();
-  vector<Pixel> vertexPixels(V);
-
-
+  vector<Vertex> conicalVertex(V);
+  vector<Pixel> vertexPixels();
   for(int i = 0; i<V; ++i){
-    VertexShader(vertices[i], vertexPixels[i], cam, light);
+    VertexShader(vertices[i], conicalVertex[i], cam, light);
   }
+
+  Sutherland_Hodgman(conicalVertex);
+
+  /*
+  p.x = glm::min(SCREEN_WIDTH-1,(int)((1-(conicalVertex.x+1) * 0.5) *SCREEN_WIDTH));
+  p.y = glm::min(SCREEN_HEIGHT-1, (int)((1-(conicalVertex.y+1)*0.5)*SCREEN_HEIGHT));
+  p.zinv = 1 / tPosition.z;
+  p.pos3d = v.position * p.zinv;
+  */
   vector<Pixel> leftPixels;
   vector<Pixel> rightPixels;
-  ComputePolygonRows(vertexPixels, leftPixels, rightPixels);
-  DrawPolygonRows(screen,leftPixels, rightPixels, color, cam, light, currentNormal, currentReflectance);
+  //ComputePolygonRows(vertexPixels, leftPixels, rightPixels);
+  //DrawPolygonRows(screen,leftPixels, rightPixels, color, cam, light, currentNormal, currentReflectance);
 
 }

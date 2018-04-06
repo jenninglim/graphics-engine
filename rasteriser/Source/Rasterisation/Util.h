@@ -23,6 +23,8 @@ typedef struct Vertex
     glm::vec4 position;
 } Vertex;
 
+
+
 void DrawPolygonRasterisation(screen* screen,
         const std::vector<Vertex>& vertices,
         vec3 color,
