@@ -24,11 +24,15 @@ vec3 ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     vec3 e1, e2;
     vec4 point(point1, 0);
 
-    float theta = DEG_TO_RAD(40);
+    float theta = DEG_TO_RAD(30);
     float deg = glm::pi<float>()/4;
 
-    static const mat3 rotx(vec3(1,0,0), vec3(0,glm::cos(deg), glm::sin(deg)), vec3(0, -glm::sin(deg), glm::cos(deg)));
-    static const mat3 rotz(vec3(cos(deg),sin(deg),0), vec3(-sin(deg),cos(deg),0), vec3(0,0,1));
+    static const mat3 rotx(vec3(1,0,0),
+            vec3(0,glm::cos(deg), glm::sin(deg)),
+            vec3(0, -glm::sin(deg), glm::cos(deg)));
+    static const mat3 rotz(vec3(cos(deg),sin(deg),0),
+            vec3(-sin(deg),cos(deg),0),
+            vec3(0,0,1));
     
     // Find Basis Vectors
     e1 = findOthor(normal);
@@ -36,15 +40,15 @@ vec3 ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     mat3 projMat = projMatr(e1,normal,e2);
 
     Cone r[AMB_RAY];
-    r[0] = Cone(point, rotx * rotz * projMat *normal, theta); //0.03
-    r[1] = Cone(point, rotx * glm::inverse(rotz) * normal, theta); //0.025
-    r[2] = Cone(point, glm::inverse(rotx) * rotz *normal,theta);
-    r[3] = Cone(point, glm::inverse(rotx) * glm::inverse(rotz)*normal,theta);
+    r[0] = Cone(point, glm::inverse(projMat) * rotz * rotx * projMat * normal, theta); //0.03
+    r[1] = Cone(point, glm::inverse(projMat) * rotz * inverse(rotx) * projMat* normal, theta); //0.025
+    r[2] = Cone(point, glm::inverse(projMat) * inverse(rotz) * rotx  * projMat * normal,theta);
+    r[3] = Cone(point, glm::inverse(projMat) * inverse(rotz) * inverse(rotx) *projMat*normal,theta);
     r[4] = Cone(point, normal,theta);
     
     for (int i = 0; i < AMB_RAY; i++)
     {
-        r[i].initial += vec4(0.001f * r[i].direction, 0);
+        r[i].initial += vec4(0.01f * r[i].direction, 0);
     }
 
     Trace t;
