@@ -25,8 +25,11 @@ vec3 ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     Intersection inter;
     CloseVox vox;
     vec4 point(point1, 0);
+
     float theta = 0.5f;
     float deg = glm::pi<float>()/4;
+
+    vec3 e1,e2;
 
     Cone r[AMB_RAY];
     r[0] = Cone(point, rotx * rotz * normal, theta); //0.03
