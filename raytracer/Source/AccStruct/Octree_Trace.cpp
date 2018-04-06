@@ -11,6 +11,10 @@ struct CloseVox{
     float diff;
 };
 
+static const mat3 rotx(vec3(1,0,0), vec3(0,glm::cos(deg), glm::sin(deg)), vec3(0, -glm::sin(deg), glm::cos(deg)));
+static const mat3 rotz(vec3(cos(deg),sin(deg),0), vec3(-sin(deg),cos(deg),0), vec3(0,0,1));
+
+
 bool ClosestVoxel(Octree * root, const vec3 point, const float threshold, CloseVox &voxel);
 void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist);
 bool ClosestVoxelLeaf(Octree * root, const vec3 point, CloseVox &vox);
@@ -23,8 +27,6 @@ vec3 ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     vec4 point(point1, 0);
     float theta = 0.5f;
     float deg = glm::pi<float>()/4;
-    mat3 rotx(vec3(1,0,0), vec3(0,glm::cos(deg), glm::sin(deg)), vec3(0, -glm::sin(deg), glm::cos(deg)));
-    mat3 rotz(vec3(cos(deg),sin(deg),0), vec3(-sin(deg),cos(deg),0), vec3(0,0,1));
 
     Cone r[AMB_RAY];
     r[0] = Cone(point, rotx * rotz * normal, theta); //0.03
