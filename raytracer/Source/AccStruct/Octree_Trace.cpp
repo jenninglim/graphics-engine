@@ -58,7 +58,7 @@ vec3 ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     }
     acc /= AMB_RAY;
     colorAcc /=AMB_RAY;
-    return  colorAcc; //vec3(acc);
+    return vec3(acc);
 }
 
 float castShadowCone(Octree * root, vec3 point, Light l, float theta)
@@ -90,15 +90,14 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
         point = vec3(r.initial) + dist * r.direction;
         weight = 1/(1+dist);
         if (!insideCube(point,0)) {
-            a += weight * (1-a) * 0.2;
+            a += glm::pow(weight,5) * (1-a);
             break;
         }
         if (ClosestVoxel(root, point, dist * tantheta, vox))
         {
-            
             c += vox.voxel->colour * (vec3(1) -c) * (float) glm::pow(1.f-vox.voxel->occlusion,2) * weight;
             //c = a * c + (1 - a) * weight * vox.voxel->colour; // REPLACED
-            a += weight *(1 - a) * glm::pow(vox.voxel->occlusion,1);
+            a += glm::pow(weight,2) *(1 - a) * glm::pow(vox.voxel->occlusion,1);
             a = 1 - glm::pow(1 - a, dist / glm::l2Norm(vox.voxel->boxHalfSize));
             delta = glm::pow(dist,2);
         }
