@@ -18,7 +18,7 @@ bool ClosestVoxelLeaf(Octree * root, const vec3 point, CloseVox &vox);
 bool insideCube(vec3 p, float e) { return abs(p.x) < 1 && abs(p.y) < 1 && abs(p.z);}
 
 #define AMB_RAY 5
-vec3 ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
+Amb_t ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
 {
     Intersection inter;
     CloseVox vox;
@@ -26,7 +26,7 @@ vec3 ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     vec4 point(point1, 0);
     vox.diff = 20;
     float theta = DEG_TO_RAD(30);
-    float deg = DEG_TO_RAD(30);
+    float deg = DEG_TO_RAD(20);
 
     static const mat3 rotx(vec3(1,0,0),
             vec3(0,glm::cos(deg), glm::sin(deg)),
@@ -46,6 +46,13 @@ vec3 ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     r[2] = Cone(point, glm::inverse(projMat) * inverse(rotz) * rotx  * projMat * normal,theta);
     r[3] = Cone(point, glm::inverse(projMat) * inverse(rotz) * inverse(rotx) *projMat*normal,theta);
     r[4] = Cone(point, normal,theta);
+
+#if (AMB_RAY >1)
+    for (int i = 0; i < AMB_RAY - 1; i++)
+    {
+        r[i].initial = r[i].initial + 0.05f * vec4(normal,0);
+    }
+#endif 
     
     Trace t;
     float acc = 0.f;
@@ -57,8 +64,11 @@ vec3 ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
         colorAcc += t.colour;
     }
     acc /= AMB_RAY;
-    colorAcc /=AMB_RAY;
-    return vec3(acc);
+    colorAcc /= AMB_RAY;
+    Amb_t ret;
+    ret.colour = colorAcc;
+    ret.occ = acc;
+    return ret;
 }
 
 float castShadowCone(Octree * root, vec3 point, Light l, float theta)

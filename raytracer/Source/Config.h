@@ -6,9 +6,9 @@
 #define VOL_APPROX_INT 0.01
 
 // Screen Setup
-#define SCREEN_WIDTH 200
-#define SCREEN_HEIGHT 200
-#define FULLSCREEN_MODE true
+#define SCREEN_WIDTH 100
+#define SCREEN_HEIGHT 100
+#define FULLSCREEN_MODE false
 
 // Camera
 #define ROTATION_SPEED 0.1 // In radians

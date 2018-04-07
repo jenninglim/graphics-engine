@@ -18,8 +18,9 @@ enum Type {
     EMPTY,
 };
 
-struct Data {
-    vec3 color;
+struct Amb_t {
+    vec3 colour;
+    float occ;
 };
 
 struct Trace
@@ -51,6 +52,6 @@ class Octree
 };
 
 float castShadowCone(Octree * root, vec3 point, Light l, float theta);
-vec3 ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l);
+Amb_t ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l);
 
 #endif
