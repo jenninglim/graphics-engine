@@ -16,12 +16,15 @@ typedef struct Pixel
     int y;
     float zinv;
     glm::vec4 pos3d;
+    glm::vec4 conicalPos;
+    float w;
 } Pixel;
 
 typedef struct Vertex
 {
     glm::vec4 position;
 } Vertex;
+
 
 
 
