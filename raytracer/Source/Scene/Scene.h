@@ -10,6 +10,7 @@
 #include "Scene.h"
 #include "Shader.h"
 #include "SDLauxiliary.h"
+#include "Octree.h"
 
 typedef const uint8_t KeyStroke_t;
 
@@ -19,6 +20,7 @@ class Scene
     Light light;
     vector<Object *> objects;
     BVH bvh;
+    Octree octree;
     public:
         Scene();
         void Update(KeyStroke_t * keystate);

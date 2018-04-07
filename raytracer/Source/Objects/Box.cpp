@@ -1,6 +1,7 @@
 #include "Box.h"
 #include "Config.h"
 #include <limits>
+#include "Overlap.h"
 
 #ifdef DEBUG
 #include <iostream>
@@ -20,6 +21,7 @@ Box::Box()
 
 Box::Box(vector<Triangle> object)
 {
+    this->colour = object[0].color;
     scale_volume(object);
     triangles = object;
     computeBoundingVolume();
@@ -30,6 +32,7 @@ Box::Box(vector<Triangle> object)
 
 Box::Box(vector<Triangle> object, float reflectance)
 {
+this->colour = object[0].color;
     scale_volume(object);
     this->triangles = object;
     computeBoundingVolume();
@@ -40,32 +43,13 @@ Box::Box(vector<Triangle> object, float reflectance)
 
 Box::Box(vector<Triangle> object, float reflectance, float refract_index)
 {
+this->colour = object[0].color;
     scale_volume(object);
     this->triangles = object;
     computeBoundingVolume();
     this->reflect_ratio = reflectance;
     this->refract_ratio= BOX_REFRACT;
     this->ior = refract_index;
-}
-
-vec3 solveLinearEq(Triangle triangle, vec4 start, vec4 dir)
-{
-    vec4 v0 = triangle.v0;
-    vec4 v1 = triangle.v1;
-    vec4 v2 = triangle.v2;
-    vec3 s = glm::vec3(start.x, start.y, start.z);
-    vec3 d = glm::vec3(dir.x, dir.y, dir.z);
-
-    vec3 e1 = vec3(v1.x-v0.x,v1.y-v0.y,v1.z-v0.z);
-    vec3 e2 = vec3(v2.x-v0.x,v2.y-v0.y,v2.z-v0.z);
-    vec3 b = vec3(s.x-v0.x,s.y-v0.y,s.z-v0.z);
-
-    mat3 A( -d, e1, e2 );
-    //if (determinant(A) != 0)
-    //{
-        return glm::inverse( A ) * b;
-    //}
-    //return vec3(0,0,0);
 }
 
 bool Box::intersection(const Ray r, Intersection &closestI) 
@@ -92,10 +76,11 @@ bool Box::intersection(const Ray r, Intersection &closestI)
             && (u > 0.f - EPSILON && u < 1.f + EPSILON))
             && (a < -EPSILON || a > EPSILON))
         {
-            intersectionFound = true;
             t = f * glm::dot(e2,q); 
             if (t>EPSILON && t < closestI.distance)
             {
+                intersectionFound = true;
+
                 closestI.position = r.initial + vec4(t * r.direction,0);
                 closestI.distance = t;
                 closestI.colour = triangles[i].color;
@@ -134,6 +119,20 @@ void Box::computeBoundingVolume()
         if (tri_max.z > max.z) { max.z=tri_max.z; }
     }
     bv = BoundingVolume(min, max);
+}
+
+bool Box::boxOverlap(vec3 boxcenter, vec3 boxhalfsize, Intersection &inter)
+{
+   for (int i = 0; i <  triangles.size(); i++)
+   {
+        if (trigBoxOverlap(boxcenter, boxhalfsize, this->triangles[i]))
+        {
+            inter.colour = this->triangles[i].color;
+            inter.normal = this->triangles[i].normal; 
+            return true;
+        }
+   }
+   return false;
 }
 
 vec3 triangleMin(Triangle triangle)

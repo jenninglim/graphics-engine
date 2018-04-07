@@ -2,6 +2,10 @@
 #define INTERSECTION_H
 
 #include <glm/glm.hpp>
+#include "Ray.h"
+#include "BoundingVolume.h"
+
+using namespace glm;
 
 struct Intersection
 {
@@ -15,5 +19,8 @@ struct Intersection
     float area;
 };
 
+bool IntersectBoundingVolume(Ray r,
+        BoundingVolume bv);
 
+bool IntersectBoundingVolume(Cone r, BoundingVolume bv);
 #endif

@@ -1,6 +1,5 @@
 #include "Shader.h"
 #include "Collision.h"
-
 #include <stack>
 
 #ifdef DEBUG
@@ -74,6 +73,19 @@ void fresnel(const Ray r, const Intersection i, float &kr)
     // kt = 1 - kr;
 }
 
+vec3 shootRay(const Ray r, vec3 &colour, Octree tree, BVH bvh, Light l)
+{
+    Intersection i;
+    i.distance = 20;
+    if (bvh.collision(r, i))
+    {
+        //colour = i.colour;
+        return ambientOcclusion(&tree, vec3(i.position),vec3(i.normal), l);
+        //return castShadowCone(&tree, vec3(i.position), l, 0.5);
+    }
+    return vec3(0.5);
+}
+
 void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
 {
     float refl_color, refr_color;
@@ -97,7 +109,7 @@ void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
         intersect.distance = std::numeric_limits<float>::max();
         c_ray = ray_stack.top();
         ray_stack.pop();
-        if (collision(bvh,
+        if (bvh.collision(
                     c_ray.r, intersect))
         {
             if (c_ray.depth == 0)
@@ -106,8 +118,8 @@ void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
             }
             fresnel(c_ray.r, intersect, kr);
 
-            lightColor = DirectLight(intersect,
-                    bvh,
+            lightColor = DirectLight(intersect.position,
+                    vec3(intersect.normal),
                     light) * ShadowLight(intersect,
                         bvh,
                         light);
