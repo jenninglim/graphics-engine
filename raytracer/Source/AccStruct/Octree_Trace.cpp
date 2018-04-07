@@ -15,6 +15,7 @@ struct CloseVox{
 bool ClosestVoxel(Octree * root, const vec3 point, const float threshold, CloseVox &voxel);
 void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist);
 bool ClosestVoxelLeaf(Octree * root, const vec3 point, CloseVox &vox);
+bool insideCube(vec3 p, float e) { return abs(p.x) < 1 && abs(p.y) < 1 && abs(p.z);}
 
 #define AMB_RAY 5
 vec3 ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
@@ -46,23 +47,18 @@ vec3 ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     r[3] = Cone(point, glm::inverse(projMat) * inverse(rotz) * inverse(rotx) *projMat*normal,theta);
     r[4] = Cone(point, normal,theta);
     
-    for (int i = 0; i < AMB_RAY; i++)
-    {
-        r[i].initial += vec4(0.02f * normal, 0);
-    }
-
     Trace t;
     float acc = 0.f;
     vec3 colorAcc = vec3(0);
     for (int i = 0; i < AMB_RAY; i ++)
     {
-        singleConeTrace(root, r[i], t, 0.5);
+        singleConeTrace(root, r[i], t, 2);
         acc += glm::pow(1-t.occlusion,2);
         colorAcc += t.colour;
     }
     acc /= AMB_RAY;
     colorAcc /=AMB_RAY;
-    return  colorAcc * acc; //vec3(acc);
+    return  colorAcc; //vec3(acc);
 }
 
 float castShadowCone(Octree * root, vec3 point, Light l, float theta)
@@ -70,6 +66,7 @@ float castShadowCone(Octree * root, vec3 point, Light l, float theta)
     Trace t;
     vec3 ab = vec3(l.position) - point;
     Cone r(vec4(point,0), glm::normalize(ab), theta);
+    r.initial = r.initial + vec4(0.1f * r.direction,0);
     singleConeTrace(root, r,t, glm::min(MAX_DIST, glm::l2Norm(ab)));
     return t.occlusion;
 }
@@ -91,20 +88,24 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
         vox.voxel = NULL;
         vox.diff = 20;
         point = vec3(r.initial) + dist * r.direction;
-        weight = 1/(1+10*dist);
+        weight = 1/(1+dist);
+        if (!insideCube(point,0)) {
+            a += weight * (1-a) * 0.2;
+            break;
+        }
         if (ClosestVoxel(root, point, dist * tantheta, vox))
         {
             
-            c += vox.voxel->colour * (1 -a) * weight;//vox.voxel->occlusion;
+            c += vox.voxel->colour * (vec3(1) -c) * (float) glm::pow(1.f-vox.voxel->occlusion,2) * weight;
             //c = a * c + (1 - a) * weight * vox.voxel->colour; // REPLACED
-            a += weight *(1 - a) * vox.voxel->occlusion;
+            a += weight *(1 - a) * glm::pow(vox.voxel->occlusion,1);
             a = 1 - glm::pow(1 - a, dist / glm::l2Norm(vox.voxel->boxHalfSize));
             delta = glm::pow(dist,2);
         }
         else
         {
             delta = dist * tantheta;
-            a += (1-a) * pow(weight,4)  * 0.0000001f;
+            // Out of box
         }
         dist += delta;
     }
@@ -123,7 +124,7 @@ bool ClosestVoxel(Octree * root, const vec3 point, const float threshold, CloseV
     if (pointInsideAABB(point, min, max) && !found)
     {
         norm = glm::l2Norm(root->boxHalfSize);
-        if (norm < threshold)
+        if (root->type != LEAF && norm < threshold)
         {
             if (glm::abs(norm - threshold) < vox.diff)
             {

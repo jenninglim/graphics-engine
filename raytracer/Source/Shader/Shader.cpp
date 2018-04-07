@@ -79,7 +79,8 @@ vec3 shootRay(const Ray r, vec3 &colour, Octree tree, BVH bvh, Light l)
     i.distance = 20;
     if (bvh.collision(r, i))
     {
-        colour = ambientOcclusion(&tree, vec3(i.position),vec3(i.normal), l);
+        //colour = colour * (1-castShadowCone(&tree, vec3(i.position), l, 0.5));
+        colour =  ambientOcclusion(&tree, vec3(i.position),vec3(i.normal), l);
     }
 }
 
