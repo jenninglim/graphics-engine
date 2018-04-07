@@ -25,7 +25,7 @@ vec3 ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     vec4 point(point1, 0);
     vox.diff = 20;
     float theta = DEG_TO_RAD(30);
-    float deg = glm::pi<float>()/6;
+    float deg = DEG_TO_RAD(30);
 
     static const mat3 rotx(vec3(1,0,0),
             vec3(0,glm::cos(deg), glm::sin(deg)),
@@ -48,7 +48,7 @@ vec3 ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     
     for (int i = 0; i < AMB_RAY; i++)
     {
-        r[i].initial += vec4(0.02f * r[i].direction, 0);
+        r[i].initial += vec4(0.02f * normal, 0);
     }
 
     Trace t;
@@ -56,13 +56,13 @@ vec3 ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     vec3 colorAcc = vec3(0);
     for (int i = 0; i < AMB_RAY; i ++)
     {
-        singleConeTrace(root, r[i], t, 2);
+        singleConeTrace(root, r[i], t, 0.5);
         acc += glm::pow(1-t.occlusion,2);
         colorAcc += t.colour;
     }
     acc /= AMB_RAY;
     colorAcc /=AMB_RAY;
-    return  acc* 0.5f*colorAcc; //vec3(acc);
+    return  colorAcc * acc; //vec3(acc);
 }
 
 float castShadowCone(Octree * root, vec3 point, Light l, float theta)
@@ -91,9 +91,10 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
         vox.voxel = NULL;
         vox.diff = 20;
         point = vec3(r.initial) + dist * r.direction;
+        weight = 1/(1+10*dist);
         if (ClosestVoxel(root, point, dist * tantheta, vox))
         {
-            weight = 1/(1+3 *dist);
+            
             c += vox.voxel->colour * (1 -a) * weight;//vox.voxel->occlusion;
             //c = a * c + (1 - a) * weight * vox.voxel->colour; // REPLACED
             a += weight *(1 - a) * vox.voxel->occlusion;
@@ -103,6 +104,7 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
         else
         {
             delta = dist * tantheta;
+            a += (1-a) * pow(weight,4)  * 0.0000001f;
         }
         dist += delta;
     }
@@ -121,7 +123,7 @@ bool ClosestVoxel(Octree * root, const vec3 point, const float threshold, CloseV
     if (pointInsideAABB(point, min, max) && !found)
     {
         norm = glm::l2Norm(root->boxHalfSize);
-        if (norm < threshold) //(abs(norm - threshold) < norm && norm < threshold)
+        if (norm < threshold)
         {
             if (glm::abs(norm - threshold) < vox.diff)
             {

@@ -48,8 +48,8 @@ void Scene::Draw(screen* screen)
             r.initial = cam.position;
             r.direction = d;
 
-            //shootRay(r, color, bvh, light);
-            color = shootRay(r, color, this->octree, this->bvh, light);
+            shootRay(r, color, bvh, light);
+            shootRay(r, color, this->octree, this->bvh, light);
             pixels[x][y] = color;
         }
     }
