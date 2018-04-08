@@ -41,11 +41,13 @@ class Octree
 
         bool toDivide(vector<Object *> objects, Light l);
         void makeKids(vector<Object *> objects, Light l, BVH * bvh, int depth);
+        Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int depth, Light light, BVH * bvh);
+        void updateTexture();
+        float interOcc();
 
     public:
         Octree();
         Octree(vector<Object *> objects, BoundingVolume bv, Light light, BVH * bvh);
-        Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int depth, Light light, BVH * bvh);
         bool collision(Ray r, Intersection &inter);
 };
 

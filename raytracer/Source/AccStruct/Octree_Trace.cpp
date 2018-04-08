@@ -92,7 +92,8 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
     float delta = 0.f;
     vec3 c = vec3(0);
 
-    float weight;
+    // For accumulation
+    float weight, occ;
     CloseVox vox;
 
     // For intepolation.
@@ -112,9 +113,20 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
         }
         if (ClosestVoxel(root, point, dist * tantheta, vox))
         {
+            occ = trilinear<float>(point - vox.tree->centre + vox.tree->boxHalfSize,
+                    vox.tree->children[7].voxel->occ,
+                    vox.tree->children[6].voxel->occ,
+                    vox.tree->children[5].voxel->occ,
+                    vox.tree->children[4].voxel->occ,
+                    vox.tree->children[3].voxel->occ,
+                    vox.tree->children[2].voxel->occ,
+                    vox.tree->children[1].voxel->occ,
+                    vox.tree->children[0].voxel->occ
+                    ); 
+
             c += vox.tree->voxel->colour * (vec3(1) -c)
                 * (float) glm::pow(1.f-vox.tree->voxel->occ,2) * weight;
-            a += glm::pow(weight,2) *(1 - a) * glm::pow(vox.tree->voxel->occ,1);
+            a += glm::pow(weight,2) *(1 - a) * glm::pow(occ,1);
             a = 1 - glm::pow(1 - a, dist / glm::l2Norm(vox.tree->boxHalfSize)); // correction
 
             /*
@@ -138,15 +150,12 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
                 //a = 1 - glm::pow(1 - a, l2Norm(prev->centre + d) / d);
             }
             */
-            
-
 
             delta = glm::pow(dist,2);
         }
         else
         {
             delta = dist * tantheta;
-            // Out of box
         }
         dist += delta;
     }
@@ -165,7 +174,8 @@ bool ClosestVoxel(Octree * root, const vec3 point, const float threshold, CloseV
     if (pointInsideAABB(point, min, max) && !found)
     {
         norm = glm::l2Norm(root->boxHalfSize);
-        if (root->type != LEAF && norm < threshold)
+        if (root->type == NODE && norm < threshold)
+
         {
             if (glm::abs(norm - threshold) < vox.diff)
             {
