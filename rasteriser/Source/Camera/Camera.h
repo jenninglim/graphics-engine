@@ -42,17 +42,16 @@ class Camera
     }
 
     void forward(){
-        this->cameraPos = this->cameraPos + glm::vec4(0,0,0.01,0);
+        this->cameraPos = this->cameraPos + glm::vec4(0,0,0.05,0);
     }
     void backward(){
-        this->cameraPos = this->cameraPos + glm::vec4(0,0,-0.01,0);
+        this->cameraPos = this->cameraPos + glm::vec4(0,0,-0.05,0);
 
     }
     void left(){
         this->yaw = yaw + ROTATION_SPEED;
         updateRotation();
         this->cameraPos = this->increR * this->cameraPos;
-
 
     }
     void right(){

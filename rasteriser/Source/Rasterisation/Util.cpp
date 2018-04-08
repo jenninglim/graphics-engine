@@ -9,6 +9,7 @@ float nearPlane = 2;
 float farPlane = 20;
 float angleOfView = 90;
 
+
 void Interpolate(Pixel a, Pixel b, vector<Pixel>& result){
 
   int N = result.size();
@@ -60,6 +61,58 @@ void multiPointMatrix(vec4 &result, vec4 &v_in, mat4 &m_in){
 
 }
 
+void ClipOnWAxis(vector<Pixel> &conicalPixels, Camera *cam){
+  // conicalPixels.clear();
+  // Pixel p0; p0.conicalPos = vec4(-0.6, 1, -3, 3);
+  // Pixel p1; p1.conicalPos = vec4(0.2, 4, 5, 4);
+  // Pixel p2; p2.conicalPos = vec4(0.5, 1, 2, -2);
+  // conicalPixels.push_back(p0);
+  // conicalPixels.push_back(p1);
+  // conicalPixels.push_back(p2);
+
+  vector<Pixel> newConicalPixels;
+  for(int i = 0; i < conicalPixels.size(); i++ ){
+    int current = i;
+    float proportion;
+    int prev = (i - 1 + conicalPixels.size()) % conicalPixels.size();
+    int prevSign = conicalPixels[prev].conicalPos.w < W_CLIPPING_PLANE ? -1 : 1;
+    int currentSign = conicalPixels[current].conicalPos.w < W_CLIPPING_PLANE ? -1 : 1;
+    if((prevSign * currentSign) < 0){
+      //The edge goes over w = 0 plane
+      vec4 newIntersectionPoint;
+      proportion = abs((W_CLIPPING_PLANE - conicalPixels[prev].conicalPos.w)) /
+                    (abs(conicalPixels[prev].conicalPos.w) + abs(conicalPixels[current].conicalPos.w));
+      newIntersectionPoint = conicalPixels[prev].conicalPos + proportion *
+                                (conicalPixels[current].conicalPos - conicalPixels[prev].conicalPos);
+      Pixel newPixel;
+      newPixel.conicalPos = newIntersectionPoint;
+
+      //Finding Zinv + Pos3d
+      mat4 tMatrix(0), tMatrixInv(0);
+      TransformationMatrix(tMatrix, cam->cameraPos,cam->R);
+      tMatrixInv = glm::inverse(tMatrix);
+
+      mat4 projMatrix(0), projMatrixInv(0);
+      setProjectionMatrix(projMatrix, nearPlane, farPlane, angleOfView);
+      projMatrixInv = glm::inverse(projMatrix);
+      vec4 tPosition;
+      multiPointMatrix(tPosition,newPixel.conicalPos,projMatrixInv);
+      newPixel.zinv = 1 / tPosition.z;
+      newPixel.pos3d = (tMatrixInv * tPosition) * newPixel.zinv;
+      newConicalPixels.push_back(newPixel);
+    }
+
+    if(currentSign > 0){
+      newConicalPixels.push_back(conicalPixels[current]);
+    }
+  }
+  conicalPixels = newConicalPixels;
+
+  for(size_t vindex = 0; vindex < conicalPixels.size(); vindex++){
+    cout << "After W Clip" << glm::to_string(conicalPixels[vindex].conicalPos) << endl;
+  }
+}
+
 void VertexShader(const Vertex& v, Pixel& p, Camera* cam, Light* light)
 {
   mat4 tMatrix(0);
@@ -75,14 +128,14 @@ void VertexShader(const Vertex& v, Pixel& p, Camera* cam, Light* light)
   multiPointMatrix(p.conicalPos, tPosition, projMatrix);
   cout << "Perspective output" << glm::to_string(p.conicalPos) << endl;
 
-
+  /*
   if(p.conicalPos.w != 1){
     p.conicalPos.x /= p.conicalPos.w;
     p.conicalPos.y /= p.conicalPos.w;
     p.conicalPos.z /= p.conicalPos.w;
     p.conicalPos.w = 1;
   }
-
+  */
   p.zinv = 1 / tPosition.z;
   p.pos3d = v.position * p.zinv;
 
@@ -190,6 +243,7 @@ void DrawPolygonRows(screen* screen,
 }
 
 void ComputeLinePlaneIntersection(Pixel &newIntersectionVertex, Pixel &S,  Pixel&E, vec4 clippingPlanePoint, vec4 clippingPlaneNormal){
+
   vec3 l = glm::normalize(vec3(S.conicalPos) - vec3(E.conicalPos));
   float d = (float)glm::dot((vec3(clippingPlanePoint) - vec3(E.conicalPos)),vec3(clippingPlaneNormal)) / (float)(glm::dot(l, vec3(clippingPlaneNormal)));
   cout << "CLPI : D value " << d << endl;
@@ -253,6 +307,17 @@ void Sutherland_Hodgman(vector<Pixel> &outputVertex){
   }
 }
 
+void WDivision(vector<Pixel>&conicalPixels){
+  for(int i = 0; i < conicalPixels.size(); i++){
+    if(conicalPixels[i].conicalPos.w != 1){
+      conicalPixels[i].conicalPos.x /= conicalPixels[i].conicalPos.w;
+      conicalPixels[i].conicalPos.y /= conicalPixels[i].conicalPos.w;
+      conicalPixels[i].conicalPos.z /= conicalPixels[i].conicalPos.w;
+      conicalPixels[i].conicalPos.w = 1;
+    }
+  }
+}
+
 void Test(const vector<Vertex>&vertices, Camera* cam, Light *light){
   //Pixel p0; p0.conicalPos = vec4(1.053813, 1.202116, -0.202116, 1.000000);
   vector<Pixel> conicalPixel(1);
@@ -281,6 +346,34 @@ void Test(const vector<Vertex>&vertices, Camera* cam, Light *light){
   */
 }
 
+void TestWClipping(Camera *cam, Light* light){
+  vector<Pixel> resultConicalPixels(3);
+  vector<Vertex> VertexArray(3);
+  VertexArray.clear();
+  Vertex p0; p0.position = vec4(0, 0, -5, 1);
+  Vertex p1; p1.position = vec4(0.2, 0, 5, 1);
+  Vertex p2; p2.position = vec4(-0.2, 0, 5, 1);
+  VertexArray.push_back(p0);
+  VertexArray.push_back(p1);
+  VertexArray.push_back(p2);
+  for(int i = 0; i<3; ++i){
+    VertexShader(VertexArray[i], resultConicalPixels[i], cam, light);
+  }
+  for(size_t vindex = 0; vindex < resultConicalPixels.size(); vindex++){
+    cout << "Before W clip" << glm::to_string(resultConicalPixels[vindex].conicalPos) << endl;
+    cout << "Before W clip zinv " << (resultConicalPixels[vindex].zinv) << endl;
+  }
+  ClipOnWAxis(resultConicalPixels,cam);
+  for(size_t vindex = 0; vindex < resultConicalPixels.size(); vindex++){
+    cout << vindex << endl;
+    cout << "After W Clip: ConicalPos" << glm::to_string(resultConicalPixels[vindex].conicalPos) << endl;
+    cout << "After W Clip: Zinv" << (resultConicalPixels[vindex].zinv) << endl;
+  }
+
+}
+
+
+
 void DrawPolygonRasterisation(screen* screen,
         const vector<Vertex>& vertices,
         vec3 color,
@@ -289,16 +382,7 @@ void DrawPolygonRasterisation(screen* screen,
         vec4 currentNormal,
         vec3 currentReflectance)
 {
-  /*
-  cout << "New Round" << endl;
-  cout << "Enter near plane";
-  cin >> nearPlane;
-  cout << "Enter far plane";
-  cin >> farPlane;
 
-  cout << "Enter fov";
-  cin >> angleOfView;
-  */
   //Test(vertices,cam, light);
   //for(size_t vindex = 0; vindex < vertices.size(); vindex++){
     //cout << glm::to_string(vertices[vindex].position) << endl;
@@ -310,9 +394,9 @@ void DrawPolygonRasterisation(screen* screen,
   //Pixel p0; p0.conicalPos = vec4(1.053813, 1.202116, -0.202116, 1.000000);
   //Pixel p1; p1.conicalPos = vec4(-1.030182, 0.928311, 0.071689, 1.000000);
   //Pixel p2; p2.conicalPos = vec4(0.379680, 0.342140, 0.657860, 1.000000);
-  if(cam->cameraPos.z >= -0.990001000){
-    cout << "Camera at -1" << endl;
-  }
+
+  //TestWClipping(cam,light);
+  //return;
 
   int V = vertices.size();
   vector<Pixel> conicalPixel(V);
@@ -323,10 +407,17 @@ void DrawPolygonRasterisation(screen* screen,
   //conicalPixel.push_back(p0);
   //conicalPixel.push_back(p1);
   //conicalPixel.push_back(p2);
+
   for(size_t vindex = 0; vindex < conicalPixel.size(); vindex++){
     cout << "Before" << glm::to_string(conicalPixel[vindex].conicalPos) << endl;
   }
 
+  //Sort the w in the triangle
+  ClipOnWAxis(conicalPixel,cam);
+  for(size_t vindex = 0; vindex < conicalPixel.size(); vindex++){
+    cout << "After W Clip" << glm::to_string(conicalPixel[vindex].conicalPos) << endl;
+  }
+  WDivision(conicalPixel);
   Sutherland_Hodgman(conicalPixel);
   cout << "ConicalPixel size after clipping" << conicalPixel.size() << endl;
   //Testing
