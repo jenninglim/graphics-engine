@@ -5,6 +5,10 @@
 using namespace std;
 using namespace glm;
 
+float nearPlane = 2;
+float farPlane = 20;
+float angleOfView = 90;
+
 void Interpolate(Pixel a, Pixel b, vector<Pixel>& result){
 
   int N = result.size();
@@ -36,14 +40,24 @@ void setProjectionMatrix(mat4 &P, float nearPlane, float  farPlane, float angleO
   float scale = 1 / glm::tan(angleOfView * 0.5 * glm::pi<float>() / 180);
   P[0][0] = scale;
   P[1][1] = scale;
-  P[2][2] = -1*farPlane / (farPlane - nearPlane);
+  P[2][2] = farPlane / (farPlane - nearPlane);
   P[3][2] = (-1 *farPlane * nearPlane) / (farPlane - nearPlane);
   P[2][3] = 1;
   P[3][3] = 0;
+
 }
 
 void multiPointMatrix(vec4 &result, vec4 &v_in, mat4 &m_in){
-  result = v_in * m_in;
+  result = v_in * glm::transpose(m_in);
+  //Transpose because of glm autoconversion
+  //cout << "Result" << glm::to_string(result) << endl;
+  //cout << "vector" << glm::to_string(v_in) << endl;
+  for(int testi = 0; testi < 4; testi++){
+    for(int testj = 0; testj < 4; testj++){
+      //cout << "P:" << m_in[testi][testj] << endl;
+    }
+  }
+
 }
 
 void VertexShader(const Vertex& v, Pixel& p, Camera* cam, Light* light)
@@ -51,22 +65,23 @@ void VertexShader(const Vertex& v, Pixel& p, Camera* cam, Light* light)
   mat4 tMatrix(0);
   TransformationMatrix(tMatrix, cam->cameraPos,cam->R);
   vec4 tPosition = tMatrix * v.position;
-
-  float nearPlane = 1;
-  float farPlane = 20;
-  float angleOfView = 90;
+  cout << "CS: Z point positions" << tPosition.z << endl;
+  cout << "CS: X point positions" << tPosition.x << endl;
+  cout << "CS: Y point positions" << tPosition.y << endl;
 
   mat4 projMatrix(0);
   setProjectionMatrix(projMatrix, nearPlane, farPlane, angleOfView);
-  multiPointMatrix(p.conicalPos, tPosition, projMatrix);
-  p.w = p.conicalPos.w;
 
+  multiPointMatrix(p.conicalPos, tPosition, projMatrix);
+  cout << "Perspective output" << glm::to_string(p.conicalPos) << endl;
   if(p.conicalPos.w != 1){
     p.conicalPos.x /= p.conicalPos.w;
     p.conicalPos.y /= p.conicalPos.w;
     p.conicalPos.z /= p.conicalPos.w;
     p.conicalPos.w = 1;
   }
+  p.zinv = 1 / tPosition.z;
+  p.pos3d = v.position * p.zinv;
 
 
   //p.x = cam->focalLength*tPosition.x / tPosition.z + SCREEN_WIDTH / 2 ;
@@ -104,6 +119,7 @@ void PixelShader(screen* screen,
   if(x >= 0 && y >= 0 && x < SCREEN_WIDTH && y < SCREEN_HEIGHT){
     if( p.zinv > cam->depthBuffer[y][x] )
     {
+
       cam->depthBuffer[y][x] = p.zinv;
       PutPixelSDL( screen, x, y, finalColour* currentColor );
     }
@@ -170,13 +186,33 @@ void DrawPolygonRows(screen* screen,
     }
 }
 
-vec4 ComputeLinePlaneIntersection( Pixel &S,  Pixel&E, vec4 clippingPlanePoint, vec4 clippingPlaneNormal){
-  vec3 l = (vec3(S.conicalPos) - vec3(E.conicalPos));
-  float d = glm::dot((vec3(clippingPlanePoint) - vec3(E.conicalPos)),vec3(clippingPlaneNormal)) / (glm::dot(l, vec3(clippingPlaneNormal)));
-  return vec4((d * l + vec3(E.conicalPos)),1);
+void ComputeLinePlaneIntersection(Pixel &newIntersectionVertex, Pixel &S,  Pixel&E, vec4 clippingPlanePoint, vec4 clippingPlaneNormal){
+  vec3 l = glm::normalize(vec3(S.conicalPos) - vec3(E.conicalPos));
+  float d = (float)glm::dot((vec3(clippingPlanePoint) - vec3(E.conicalPos)),vec3(clippingPlaneNormal)) / (float)(glm::dot(l, vec3(clippingPlaneNormal)));
+  cout << "CLPI : D value " << d << endl;
+  vec3 intersection = d * l + vec3(E.conicalPos);
+  float proportionToIntersection = (float)glm::length(d * l) / (float)glm::length(vec3(S.conicalPos) - vec3(E.conicalPos));
+  cout << "Prop of intersection:" << proportionToIntersection << endl;
+  newIntersectionVertex.zinv = (float)(S.zinv - E.zinv) * proportionToIntersection + E.zinv;
+  cout << "CLPI : S Z inv value " << S.zinv << endl;
+  cout << "CLPI : E Z inv value " << E.zinv << endl;
+  cout << "CLPI : New Z inv value " << newIntersectionVertex.zinv << endl;
+
+  newIntersectionVertex.pos3d = (S.pos3d - E.pos3d) * proportionToIntersection + E.pos3d;
+  newIntersectionVertex.conicalPos = vec4(intersection,1);
 }
 
+
 void Sutherland_Hodgman(vector<Pixel> &outputVertex){
+  outputVertex.clear();
+  Pixel p0; p0.conicalPos = vec4(-0.284091, 0.284091, 0.479798, 1.000000);
+  Pixel p1; p1.conicalPos = vec4(0.284091, 0.284091, 0.479798, 1.000000);
+  Pixel p2; p2.conicalPos = vec4(0.657894, 0.657894, -0.350876, 1.000000);
+  outputVertex.push_back(p0);
+  outputVertex.push_back(p1);
+  outputVertex.push_back(p2);
+
+
   vector<vec4> clippingPlanes = {vec4(1,0,0,1), vec4(-1,0,0,1),vec4(0,1,0,1), vec4(0,-1,0,1), vec4(0,0,1,1), vec4(0,0,0,1)};
   vector<vec4> clippingNormals ={vec4(-1,0,0,1), vec4(1,0,0,1),vec4(0,-1,0,1), vec4(0,1,0,1), vec4(0,0,-1,1), vec4(0,0,1,1)};
   for(size_t planeindex = 0; planeindex < clippingPlanes.size(); planeindex++){
@@ -188,10 +224,11 @@ void Sutherland_Hodgman(vector<Pixel> &outputVertex){
       vec4 planenormal = clippingNormals[planeindex];
       if(glm::dot(planenormal, E.conicalPos) >= 0){
         //E Inside plane
-        if(glm::dot(planenormal, S.conicalPos) < 0){
+          if(glm::dot(planenormal, S.conicalPos) < 0){
           //S Outside plane
           Pixel newIntersectionVertex;
-          newIntersectionVertex.conicalPos = ComputeLinePlaneIntersection(S,E,clippingPlanes[planeindex], planenormal);
+          ComputeLinePlaneIntersection(newIntersectionVertex, S,E,clippingPlanes[planeindex], planenormal);
+
           auto it  = std::find_if(outputVertex.begin(), outputVertex.end(),
             [&](Pixel &pixel) {return pixel.conicalPos == newIntersectionVertex.conicalPos;});
           if(it == outputVertex.end()){
@@ -205,7 +242,7 @@ void Sutherland_Hodgman(vector<Pixel> &outputVertex){
         }
       }else if(glm::dot(planenormal,S.conicalPos) >= 0){
         Pixel newIntersectionVertex;
-        newIntersectionVertex.conicalPos = ComputeLinePlaneIntersection(S,E,clippingPlanes[planeindex], planenormal);
+        ComputeLinePlaneIntersection(newIntersectionVertex, E,S,clippingPlanes[planeindex], planenormal);
         auto it  = std::find_if(outputVertex.begin(), outputVertex.end(),
           [&](Pixel &pixel) {return pixel.conicalPos == newIntersectionVertex.conicalPos;});
         if(it == outputVertex.end()){
@@ -217,6 +254,34 @@ void Sutherland_Hodgman(vector<Pixel> &outputVertex){
   }
 }
 
+void Test(const vector<Vertex>&vertices, Camera* cam, Light *light){
+  //Pixel p0; p0.conicalPos = vec4(1.053813, 1.202116, -0.202116, 1.000000);
+  vector<Pixel> conicalPixel(1);
+  cout << "Original vertex:" << glm::to_string(vertices[0].position) << endl;
+  VertexShader(vertices[0], conicalPixel[0], cam, light);
+
+  mat4 tMatrix(0), tMatrixInv(0);
+  TransformationMatrix(tMatrix, cam->cameraPos,cam->R);
+  tMatrixInv = glm::inverse(tMatrix);
+
+  mat4 projMatrix(0), projMatrixInv(0);
+  setProjectionMatrix(projMatrix, nearPlane, farPlane, angleOfView);
+  projMatrixInv = glm::inverse(projMatrix);
+  /*
+  for(size_t pixel; pixel < conicalPixel.size(); pixel++){
+    vec4 tPosition = conicalPixel[pixel].conicalPos * conicalPixel[pixel].w * projMatrixInv;
+    conicalPixel[pixel].zinv = 1 / tPosition.z;
+    vec4 v = tMatrixInv * tPosition ;
+    cout << "Final vertex:" << glm::to_string(v) << endl;
+
+    conicalPixel[pixel].pos3d = v * conicalPixel[pixel].zinv;
+    conicalPixel[pixel].x = glm::min(SCREEN_WIDTH-1,(int)((1-(conicalPixel[pixel].conicalPos.x+1) * 0.5) *SCREEN_WIDTH));
+    conicalPixel[pixel].y = glm::min(SCREEN_HEIGHT-1, (int)((1-(conicalPixel[pixel].conicalPos.y+1)*0.5)*SCREEN_HEIGHT));
+    //cout << "y:" << conicalPixel[pixel].y <<  " x:" << conicalPixel[pixel].x << endl;
+  }
+  */
+}
+
 void DrawPolygonRasterisation(screen* screen,
         const vector<Vertex>& vertices,
         vec3 color,
@@ -225,74 +290,99 @@ void DrawPolygonRasterisation(screen* screen,
         vec4 currentNormal,
         vec3 currentReflectance)
 {
-  for(size_t vindex = 0; vindex < vertices.size(); vindex++){
+  /*
+  cout << "New Round" << endl;
+  cout << "Enter near plane";
+  cin >> nearPlane;
+  cout << "Enter far plane";
+  cin >> farPlane;
+
+  cout << "Enter fov";
+  cin >> angleOfView;
+  */
+  //Test(vertices,cam, light);
+  //for(size_t vindex = 0; vindex < vertices.size(); vindex++){
     //cout << glm::to_string(vertices[vindex].position) << endl;
-  }
+  //}
   //Beforevec4(1.053813, 1.202116, -0.202116, 1.000000)
   //Beforevec4(-1.030182, 0.928311, 0.071689, 1.000000)
   //Beforevec4(0.379680, 0.342140, 0.657860, 1.000000)
 
-  Pixel p0; p0.conicalPos = vec4(1.053813, 1.202116, -0.202116, 1.000000);
-  Pixel p1; p1.conicalPos = vec4(-1.030182, 0.928311, 0.071689, 1.000000);
-  Pixel p2; p2.conicalPos = vec4(0.379680, 0.342140, 0.657860, 1.000000);
+  //Pixel p0; p0.conicalPos = vec4(1.053813, 1.202116, -0.202116, 1.000000);
+  //Pixel p1; p1.conicalPos = vec4(-1.030182, 0.928311, 0.071689, 1.000000);
+  //Pixel p2; p2.conicalPos = vec4(0.379680, 0.342140, 0.657860, 1.000000);
   int V = vertices.size();
-  vector<Pixel> conicalPixel({p0,p1,p2});
+  vector<Pixel> conicalPixel(V);
   vector<Pixel> vertexPixels(V);
-  //for(int i = 0; i<V; ++i){
-  //  VertexShader(vertices[i], conicalPixel[i], cam, light);
-  //}
+  for(int i = 0; i<V; ++i){
+    VertexShader(vertices[i], conicalPixel[i], cam, light);
+  }
   //conicalPixel.push_back(p0);
   //conicalPixel.push_back(p1);
   //conicalPixel.push_back(p2);
   for(size_t vindex = 0; vindex < conicalPixel.size(); vindex++){
     cout << "Before" << glm::to_string(conicalPixel[vindex].conicalPos) << endl;
   }
+
   Sutherland_Hodgman(conicalPixel);
-  cout << "Round" << endl;
+  //Testing
+  //vector<Pixel> testPixel(1);
+  //Pixel p0; p0.conicalPos = vec4(0.799998, -0.799998, -1.299998, 1.000000);
+  //testPixel[0] = p0;
+  //Sutherland_Hodgman(testPixel);
+
+  //return;
+  //End test
   for(size_t vindex = 0; vindex < conicalPixel.size(); vindex++){
-    cout << glm::to_string(conicalPixel[vindex].conicalPos) << endl;
+    cout << "Clipping:" << glm::to_string(conicalPixel[vindex].conicalPos) << endl;
   }
   mat4 tMatrix(0), tMatrixInv(0);
   TransformationMatrix(tMatrix, cam->cameraPos,cam->R);
   tMatrixInv = glm::inverse(tMatrix);
-  float nearPlane = 1;
-  float farPlane = 20;
-  float angleOfView = 90;
+
   mat4 projMatrix(0), projMatrixInv(0);
   setProjectionMatrix(projMatrix, nearPlane, farPlane, angleOfView);
   projMatrixInv = glm::inverse(projMatrix);
 
+  for(int testi = 0; testi < 4; testi++){
+    for(int testj = 0; testj < 4; testj++){
+      cout << "P Inverse:" << projMatrixInv[testi][testj];
+    }
+    cout << endl;
+  }
+
   for(size_t pixel; pixel < conicalPixel.size(); pixel++){
-    vec4 tPosition = conicalPixel[pixel].conicalPos * conicalPixel[pixel].w * projMatrixInv;
-    conicalPixel[pixel].zinv = 1 / tPosition.z;
-    vec4 v = tMatrixInv * tPosition ;
-    conicalPixel[pixel].pos3d = v * conicalPixel[pixel].zinv;
+    //vec4 tPosition = (conicalPixel[pixel].conicalPos * conicalPixel[pixel].w) * glm::transpose(projMatrixInv);
+    //cout << "T position: " << glm::to_string(tPosition) << endl;
+    //Transpose for glm vector multiplication problem - row vector
+    //conicalPixel[pixel].zinv = 1 / tPosition.z;
+    cout << "Z inv " << conicalPixel[pixel].zinv << endl;
+    printf("Z inv Precise %.8f\n", conicalPixel[pixel].zinv);
+
+    //vec4 v = tMatrixInv * tPosition ;
+    //conicalPixel[pixel].pos3d = v * conicalPixel[pixel].zinv;
     conicalPixel[pixel].x = glm::min(SCREEN_WIDTH-1,(int)((1-(conicalPixel[pixel].conicalPos.x+1) * 0.5) *SCREEN_WIDTH));
     conicalPixel[pixel].y = glm::min(SCREEN_HEIGHT-1, (int)((1-(conicalPixel[pixel].conicalPos.y+1)*0.5)*SCREEN_HEIGHT));
+    cout << "y:" << conicalPixel[pixel].y <<  " x:" << conicalPixel[pixel].x << endl;
   }
-  for(size_t vindex = 0; vindex < vertices.size(); vindex++){
-    //cout << glm::to_string(conicalPixel[vindex].pos3d / conicalPixel[vindex].zinv) << endl;
-  }
+
 
   //cout << conicalPixel.size() << endl;
-  if(conicalPixel.size() == 4){
-    for(int y = 0; y < 2; y++ ){
-      for(int j = 0; j < vertexPixels.size(); j++){
-        vertexPixels[j] = conicalPixel[j+y];
-        vector<Pixel> leftPixels;
-        vector<Pixel> rightPixels;
-        ComputePolygonRows(vertexPixels, leftPixels, rightPixels);
-        DrawPolygonRows(screen,leftPixels, rightPixels, color, cam, light, currentNormal, currentReflectance);
+    for(int y = 1; y < conicalPixel.size() - 1; y++ ){
+      vertexPixels[0] = conicalPixel[0];
+      vertexPixels[1] = conicalPixel[y];
+      vertexPixels[2] = conicalPixel[y+1];
+      vector<Pixel> leftPixels;
+      vector<Pixel> rightPixels;
+      //cout << "Triange to draw" << endl;
+      for(size_t testvertex = 0; testvertex < vertexPixels.size(); testvertex++){
+        //cout << (vertexPixels[testvertex].x) << endl;
       }
+      ComputePolygonRows(vertexPixels, leftPixels, rightPixels);
+      for(size_t testvertex = 0; testvertex < leftPixels.size(); testvertex++){
+        //cout << "x value :" << (rightPixels[testvertex].x) << " y value: " << (rightPixels[testvertex].y) << endl;
+      }
+      DrawPolygonRows(screen,leftPixels, rightPixels, color, cam, light, currentNormal, currentReflectance);
     }
-  }
 
-
-  if(conicalPixel.size() == 3){
-    vertexPixels = conicalPixel;
-    vector<Pixel> leftPixels;
-    vector<Pixel> rightPixels;
-    ComputePolygonRows(vertexPixels, leftPixels, rightPixels);
-    DrawPolygonRows(screen,leftPixels, rightPixels, color, cam, light, currentNormal, currentReflectance);
-  }
 }

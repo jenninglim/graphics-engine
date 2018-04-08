@@ -17,15 +17,12 @@ typedef struct Pixel
     float zinv;
     glm::vec4 pos3d;
     glm::vec4 conicalPos;
-    float w;
 } Pixel;
 
 typedef struct Vertex
 {
     glm::vec4 position;
 } Vertex;
-
-
 
 
 void DrawPolygonRasterisation(screen* screen,

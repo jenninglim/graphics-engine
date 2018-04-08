@@ -15,7 +15,7 @@
 // Lighting
 #define SPECULAR_INTENSITY 10
 #define DIFFUSE_INTENSITY 2
-#define AMBIENT_INTENSITY 0.2
+#define AMBIENT_INTENSITY 1
 
 
 #endif
