@@ -11,10 +11,9 @@ class Camera
 
     public:
         float focalLength;
+        float yaw;
         glm::vec4 cameraPos;
         glm::mat4 R;
-        float yaw; // rotation of the camera
-        float distance;
         glm::vec4 facingDirection;
         mat4 increR;
         float depthBuffer[SCREEN_HEIGHT][SCREEN_WIDTH];
@@ -61,14 +60,12 @@ class Camera
         this->yaw = yaw + ROTATION_SPEED;
         updateRotation();
         this->facingDirection = this->increR * this->facingDirection;
-
     }
-
     private:
     void updateRotation()
     {
-        vec4 v0(glm::cos(yaw), 0, -glm::sin(yaw),0);
-        vec4 v1(glm::sin(yaw), 0, glm::cos(yaw),0);
+        vec4 v0(glm::cos(yaw), 0, glm::sin(yaw),0);
+        vec4 v1(-glm::sin(yaw), 0, glm::cos(yaw),0);
         vec4 v2(0, 1, 0,0);
         this->R = mat4(v0,v2,v1,vec4(0,0,0,1));
     }
