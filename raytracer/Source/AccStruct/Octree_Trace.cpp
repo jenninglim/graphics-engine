@@ -50,7 +50,7 @@ Amb_t ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
 #if (AMB_RAY >1)
     for (int i = 0; i < AMB_RAY - 1; i++)
     {
-        r[i].initial = r[i].initial + 0.05f * vec4(normal,0);
+        r[i].initial = r[i].initial + 0.02f * vec4(normal,0);
     }
 #endif 
     
@@ -91,14 +91,21 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
     float a = 0.f;
     float delta = 0.f;
     vec3 c = vec3(0);
+
     float weight;
     CloseVox vox;
+
+    // For intepolation.
+    Octree * prev = NULL;
+    Octree * next = NULL;
+    float diff, fract, d;
     while (dist < maxDist)
     {
         vox.voxel = NULL;
         vox.diff = 20;
         point = vec3(r.initial) + dist * r.direction;
         weight = 1/(1+dist);
+
         if (!insideCube(point,0)) {
             a += glm::pow(weight,5) * (1-a);
             break;
@@ -106,9 +113,31 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
         if (ClosestVoxel(root, point, dist * tantheta, vox))
         {
             c += vox.voxel->colour * (vec3(1) -c) * (float) glm::pow(1.f-vox.voxel->occlusion,2) * weight;
-            //c = a * c + (1 - a) * weight * vox.voxel->colour; // REPLACED
             a += glm::pow(weight,2) *(1 - a) * glm::pow(vox.voxel->occlusion,1);
-            a = 1 - glm::pow(1 - a, dist / glm::l2Norm(vox.voxel->boxHalfSize));
+            a = 1 - glm::pow(1 - a, dist / glm::l2Norm(vox.voxel->boxHalfSize)); // correction
+
+            // Interpolate
+            prev = next;
+            next = vox.voxel;
+            if (prev != NULL)
+            {
+                d = l2Norm(
+                    next->boxHalfSize - prev->boxHalfSize) * 0.5f;
+                fract = (d - l2Norm(prev->boxHalfSize));
+
+                if (fract <= 0)
+                {
+                }
+                else
+                {
+                    fract /= (l2Norm(next->boxHalfSize) - l2Norm(prev->boxHalfSize));
+                    a += weight * (next->occlusion - prev->occlusion) * fract;
+                }
+                //a = 1 - glm::pow(1 - a, l2Norm(prev->centre + d) / d);
+            }
+            
+
+
             delta = glm::pow(dist,2);
         }
         else

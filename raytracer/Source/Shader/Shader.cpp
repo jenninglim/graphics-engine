@@ -82,6 +82,7 @@ void shootRay(const Ray r, vec3 &colour, Octree tree, BVH bvh, Light l)
     {
         amb = ambientOcclusion(&tree, vec3(i.position),vec3(i.normal), l);
         colour = 0.9f * colour * amb.occ + 0.1f * amb.occ*amb.colour;
+        //colour = vec3(amb.occ);
     }
 }
 
