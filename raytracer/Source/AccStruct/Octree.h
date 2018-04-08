@@ -38,7 +38,6 @@ class Octree
         vec3 boxHalfSize;
         
         vec3 colour;
-        vec3 directLight;
         float occlusion;
 
         bool toDivide(vector<Object *> objects, Light l);

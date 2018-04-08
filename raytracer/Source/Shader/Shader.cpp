@@ -73,7 +73,7 @@ void fresnel(const Ray r, const Intersection i, float &kr)
     // kt = 1 - kr;
 }
 
-vec3 shootRay(const Ray r, vec3 &colour, Octree tree, BVH bvh, Light l)
+void shootRay(const Ray r, vec3 &colour, Octree tree, BVH bvh, Light l)
 {
     Intersection i;
     Amb_t amb;
