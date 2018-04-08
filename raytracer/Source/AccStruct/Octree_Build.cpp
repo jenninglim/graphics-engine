@@ -29,8 +29,9 @@ Octree::Octree(vector<Object *> objects, BoundingVolume bv, Light l, BVH * bvh)
     // Set up root tree.
     this->boxHalfSize = (bv.max - bv.min) / 2.f;
     this->centre = bv.min + boxHalfSize;
-    this->occlusion = 0;
-    this->colour = vec3(0);
+    this->voxel = new tex_t();
+    this->voxel->occ = 0;
+    this->voxel->colour = vec3(0);
     this->makeKids(objects, l, bvh, 0.); 
 }
 
@@ -39,8 +40,9 @@ Octree::Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int dept
     // Set up root tree.
     this->boxHalfSize = boxhalfsize;
     this->centre = center;
-    this->occlusion = 0;
-    this->colour = vec3(0);
+    this->voxel = new tex_t();
+    this->voxel->occ = 0;
+    this->voxel->colour = vec3(0);
     this->makeKids(objects, l, bvh, depth); 
 }
 
@@ -58,18 +60,22 @@ void Octree::makeKids(vector<Object *> objects, Light l, BVH* bvh, int depth)
                     depth+1,
                     l,
                     bvh);
-            this->occlusion += 1.f/8.f * this->children[i].occlusion;
-            this->colour += 1.f/8.f * this->children[i].colour;
-       }
+
+            if (this->children[i].voxel != NULL)
+            {
+                this->voxel->occ += 1.f/8.f * this->children[i].voxel->occ;
+                this->voxel->colour += 1.f/8.f * this->children[i].voxel->colour;
+            }
+        }
     }
-    else if (!this->toDivide(objects, l)) //if (depth < OCT_DEPTH)
+    else if (!this->toDivide(objects, l)) 
     {
         this->type = EMPTY;
     }
     else
     {
         this->type = LEAF;
-        
+
         // Calculate occlusion
         Intersection i;
         i.distance = 20;
@@ -78,16 +84,16 @@ void Octree::makeKids(vector<Object *> objects, Light l, BVH* bvh, int depth)
         {
             if (i.distance > glm::l2Norm(dir) && i.distance > EPSILON)
             {
-                this->occlusion = 0;
+                this->voxel->occ = 0;
             }
             else
             {
-                this->occlusion = 1;
+                this->voxel->occ = 1;
             }
         }
         else
         {
-            this->occlusion = 0;
+            this->voxel->occ = 0;
         }
     }
 }
@@ -99,7 +105,7 @@ bool Octree::toDivide(vector<Object *> objects, Light l)
     {
         if (objects[i]->boxOverlap(this->centre, this->boxHalfSize, inter))
         {
-            this->colour = inter.colour;
+           this->voxel->colour = inter.colour;
             return true;
         }
     }
@@ -124,7 +130,7 @@ bool Octree::collision(Ray r, Intersection &inter)
             if (dist < inter.distance)
             {
                 inter.position = vec4(this->centre,0);
-                inter.colour = vec3(this->colour);
+                inter.colour = vec3(this->voxel->colour);
                 inter.distance = dist;
             }
             return true;

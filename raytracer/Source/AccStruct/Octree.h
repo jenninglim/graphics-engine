@@ -18,7 +18,7 @@ enum Type {
     EMPTY,
 };
 
-struct Amb_t {
+struct tex_t {
     vec3 colour;
     float occ;
 };
@@ -37,8 +37,7 @@ class Octree
         vec3 centre;
         vec3 boxHalfSize;
         
-        vec3 colour;
-        float occlusion;
+        tex_t * voxel;
 
         bool toDivide(vector<Object *> objects, Light l);
         void makeKids(vector<Object *> objects, Light l, BVH * bvh, int depth);
@@ -51,6 +50,6 @@ class Octree
 };
 
 float castShadowCone(Octree * root, vec3 point, Light l, float theta);
-Amb_t ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l);
+tex_t ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l);
 
 #endif

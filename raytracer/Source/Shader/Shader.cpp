@@ -76,12 +76,12 @@ void fresnel(const Ray r, const Intersection i, float &kr)
 void shootRay(const Ray r, vec3 &colour, Octree tree, BVH bvh, Light l)
 {
     Intersection i;
-    Amb_t amb;
+    tex_t tex;
     i.distance = 20;
     if (bvh.collision(r, i))
     {
-        amb = ambientOcclusion(&tree, vec3(i.position),vec3(i.normal), l);
-        colour = 0.9f * colour * amb.occ + 0.1f * amb.occ*amb.colour;
+        tex = ambientOcclusion(&tree, vec3(i.position),vec3(i.normal), l);
+        colour = 0.9f * colour * tex.occ + 0.1f * tex.occ*tex.colour;
         //colour = vec3(amb.occ);
     }
 }
