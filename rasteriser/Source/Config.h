@@ -18,6 +18,10 @@
 #define AMBIENT_INTENSITY 0.1
 
 #define W_CLIPPING_PLANE 0.00001
+#define NEARPLANE 0.5
+#define FARPLANE 20
+#define ANGLEOFVIEW 90
+
 
 
 #endif

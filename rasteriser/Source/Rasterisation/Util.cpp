@@ -1,14 +1,8 @@
 #include "Util.h"
 #include <algorithm>
 
-
 using namespace std;
 using namespace glm;
-
-float nearPlane = 2;
-float farPlane = 20;
-float angleOfView = 90;
-
 
 void Interpolate(Pixel a, Pixel b, vector<Pixel>& result){
 
@@ -37,12 +31,15 @@ void TransformationMatrix(mat4 &M, vec4 cameraPosition, mat4 cameraRotation)
       column(mat4(1) ,3, vec4 (vec3(-1.0f * cameraPosition), 1));
 }
 
-void setProjectionMatrix(mat4 &P, float nearPlane, float  farPlane, float angleOfView){
-  float scale = 1 / glm::tan(angleOfView * 0.5 * glm::pi<float>() / 180);
+void setProjectionMatrix(mat4 &P){
+  float angleofview = (float)ANGLEOFVIEW;
+  float nearplane = (float)NEARPLANE;
+  float farplane = (float)FARPLANE;
+  float scale = 1 / glm::tan(angleofview * 0.5 * glm::pi<float>() / 180);
   P[0][0] = scale;
   P[1][1] = scale;
-  P[2][2] = farPlane / (farPlane - nearPlane);
-  P[3][2] = (-1 *farPlane * nearPlane) / (farPlane - nearPlane);
+  P[2][2] = farplane / (farplane - nearplane);
+  P[3][2] = (-1 *farplane * nearplane) / (farplane - nearplane);
   P[2][3] = 1;
   P[3][3] = 0;
 
@@ -93,7 +90,7 @@ void ClipOnWAxis(vector<Pixel> &conicalPixels, Camera *cam){
       tMatrixInv = glm::inverse(tMatrix);
 
       mat4 projMatrix(0), projMatrixInv(0);
-      setProjectionMatrix(projMatrix, nearPlane, farPlane, angleOfView);
+      setProjectionMatrix(projMatrix);
       projMatrixInv = glm::inverse(projMatrix);
       vec4 tPosition;
       multiPointMatrix(tPosition,newPixel.conicalPos,projMatrixInv);
@@ -123,7 +120,7 @@ void VertexShader(const Vertex& v, Pixel& p, Camera* cam, Light* light)
   cout << "CS: Y point positions" << tPosition.y << endl;
 
   mat4 projMatrix(0);
-  setProjectionMatrix(projMatrix, nearPlane, farPlane, angleOfView);
+  setProjectionMatrix(projMatrix);
 
   multiPointMatrix(p.conicalPos, tPosition, projMatrix);
   cout << "Perspective output" << glm::to_string(p.conicalPos) << endl;
@@ -329,7 +326,7 @@ void Test(const vector<Vertex>&vertices, Camera* cam, Light *light){
   tMatrixInv = glm::inverse(tMatrix);
 
   mat4 projMatrix(0), projMatrixInv(0);
-  setProjectionMatrix(projMatrix, nearPlane, farPlane, angleOfView);
+  setProjectionMatrix(projMatrix);
   projMatrixInv = glm::inverse(projMatrix);
   /*
   for(size_t pixel; pixel < conicalPixel.size(); pixel++){
@@ -436,7 +433,7 @@ void DrawPolygonRasterisation(screen* screen,
   tMatrixInv = glm::inverse(tMatrix);
 
   mat4 projMatrix(0), projMatrixInv(0);
-  setProjectionMatrix(projMatrix, nearPlane, farPlane, angleOfView);
+  setProjectionMatrix(projMatrix);
   projMatrixInv = glm::inverse(projMatrix);
 
   for(int testi = 0; testi < 4; testi++){
@@ -456,7 +453,7 @@ void DrawPolygonRasterisation(screen* screen,
 
     //vec4 v = tMatrixInv * tPosition ;
     //conicalPixel[pixel].pos3d = v * conicalPixel[pixel].zinv;
-    conicalPixel[pixel].x = glm::min(SCREEN_WIDTH-1,(int)((1-(conicalPixel[pixel].conicalPos.x+1) * 0.5) *SCREEN_WIDTH));
+    conicalPixel[pixel].x = glm::min(SCREEN_WIDTH-1,(int)(((conicalPixel[pixel].conicalPos.x+1) * 0.5) *SCREEN_WIDTH));
     //conicalPixel[pixel].y = glm::min(SCREEN_HEIGHT-1, (int)((1-(conicalPixel[pixel].conicalPos.y+1)*0.5)*SCREEN_HEIGHT));
     conicalPixel[pixel].y = glm::min(SCREEN_HEIGHT-1, (int)(((conicalPixel[pixel].conicalPos.y+1)*0.5)*SCREEN_HEIGHT));
     cout << "y:" << conicalPixel[pixel].y <<  " x:" << conicalPixel[pixel].x << endl;
