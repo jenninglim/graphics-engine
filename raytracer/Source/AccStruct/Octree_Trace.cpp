@@ -94,6 +94,7 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
 
     // For accumulation
     float weight, occ;
+    vec3 col(0);
     CloseVox vox;
 
     // For intepolation.
@@ -108,31 +109,22 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
         weight = 1/(1+dist);
 
         if (!insideCube(point,0)) {
-            a += glm::pow(weight,5) * (1-a);
+            a += glm::pow(weight,10) * (1-a);
             break;
         }
         if (ClosestVoxel(root, point, dist * tantheta, vox))
         {
-            occ = trilinear<float>(point - vox.tree->centre + vox.tree->boxHalfSize,
-                    vox.tree->children[7].voxel->occ,
-                    vox.tree->children[6].voxel->occ,
-                    vox.tree->children[5].voxel->occ,
-                    vox.tree->children[4].voxel->occ,
-                    vox.tree->children[3].voxel->occ,
-                    vox.tree->children[2].voxel->occ,
-                    vox.tree->children[1].voxel->occ,
-                    vox.tree->children[0].voxel->occ
-                    ); 
-
-            c += vox.tree->voxel->colour * (vec3(1) -c)
-                * (float) glm::pow(1.f-vox.tree->voxel->occ,2) * weight;
+            occ = vox.tree->interOcc(point);
+            col = vox.tree->interCol(point);
+            c += col * (vec3(1) - c)
+                * (1.f - occ) * (float) glm::pow(weight,2);
             a += glm::pow(weight,2) *(1 - a) * glm::pow(occ,1);
             a = 1 - glm::pow(1 - a, dist / glm::l2Norm(vox.tree->boxHalfSize)); // correction
 
-            /*
             // Interpolate
             prev = next;
             next = vox.tree;
+            /*
             if (prev != NULL)
             {
                 d = l2Norm(
@@ -145,7 +137,7 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
                 else
                 {
                     fract /= (l2Norm(next->boxHalfSize) - l2Norm(prev->boxHalfSize));
-                    a += weight * (next->occlusion - prev->occlusion) * fract;
+                    a += weight * (next->voxel->occ - prev->voxel->occ) * fract;
                 }
                 //a = 1 - glm::pow(1 - a, l2Norm(prev->centre + d) / d);
             }

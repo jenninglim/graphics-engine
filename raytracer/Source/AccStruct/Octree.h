@@ -43,7 +43,8 @@ class Octree
         void makeKids(vector<Object *> objects, Light l, BVH * bvh, int depth);
         Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int depth, Light light, BVH * bvh);
         void updateTexture();
-        float interOcc();
+        float interOcc(vec3 point);
+        vec3 interCol(vec3 point);
 
     public:
         Octree();

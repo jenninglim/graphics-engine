@@ -60,8 +60,8 @@ void Octree::updateTexture()
     }
     if (count >0)
     {
-        this->voxel->occ /= count;
-        this->voxel->colour /= count;
+        this->voxel->occ /= 8;
+        this->voxel->colour /= 8;
     }
 }
 
