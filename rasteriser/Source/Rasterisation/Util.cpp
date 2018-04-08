@@ -74,12 +74,15 @@ void VertexShader(const Vertex& v, Pixel& p, Camera* cam, Light* light)
 
   multiPointMatrix(p.conicalPos, tPosition, projMatrix);
   cout << "Perspective output" << glm::to_string(p.conicalPos) << endl;
+
+
   if(p.conicalPos.w != 1){
     p.conicalPos.x /= p.conicalPos.w;
     p.conicalPos.y /= p.conicalPos.w;
     p.conicalPos.z /= p.conicalPos.w;
     p.conicalPos.w = 1;
   }
+
   p.zinv = 1 / tPosition.z;
   p.pos3d = v.position * p.zinv;
 
@@ -209,7 +212,12 @@ void Sutherland_Hodgman(vector<Pixel> &outputVertex){
     cout << "SH-PlaneIndex:" << planeindex << endl;
     vector<Pixel> inputList = outputVertex;
     outputVertex.clear();
-    Pixel S = inputList.back();
+    Pixel S;
+    if(inputList.size() > 0){
+      S = inputList.back();
+    }else{
+      return;
+    }
     for(size_t vertexindex = 0; vertexindex < inputList.size(); vertexindex++){
       Pixel E = inputList[vertexindex];
       vec4 planenormal = clippingNormals[planeindex];
@@ -302,6 +310,10 @@ void DrawPolygonRasterisation(screen* screen,
   //Pixel p0; p0.conicalPos = vec4(1.053813, 1.202116, -0.202116, 1.000000);
   //Pixel p1; p1.conicalPos = vec4(-1.030182, 0.928311, 0.071689, 1.000000);
   //Pixel p2; p2.conicalPos = vec4(0.379680, 0.342140, 0.657860, 1.000000);
+  if(cam->cameraPos.z >= -0.990001000){
+    cout << "Camera at -1" << endl;
+  }
+
   int V = vertices.size();
   vector<Pixel> conicalPixel(V);
   vector<Pixel> vertexPixels(V);
@@ -316,6 +328,7 @@ void DrawPolygonRasterisation(screen* screen,
   }
 
   Sutherland_Hodgman(conicalPixel);
+  cout << "ConicalPixel size after clipping" << conicalPixel.size() << endl;
   //Testing
   //vector<Pixel> testPixel(1);
   //Pixel p0; p0.conicalPos = vec4(0.799998, -0.799998, -1.299998, 1.000000);
@@ -360,7 +373,9 @@ void DrawPolygonRasterisation(screen* screen,
 
 
   //cout << conicalPixel.size() << endl;
+  if(conicalPixel.size() > 0){
     for(int y = 1; y < conicalPixel.size() - 1; y++ ){
+      cout << "Ready to draw" << endl;
       vertexPixels[0] = conicalPixel[0];
       vertexPixels[1] = conicalPixel[y];
       vertexPixels[2] = conicalPixel[y+1];
@@ -376,5 +391,5 @@ void DrawPolygonRasterisation(screen* screen,
       }
       DrawPolygonRows(screen,leftPixels, rightPixels, color, cam, light, currentNormal, currentReflectance);
     }
-
+  }
 }

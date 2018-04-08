@@ -38,7 +38,7 @@ void LoadObjects(std::vector<Object *>& objects )
   // Floor:
   triangles.push_back( Triangle( C, B, A, green ) );
   triangles.push_back( Triangle( C, D, B, green ) );
-  /*
+
   // Left wall
   triangles.push_back( Triangle( A, E, C, purple ) );
   triangles.push_back( Triangle( C, E, G, purple ) );
@@ -54,7 +54,7 @@ void LoadObjects(std::vector<Object *>& objects )
   // Back wall
   triangles.push_back( Triangle( G, D, C, white ) );
   triangles.push_back( Triangle( G, H, D, white ) );
-  */
+
   push_box(objects, triangles);
 	// ---------------------------------------------------------------------------
 	// Short block
@@ -90,7 +90,7 @@ void LoadObjects(std::vector<Object *>& objects )
 	triangles.push_back( Triangle(G,F,E,red) );
 	triangles.push_back( Triangle(G,H,F,red) );
 
-  //push_box(objects, triangles);
+  push_box(objects, triangles);
 
 	// ---------------------------------------------------------------------------
 	// Tall block
@@ -127,5 +127,5 @@ void LoadObjects(std::vector<Object *>& objects )
 	triangles.push_back( Triangle(G,F,E,blue) );
 	triangles.push_back( Triangle(G,H,F,blue) );
 
-  //push_box(objects, triangles);
+  push_box(objects, triangles);
 }
