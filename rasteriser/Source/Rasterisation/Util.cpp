@@ -197,34 +197,25 @@ void ComputeLinePlaneIntersection(Pixel &newIntersectionVertex, Pixel &S,  Pixel
   cout << "CLPI : S Z inv value " << S.zinv << endl;
   cout << "CLPI : E Z inv value " << E.zinv << endl;
   cout << "CLPI : New Z inv value " << newIntersectionVertex.zinv << endl;
-
   newIntersectionVertex.pos3d = (S.pos3d - E.pos3d) * proportionToIntersection + E.pos3d;
   newIntersectionVertex.conicalPos = vec4(intersection,1);
 }
 
 
 void Sutherland_Hodgman(vector<Pixel> &outputVertex){
-  outputVertex.clear();
-  Pixel p0; p0.conicalPos = vec4(-0.284091, 0.284091, 0.479798, 1.000000);
-  Pixel p1; p1.conicalPos = vec4(0.284091, 0.284091, 0.479798, 1.000000);
-  Pixel p2; p2.conicalPos = vec4(0.657894, 0.657894, -0.350876, 1.000000);
-  outputVertex.push_back(p0);
-  outputVertex.push_back(p1);
-  outputVertex.push_back(p2);
-
-
-  vector<vec4> clippingPlanes = {vec4(1,0,0,1), vec4(-1,0,0,1),vec4(0,1,0,1), vec4(0,-1,0,1), vec4(0,0,1,1), vec4(0,0,0,1)};
-  vector<vec4> clippingNormals ={vec4(-1,0,0,1), vec4(1,0,0,1),vec4(0,-1,0,1), vec4(0,1,0,1), vec4(0,0,-1,1), vec4(0,0,1,1)};
+  vector<vec4> clippingPlanes = {vec4(1,0,0,0), vec4(-1,0,0,0),vec4(0,1,0,0), vec4(0,-1,0,0), vec4(0,0,1,0), vec4(0,0,0,0)};
+  vector<vec4> clippingNormals ={vec4(-1,0,0,0), vec4(1,0,0,0),vec4(0,-1,0,0), vec4(0,1,0,0), vec4(0,0,-1,0), vec4(0,0,1,0)};
   for(size_t planeindex = 0; planeindex < clippingPlanes.size(); planeindex++){
+    cout << "SH-PlaneIndex:" << planeindex << endl;
     vector<Pixel> inputList = outputVertex;
     outputVertex.clear();
     Pixel S = inputList.back();
     for(size_t vertexindex = 0; vertexindex < inputList.size(); vertexindex++){
       Pixel E = inputList[vertexindex];
       vec4 planenormal = clippingNormals[planeindex];
-      if(glm::dot(planenormal, E.conicalPos) >= 0){
+      if(glm::dot(planenormal, E.conicalPos - clippingPlanes[planeindex]) >= 0){
         //E Inside plane
-          if(glm::dot(planenormal, S.conicalPos) < 0){
+          if(glm::dot(planenormal, S.conicalPos - clippingPlanes[planeindex]) < 0){
           //S Outside plane
           Pixel newIntersectionVertex;
           ComputeLinePlaneIntersection(newIntersectionVertex, S,E,clippingPlanes[planeindex], planenormal);
@@ -240,7 +231,7 @@ void Sutherland_Hodgman(vector<Pixel> &outputVertex){
         if(it == outputVertex.end()){
           outputVertex.push_back(E);
         }
-      }else if(glm::dot(planenormal,S.conicalPos) >= 0){
+      }else if(glm::dot(planenormal,S.conicalPos - clippingPlanes[planeindex]) >= 0){
         Pixel newIntersectionVertex;
         ComputeLinePlaneIntersection(newIntersectionVertex, E,S,clippingPlanes[planeindex], planenormal);
         auto it  = std::find_if(outputVertex.begin(), outputVertex.end(),
@@ -351,7 +342,7 @@ void DrawPolygonRasterisation(screen* screen,
     cout << endl;
   }
 
-  for(size_t pixel; pixel < conicalPixel.size(); pixel++){
+  for(size_t pixel = 0; pixel < conicalPixel.size(); pixel++){
     //vec4 tPosition = (conicalPixel[pixel].conicalPos * conicalPixel[pixel].w) * glm::transpose(projMatrixInv);
     //cout << "T position: " << glm::to_string(tPosition) << endl;
     //Transpose for glm vector multiplication problem - row vector
@@ -362,7 +353,8 @@ void DrawPolygonRasterisation(screen* screen,
     //vec4 v = tMatrixInv * tPosition ;
     //conicalPixel[pixel].pos3d = v * conicalPixel[pixel].zinv;
     conicalPixel[pixel].x = glm::min(SCREEN_WIDTH-1,(int)((1-(conicalPixel[pixel].conicalPos.x+1) * 0.5) *SCREEN_WIDTH));
-    conicalPixel[pixel].y = glm::min(SCREEN_HEIGHT-1, (int)((1-(conicalPixel[pixel].conicalPos.y+1)*0.5)*SCREEN_HEIGHT));
+    //conicalPixel[pixel].y = glm::min(SCREEN_HEIGHT-1, (int)((1-(conicalPixel[pixel].conicalPos.y+1)*0.5)*SCREEN_HEIGHT));
+    conicalPixel[pixel].y = glm::min(SCREEN_HEIGHT-1, (int)(((conicalPixel[pixel].conicalPos.y+1)*0.5)*SCREEN_HEIGHT));
     cout << "y:" << conicalPixel[pixel].y <<  " x:" << conicalPixel[pixel].x << endl;
   }
 

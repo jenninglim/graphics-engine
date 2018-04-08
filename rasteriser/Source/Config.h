@@ -9,7 +9,7 @@
 #define FULLSCREEN_MODE false
 
 // Camera
-#define ROTATION_SPEED 0.1 // In radians
+#define ROTATION_SPEED 0.01 // In radians
 #define CAM_FOCAL_LENGTH  300
 
 // Lighting
