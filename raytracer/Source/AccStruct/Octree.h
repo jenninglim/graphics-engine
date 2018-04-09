@@ -46,6 +46,8 @@ class Octree
         void makeTexture(const vec3 colour);
         void updateTexture();
         void mipmap();
+        void BrickEdgeCopy();
+        void PrintBrick();
         float interOcc(vec3 point);
         vec3 interCol(vec3 point);
 
