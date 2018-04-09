@@ -18,7 +18,7 @@ bool ClosestVoxelLeaf(Octree * root, const vec3 point, CloseVox &vox);
 bool insideCube(vec3 p, float e) { return abs(p.x) < 1 && abs(p.y) < 1 && abs(p.z);}
 
 #define AMB_RAY 5
-tex_t ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
+Trace ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
 {
     Intersection inter;
     CloseVox vox;
@@ -60,12 +60,12 @@ tex_t ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     for (int i = 0; i < AMB_RAY; i ++)
     {
         singleConeTrace(root, r[i], t, 2);
-        acc += glm::pow(1-t.occlusion,2);
+        acc += glm::pow(1-t.occ,2);
         colorAcc += t.colour;
     }
     acc /= AMB_RAY;
     colorAcc /= AMB_RAY;
-    tex_t ret;
+    Trace ret;
     ret.colour = colorAcc;
     ret.occ = acc;
     return ret;
@@ -78,7 +78,7 @@ float castShadowCone(Octree * root, vec3 point, Light l, float theta)
     Cone r(vec4(point,0), glm::normalize(ab), theta);
     r.initial = r.initial + vec4(0.1f * r.direction,0);
     singleConeTrace(root, r,t, glm::min(MAX_DIST, glm::l2Norm(ab)));
-    return t.occlusion;
+    return t.occ;
 }
 
 void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
@@ -153,7 +153,7 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
     }
 
     t.colour = c;
-    t.occlusion = (a > 1) ? 1 : a;
+    t.occ = (a > 1) ? 1 : a;
 }
 
 bool ClosestVoxel(Octree * root, const vec3 point, const float threshold, CloseVox &vox)

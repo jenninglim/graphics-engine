@@ -29,9 +29,6 @@ Octree::Octree(vector<Object *> objects, BoundingVolume bv, Light l, BVH * bvh)
     // Set up root tree.
     this->boxHalfSize = (bv.max - bv.min) / 2.f  * (1+EPSILON);
     this->centre = bv.min + boxHalfSize;
-    this->voxel = new tex_t();
-    this->voxel->occ = 0;
-    this->voxel->colour = vec3(0);
     this->makeKids(objects, l, bvh, 0.); 
 }
 
@@ -40,38 +37,97 @@ Octree::Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int dept
     // Set up root tree.
     this->boxHalfSize = boxhalfsize * (1 + EPSILON);
     this->centre = center;
-    this->voxel = new tex_t();
-    this->voxel->occ = 0;
-    this->voxel->colour = vec3(0);
     this->makeKids(objects, l, bvh, depth); 
 }
 
+static const int cubeOffset[4] = {1,1,2,2};
 void Octree::updateTexture()
 {
-    float count = 0;
-    for (int i = 0; i < 8; i++)
+    if (this->type == NODE)
     {
-        if (this->children[i].voxel != NULL && this->children[i].type != EMPTY)
+        this->voxel->brick = new vec3[3 * 3 * 3];
+        for (int i = 0; i < 3 * 3 *3; i++)
         {
-            this->voxel->occ += this->children[i].voxel->occ;
-            this->voxel->colour += this->children[i].voxel->colour;
-            count = count + 1;
+            this->voxel->brick[i] = vec3(0);
         }
+        int index = 0;
+        for (int i = 0; i < 8; i ++)
+        {
+            index = (i % 4) + cubeOffset[i % 4] + 9*floor(i / 4);
+            if (this->children[i].type != EMPTY)
+            {
+                this->voxel->brick[index] = children[i].voxel->colour;
+            }
+            if (this->children[i].type == NODE)
+            {
+
+            }
+        }
+        this->mipmap();
     }
-    if (count >0)
+}
+
+void Octree::makeTexture(const vec3 colour)
+{
+    this->voxel = new tex_t();
+    this->voxel->occ = 0;
+    if (this->type == LEAF)
     {
-        this->voxel->occ /= 8;
-        this->voxel->colour /= 8;
+        this->voxel->colour = colour;
     }
+}
+
+static const int mipmapoffset[5][3] = {{0,2,4},
+                                {6,6,6},
+                                {18,18,18},
+                                {1,-3,-9},
+                                {9,9,3}}; // 
+void Octree::mipmap()
+{
+    int index;
+/*
+    for (int i= 0; i < 3; i ++)
+    {
+        for (int j = 0; j <3; j++)
+        {
+            for (int k=0; k<3; k++)
+            {
+                cout << to_string(this->voxel->brick[i*9+j*3+k]);
+            }
+            cout << endl;
+        }
+        cout << endl;
+    }
+    */
+    for (int i = 0; i < 3; i++) // X Y Z PASS
+    {
+        for (int j = 0; j < 3; j++) // CUBE ASSIGMENT;
+        {
+            for (int k = 0; k < 3; k++) 
+            {
+                index = k + mipmapoffset[i][k] + j * mipmapoffset[4][i]; // edge assignment
+                this->voxel->brick[index] = this->voxel->brick[index + mipmapoffset[3][i]];
+                index = k + mipmapoffset[i][k] + j * mipmapoffset[4][i] + mipmapoffset[3][i]; // edge assignment
+                this->voxel->brick[index] += this->voxel->brick[index + mipmapoffset[3][i]];
+                this->voxel->brick[index] /= 2;
+            }
+        }
+   }
+
+    this->voxel->colour = this->voxel->brick[14];
+
 }
 
 void Octree::makeKids(vector<Object *> objects, Light l, BVH* bvh, int depth)
 {
-    if (this->toDivide(objects, l))
+    vec3 colour;
+    if (this->toDivide(objects, colour))
     {
         if (depth < OCT_DEPTH)
         {
             this->type = NODE;
+            makeTexture(colour);
+
             this->children = new Octree[8];
             for (int i = 0; i < 8; i++)
             {
@@ -87,6 +143,7 @@ void Octree::makeKids(vector<Object *> objects, Light l, BVH* bvh, int depth)
         else
         {
             this->type = LEAF;
+            makeTexture(colour);
             // Calculate occlusion
             Intersection i;
             i.distance = 20;
@@ -113,16 +170,16 @@ void Octree::makeKids(vector<Object *> objects, Light l, BVH* bvh, int depth)
     {
         this->type = EMPTY;
     }
-   }
+}
 
-bool Octree::toDivide(vector<Object *> objects, Light l)
+bool Octree::toDivide(vector<Object *> objects, vec3 & colour)
 {
     Intersection inter;
     for (int i = 0; i < objects.size(); i++)
     {
         if (objects[i]->boxOverlap(this->centre, this->boxHalfSize, inter))
         {
-            this->voxel->colour = inter.colour;
+            colour = inter.colour;
             return true;
         }
     }
@@ -147,7 +204,7 @@ bool Octree::collision(Ray r, Intersection &inter)
             if (dist < inter.distance)
             {
                 inter.position = vec4(this->centre,0);
-                inter.colour = vec3(this->voxel->colour);
+                inter.colour = vec3(this->voxel->colour[0]);
                 inter.distance = dist;
                 return true;
             }

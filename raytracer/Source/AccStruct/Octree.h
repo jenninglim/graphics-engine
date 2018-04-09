@@ -19,6 +19,7 @@ enum Type {
 };
 
 struct tex_t {
+    vec3 * brick;
     vec3 colour;
     float occ;
 };
@@ -26,7 +27,7 @@ struct tex_t {
 struct Trace
 {
     vec3 colour;
-    float occlusion;
+    float occ;
 };
 
 class Octree
@@ -39,10 +40,12 @@ class Octree
         
         tex_t * voxel;
 
-        bool toDivide(vector<Object *> objects, Light l);
+        bool toDivide(vector<Object *> objects, vec3 &colour);
         void makeKids(vector<Object *> objects, Light l, BVH * bvh, int depth);
         Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int depth, Light light, BVH * bvh);
+        void makeTexture(const vec3 colour);
         void updateTexture();
+        void mipmap();
         float interOcc(vec3 point);
         vec3 interCol(vec3 point);
 
@@ -53,6 +56,6 @@ class Octree
 };
 
 float castShadowCone(Octree * root, vec3 point, Light l, float theta);
-tex_t ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l);
+Trace ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l);
 
 #endif
