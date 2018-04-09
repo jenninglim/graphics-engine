@@ -114,7 +114,8 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
         }
         if (ClosestVoxel(root, point, dist * tantheta, vox))
         {
-            occ = vox.tree->interOcc(point);
+    //        occ = vox.tree->interOcc(point);
+            occ = 0;
             col = vox.tree->interCol(point);
             c += col * (vec3(1) - c)
                 * (1.f - occ) * (float) glm::pow(weight,2);

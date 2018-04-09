@@ -89,7 +89,6 @@ void Octree::mipmap()
             this->voxel->colour += 1.f/8.f * this->voxel->colour;
         }
     }
-    //this->voxel->colour = this->voxel->brick[14];
 }
 
 void Octree::PrintBrick()
@@ -135,7 +134,7 @@ void Octree::BrickEdgeCopy()
                     2);
         }
     }
-    }
+}
 
 const static int edgeoffsets[3][3] = {{6,1,9}, //
                                   {2,3,9}, // LEFT/RIGHT
@@ -156,5 +155,4 @@ void EdgeCopy(vec3 * brick1, vec3 * brick2, int orient)
 
         brick2[index2] = brick1[index1];
     }
-
 }
