@@ -67,49 +67,53 @@ void Octree::updateTexture()
 
 void Octree::makeKids(vector<Object *> objects, Light l, BVH* bvh, int depth)
 {
-    if (this->toDivide(objects, l) && depth < OCT_DEPTH)
+    if (this->toDivide(objects, l))
     {
-        this->type = NODE;
-        this->children = new Octree[8];
-        for (int i = 0; i < 8; i++)
+        if (depth < OCT_DEPTH)
         {
-            this->children[i] = Octree(objects,
-                    offsets[i] * this->boxHalfSize / 2.f + this->centre,
-                    this->boxHalfSize/2.f,
-                    depth+1,
-                    l,
-                    bvh);
-        }
-        this->updateTexture();
-    }
-    else if (!this->toDivide(objects, l)) 
-    {
-        this->type = EMPTY;
-    }
-    else
-    {
-        this->type = LEAF;
-        // Calculate occlusion
-        Intersection i;
-        i.distance = 20;
-        vec3 dir = vec3(l.position) - this->centre;
-        if (bvh->collision(Ray(vec4(this->centre,0), glm::normalize(dir)), i))
-        {
-            if (i.distance > glm::l2Norm(dir) && i.distance > EPSILON)
+            this->type = NODE;
+            this->children = new Octree[8];
+            for (int i = 0; i < 8; i++)
             {
-                this->voxel->occ = 0;
+                this->children[i] = Octree(objects,
+                        offsets[i] * this->boxHalfSize / 2.f + this->centre,
+                        this->boxHalfSize/2.f,
+                        depth+1,
+                        l,
+                        bvh);
             }
-            else
-            {
-                this->voxel->occ = 1;
-            }
+            this->updateTexture();
         }
         else
         {
-            this->voxel->occ = 0;
+            this->type = LEAF;
+            // Calculate occlusion
+            Intersection i;
+            i.distance = 20;
+            vec3 dir = vec3(l.position) - this->centre;
+            if (bvh->collision(Ray(vec4(this->centre,0), glm::normalize(dir)), i))
+            {
+                if (i.distance > glm::l2Norm(dir) && i.distance > EPSILON)
+                {
+                    this->voxel->occ = 0;
+                }
+                else
+                {
+                    this->voxel->occ = 1;
+                }
+            }
+            else
+            {
+                this->voxel->occ = 0;
+            }
         }
+
     }
-}
+    else 
+    {
+        this->type = EMPTY;
+    }
+   }
 
 bool Octree::toDivide(vector<Object *> objects, Light l)
 {
