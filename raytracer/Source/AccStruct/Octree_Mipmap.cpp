@@ -11,17 +11,17 @@ static const int mipmapoffset[5][3] = {{0,2,4},
 
 static const int cubeOffset[4] = {1,1,2,2};
 
-void EdgeCopy(vec3 * brick1, vec3 * brick2, int orient);
+void EdgeCopy(Cell * brick1, Cell * brick2, int orient);
 
 void Octree::updateTexture()
 {
     if (this->type == NODE)
     {
         BrickEdgeCopy();
-        this->voxel->brick = new vec3[3 * 3 * 3];
+        this->voxel->brick = new Cell[3 * 3 * 3];
         for (int i = 0; i < 3 * 3 *3; i++)
         {
-            this->voxel->brick[i] = vec3(0);
+            this->voxel->brick[i] = Cell();
         }
         int index = 0;
 
@@ -30,7 +30,9 @@ void Octree::updateTexture()
             index = (i % 4) + cubeOffset[i % 4] + 9*floor(i / 4);
             if (this->children[i].type != EMPTY)
             {
-                this->voxel->brick[index] = children[i].voxel->colour;
+                this->voxel->brick[index].col = children[i].voxel->colour;
+                this->voxel->brick[index].occ = children[i].voxel->occ;
+
             }
         }
         this->mipmap();
@@ -67,28 +69,31 @@ void Octree::mipmap()
                 index = k + mipmapoffset[i][k] + j * mipmapoffset[4][i]; // edge assignment
                 this->voxel->brick[index] = this->voxel->brick[index + mipmapoffset[3][i]];
                 index = k + mipmapoffset[i][k] + j * mipmapoffset[4][i] + mipmapoffset[3][i]; // edge assignment
-                this->voxel->brick[index] += this->voxel->brick[index + mipmapoffset[3][i]];
-                this->voxel->brick[index] /= 2;
+                this->voxel->brick[index] = this->voxel->brick[index]+this->voxel->brick[index + mipmapoffset[3][i]];
+                this->voxel->brick[index] =this->voxel->brick[index]/ 2;
             }
         }
     }
+    Cell cell = Cell();
 
-    this->voxel->colour = vec3(0);
     for (int i = 0; i < 8; i++)
     {
         if (this->children[i].type == NODE)
         {
-            this->voxel->colour += 1/8.f
-                *(this->children[i].voxel->brick[weightoffset[i][0]] * 0.4f
+            cell = cell +
+                (this->children[i].voxel->brick[weightoffset[i][0]] * 0.4f
                         + this->children[i].voxel->brick[weightoffset[i][1]] * 0.2f
                         + this->children[i].voxel->brick[weightoffset[i][2]] * 0.2f
-                        + this->children[i].voxel->brick[weightoffset[i][3]] * 0.2f);
+                        + this->children[i].voxel->brick[weightoffset[i][3]] * 0.2f) * 1/8.f;
         }
         else if (this->children[i].type == LEAF)
         {
-            this->voxel->colour += 1.f/8.f * this->voxel->colour;
+            cell.col += 1.f/8.f * this->voxel->colour;
+            cell.occ += 1.f/8.f * this->voxel->occ;
         }
     }
+    this->voxel->colour = cell.col;
+    this->voxel->occ = cell.occ;
 }
 
 void Octree::PrintBrick()
@@ -99,7 +104,7 @@ void Octree::PrintBrick()
         {
             for(int k=0; k<3; k++)
             {
-                cout << to_string(this->voxel->brick[i*9+j*3+k]) << " ";
+             //   cout << to_string(this->voxel->brick[i*9+j*3+k]) << " ";
             }
             cout << endl;
         }
@@ -140,7 +145,7 @@ const static int edgeoffsets[3][3] = {{6,1,9}, //
                                   {2,3,9}, // LEFT/RIGHT
                                   {9,1,3}}; // TOP/DOWN
 
-void EdgeCopy(vec3 * brick1, vec3 * brick2, int orient)
+void EdgeCopy(Cell * brick1, Cell * brick2, int orient)
 {
     int index1, index2;
     for (int i = 0; i < 9; i++)
@@ -150,8 +155,8 @@ void EdgeCopy(vec3 * brick1, vec3 * brick2, int orient)
         index2= (i % 3) * edgeoffsets[orient][1]
             + floor(i/3) * edgeoffsets[orient][2];
 
-        brick1[index1] += brick2[index2];
-        brick1[index1] /= 2;
+        brick1[index1] = brick1[index1] + brick2[index2];
+        brick1[index1] = brick1[index1]/ 2;
 
         brick2[index2] = brick1[index1];
     }

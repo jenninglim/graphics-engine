@@ -82,9 +82,9 @@ void shootRay(const Ray r, vec3 &colour, Octree tree, BVH bvh, Light l)
     if (bvh.collision(r, i))
     {
         trace = ambientOcclusion(&tree, vec3(i.position),vec3(i.normal), l);
-        colour = trace.colour;
+        //colour = trace.colour;
         //colour = 0.9f * colour * tex.occ + 0.1f * tex.occ*tex.colour;
-        //colour = vec3(trace.occ);
+        colour = vec3(trace.occ);
     }
     else
     {

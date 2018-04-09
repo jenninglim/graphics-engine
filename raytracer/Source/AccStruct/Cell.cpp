@@ -1,5 +1,9 @@
 #include "Cell.h"
-
+Cell::Cell()
+{
+    this->col = vec3(0);
+    this->occ = 0;
+}
 Cell Cell::operator+ (const Cell &c)
 {
     Cell cell;

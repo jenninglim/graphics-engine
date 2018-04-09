@@ -7,6 +7,7 @@
 #include <vector>
 #include "Light.h"
 #include "BVH.h"
+#include "Cell.h"
 
 #define SCALING 5.f
 
@@ -19,7 +20,7 @@ enum Type {
 };
 
 struct tex_t {
-    vec3 * brick;
+    Cell * brick;
     vec3 colour;
     float occ;
 };

@@ -11,7 +11,7 @@ struct Cell{
     Cell operator+(const Cell &c);
     Cell operator*(const float x);
     Cell operator/(const float x);
-
+    Cell();
 };
 
 #endif
