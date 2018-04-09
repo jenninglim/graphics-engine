@@ -78,12 +78,18 @@ void shootRay(const Ray r, vec3 &colour, Octree tree, BVH bvh, Light l)
     Intersection i;
     tex_t tex;
     i.distance = 20;
-    if (bvh.collision(r, i))
+    i.colour = vec3(0.5);
+    if (tree.collision(r,i)) //(bvh.collision(r, i))
     {
-        tex = ambientOcclusion(&tree, vec3(i.position),vec3(i.normal), l);
-        colour = tex.colour;
+        colour = i.colour;
+        //tex = ambientOcclusion(&tree, vec3(i.position),vec3(i.normal), l);
+        //colour = tex.colour;
         //colour = 0.9f * colour * tex.occ + 0.1f * tex.occ*tex.colour;
         //colour = vec3(tex.occ);
+    }
+    else
+    {
+
     }
 }
 

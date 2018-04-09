@@ -27,7 +27,7 @@ Octree::Octree()
 Octree::Octree(vector<Object *> objects, BoundingVolume bv, Light l, BVH * bvh)
 {
     // Set up root tree.
-    this->boxHalfSize = (bv.max - bv.min) / 2.f;
+    this->boxHalfSize = (bv.max - bv.min) / 2.f  * (1+EPSILON);
     this->centre = bv.min + boxHalfSize;
     this->voxel = new tex_t();
     this->voxel->occ = 0;
@@ -38,7 +38,7 @@ Octree::Octree(vector<Object *> objects, BoundingVolume bv, Light l, BVH * bvh)
 Octree::Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int depth, Light l, BVH * bvh)
 {
     // Set up root tree.
-    this->boxHalfSize = boxhalfsize;
+    this->boxHalfSize = boxhalfsize * (1 + EPSILON);
     this->centre = center;
     this->voxel = new tex_t();
     this->voxel->occ = 0;
@@ -145,8 +145,8 @@ bool Octree::collision(Ray r, Intersection &inter)
                 inter.position = vec4(this->centre,0);
                 inter.colour = vec3(this->voxel->colour);
                 inter.distance = dist;
+                return true;
             }
-            return true;
         }
         else
         {
