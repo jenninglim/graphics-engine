@@ -5,6 +5,7 @@
 #include "Object.h"
 #include "BoundingVolume.h"
 #include "Intersection.h"
+#include <vector>
 
 class BVH
 {
