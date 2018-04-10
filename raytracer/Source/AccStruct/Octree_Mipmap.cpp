@@ -40,8 +40,11 @@ void Octree::updateTexture()
             index = (i % 4) + cubeOffset[i % 4] + 9*floor(i / 4);
             if (this->children[i].type != EMPTY)
             {
-                this->brick[index].col = children[i].voxel->col;
-                this->brick[index].occ = children[i].voxel->occ;
+                this->brick[index] = *children[i].voxel;
+            }
+            else
+            {
+                //this->brick[index].
             }
         }
         this->mipmap();
@@ -60,13 +63,10 @@ void Octree::updateTexture()
             }
             else if (this->children[i].type == LEAF)
             {
-                cell.col += 1.f/8.f * this->voxel->col;
-                cell.occ += 1.f/8.f * this->voxel->occ;
+                cell= cell +  *this->voxel * 1.f/8.f;
             }
         }
-
         *this->voxel = cell;
-        //cout << this->voxel->occ << endl;
     }
 }
 

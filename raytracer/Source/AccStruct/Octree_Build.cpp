@@ -66,7 +66,6 @@ void Octree::makeKids(vector<Object *> objects, Light l, BVH* bvh, int depth)
         {
             this->type = LEAF;
             makeTexture(colour);
-            // Calculate occlusion
             Intersection i;
             vec3 distance = vec3(l.position) - this->centre;
             i.distance = l2Norm(distance) - 0.05;
@@ -119,9 +118,12 @@ bool Octree::collision(Ray r, Intersection &inter, int d_depth, int c_depth)
             dist = glm::l2Norm(vec3(r.initial), this->centre);
             if (dist < inter.distance)
             {
-                this->PrintBrick();
+                PrintBrick();
                 inter.position = vec4(this->centre,0);
-                inter.colour = vec3(this->voxel->occ);
+                inter.colour = vec3(this->brick[13].col);
+                cout << "AV" << endl;
+                cout << to_string(this->voxel->col) << endl;
+                cout << this->voxel->occ << endl;
                 inter.distance = dist;
                 return true;
             }
