@@ -18,7 +18,7 @@ SDL_CFLAGS := $(shell sdl2-config --cflags)
 GLM_CFLAGS := -I../glm/
 SDL_LDFLAGS := $(shell sdl2-config --libs)
 
-CPPFLAGS ?= $(INC_FLAGS) -pipe -Wall -Wno-switch -g -O3
+CPPFLAGS ?= $(INC_FLAGS) -pipe -Wall -Wno-switch -g -O3 -Wstrict-aliasing
 
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
 	$(CC) $(CPPFLAGS) $(OBJS) -o $@ $(LDFLAGS) $(SDL_LDFLAGS)
