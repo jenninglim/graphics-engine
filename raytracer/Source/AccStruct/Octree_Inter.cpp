@@ -34,7 +34,7 @@ vec3 Octree::interCol(vec3 point)
         data[i] = vec3(0);
         if (this->children[i].voxel != NULL && this->children[i].type != EMPTY)
         {
-            data[i] = this->children[i].voxel->colour;
+            data[i] = this->children[i].voxel->col;
         }
     }
     return trilinear<vec3>(point - this->centre + this->boxHalfSize,

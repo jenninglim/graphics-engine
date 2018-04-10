@@ -2,16 +2,17 @@
 #include "Config.h"
 #include <assert.h>
 #include <vector>
+#include "Object.h"
 
 #ifdef DEBUG
 #include <iostream>
 #include "glm/ext.hpp"
 #endif
 
-using namespace std;
-
 BoundingVolume computeBoundingVolume(vector<Object *> objects);
 vector<vector<Object *> > partitionObject(vector<Object *> objects);
+
+class Object;
 
 BVH::BVH()
 {
@@ -19,7 +20,7 @@ BVH::BVH()
     right = NULL;
 }
 
-BVH::BVH(vector<Object *> objects)
+BVH::BVH(std::vector<Object *> objects)
 {
     assert(objects.size() > 0);
     bv = computeBoundingVolume(objects);

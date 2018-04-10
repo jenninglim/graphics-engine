@@ -26,7 +26,7 @@ Trace ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     vec4 point(point1, 0);
     vox.diff = 20;
     float theta = DEG_TO_RAD(30);
-    float deg = DEG_TO_RAD(20);
+    float deg = DEG_TO_RAD(30);
 
     static const mat3 rotx(vec3(1,0,0),
             vec3(0,glm::cos(deg), glm::sin(deg)),
@@ -115,11 +115,11 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
         if (ClosestVoxel(root, point, dist * tantheta, vox))
         {
     //        occ = vox.tree->interOcc(point);
-            occ = 0;
+            occ = vox.tree->voxel->occ;
             col = vox.tree->interCol(point);
             c += col * (vec3(1) - c)
                 * (1.f - occ) * (float) glm::pow(weight,2);
-            a += glm::pow(weight,2) *(1 - a) * glm::pow(occ,1);
+            a += glm::pow(weight,1) *(1 - a) * glm::pow(occ,1);
             a = 1 - glm::pow(1 - a, dist / glm::l2Norm(vox.tree->boxHalfSize)); // correction
 
             // Interpolate

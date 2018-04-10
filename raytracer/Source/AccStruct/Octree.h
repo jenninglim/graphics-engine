@@ -19,12 +19,6 @@ enum Type {
     EMPTY,
 };
 
-struct tex_t {
-    Cell * brick;
-    vec3 colour;
-    float occ;
-};
-
 struct Trace
 {
     vec3 colour;
@@ -38,8 +32,9 @@ class Octree
         Octree * children;
         vec3 centre;
         vec3 boxHalfSize;
-        
-        tex_t * voxel;
+
+        Cell * brick;
+        Cell * voxel;
 
         bool toDivide(vector<Object *> objects, vec3 &colour);
         void makeKids(vector<Object *> objects, Light l, BVH * bvh, int depth);
