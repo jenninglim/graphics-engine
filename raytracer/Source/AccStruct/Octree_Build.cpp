@@ -68,18 +68,12 @@ void Octree::makeKids(vector<Object *> objects, Light l, BVH* bvh, int depth)
             makeTexture(colour);
             // Calculate occlusion
             Intersection i;
-            i.distance = 20;
-            vec3 dir = vec3(l.position) - this->centre;
-            if (bvh->collision(Ray(vec4(this->centre,0), glm::normalize(dir)), i))
+            vec3 distance = vec3(l.position) - this->centre;
+            i.distance = l2Norm(distance) - 0.05;
+            vec3 dir = normalize(distance);
+            if (bvh->collision(Ray(vec4(this->centre + dir*(0.05f),0), glm::normalize(dir)), i))
             {
-                if (i.distance > glm::l2Norm(dir) && i.distance > EPSILON)
-                {
-                    this->voxel->occ = 0;
-                }
-                else
-                {
-                    this->voxel->occ = 1;
-                }
+                this->voxel->occ = 1;
             }
             else
             {
@@ -108,7 +102,7 @@ bool Octree::toDivide(vector<Object *> objects, vec3 & colour)
     return false;
 }
 
-bool Octree::collision(Ray r, Intersection &inter)
+bool Octree::collision(Ray r, Intersection &inter, int d_depth, int c_depth)
 {
     bool didColide = false;
     vec3 min, max;
@@ -116,7 +110,7 @@ bool Octree::collision(Ray r, Intersection &inter)
     min = this->centre - this->boxHalfSize;
     float dist = 0;
 
-    if (this->type == LEAF)
+    if (d_depth == c_depth && this->type != EMPTY)
     {
         max = this->centre + this->boxHalfSize;
         min = this->centre - this->boxHalfSize;
@@ -125,8 +119,9 @@ bool Octree::collision(Ray r, Intersection &inter)
             dist = glm::l2Norm(vec3(r.initial), this->centre);
             if (dist < inter.distance)
             {
+                this->PrintBrick();
                 inter.position = vec4(this->centre,0);
-                inter.colour = vec3(this->voxel->col[0]);
+                inter.colour = vec3(this->voxel->occ);
                 inter.distance = dist;
                 return true;
             }
@@ -146,7 +141,7 @@ bool Octree::collision(Ray r, Intersection &inter)
         {
             for (int i = 0; i < 8; i ++)
             {
-                didColide |= (this->children[i].collision(r, inter));
+                didColide |= (this->children[i].collision(r, inter, d_depth, c_depth+1));
             }
         }
     }

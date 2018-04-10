@@ -44,13 +44,14 @@ class Octree
         void mipmap();
         void BrickEdgeCopy();
         void PrintBrick();
+        void LeafEdgeCopy();
         float interOcc(vec3 point);
         vec3 interCol(vec3 point);
 
     public:
         Octree();
         Octree(vector<Object *> objects, BoundingVolume bv, Light light, BVH * bvh);
-        bool collision(Ray r, Intersection &inter);
+        bool collision(Ray r, Intersection &inter, int d_depth, int c_depth);
 };
 
 float castShadowCone(Octree * root, vec3 point, Light l, float theta);

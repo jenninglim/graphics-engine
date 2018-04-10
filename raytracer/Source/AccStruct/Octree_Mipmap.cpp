@@ -21,6 +21,7 @@ const static int weightoffset[8][4] = {{26,25,23,17},
                                 {0,1,3,9}};
 
 void EdgeCopy(Cell * brick1, Cell * brick2, int orient);
+void ChildrenEdgeCopy(Octree * t, int c1, int c2);
 
 void Octree::updateTexture()
 {
@@ -65,7 +66,7 @@ void Octree::updateTexture()
         }
 
         *this->voxel = cell;
-        //this->voxel->occ = this->voxel->brick[13].occ;
+        //cout << this->voxel->occ << endl;
     }
 }
 
@@ -116,14 +117,14 @@ void Octree::PrintBrick()
 
 void Octree::BrickEdgeCopy()
 {    
-    
+    LeafEdgeCopy(); 
     for (int i = 0; i < 4; i++)
     {
-        if (this->children[i].type == NODE &&
-                this->children[i+2].type == NODE)
+        if (this->children[i + (int)floor(i/2) *2].type == NODE &&
+                this->children[i+ (int)floor(i/2) *2+2].type == NODE)
         {
-            EdgeCopy(this->children[i].brick,
-                    this->children[i+2].brick,
+            EdgeCopy(this->children[i+ (int)floor(i/2) * 2].brick,
+                    this->children[i+2+ (int)floor(i/2) *2].brick,
                     0);
         }
 
@@ -150,21 +151,27 @@ const static int edgeoffsets[3][3] = {{6,1,9}, //
                                   {9,1,3}}; // TOP/DOWN
 
 
-
-void EdgeCopyLeaf(Octree * t1, Octree * t2, int orient)
+void Octree::LeafEdgeCopy()
 {
     int index1, index2;
     for (int i = 0; i < 4; i ++)
     {
-
+        ChildrenEdgeCopy(this, i,i+2);
+        ChildrenEdgeCopy(this, 2*i,2*i+1);
+        ChildrenEdgeCopy(this, i,i + 4);
     }
 }
 
-void EdgeCopy(Cell * vox1, Cell * vox2)
-
+void ChildrenEdgeCopy(Octree * t, int c1, int c2)
 {
-    
+    if (t->children[c1].type == LEAF &&t->children[c2].type  == LEAF)
+    {
+        *t->children[c1].voxel = *t->children[c1].voxel + *t->children[c2].voxel;
+        *t->children[c1].voxel = *t->children[c1].voxel / 2.f;
+        *t->children[c2].voxel = *t->children[c1].voxel;
+    }
 }
+
 void EdgeCopy(Cell * brick1, Cell * brick2, int orient)
 {
     int index1, index2;
