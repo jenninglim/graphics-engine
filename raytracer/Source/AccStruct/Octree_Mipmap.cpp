@@ -1,4 +1,5 @@
 #include "Octree.h"
+#include <csignal>
 #include "glm/ext.hpp"
 
 using namespace glm;
@@ -34,6 +35,10 @@ void ChildrenEdgeCopy(Octree * t, int c1, int c2);
 
 void Octree::updateTexture()
 {
+    int index = 0;
+    int acc=0;
+    int other=0;
+
     if (this->type == NODE)
     {
         //BrickEdgeCopy();
@@ -41,8 +46,6 @@ void Octree::updateTexture()
         {
             this->brick[i] = Cell();
         }
-        int index = 0;
-
         for (int i = 0; i < 8; i ++)
         {
             index = (i % 4) + cubeOffset[i % 4] + 9*floor(i / 4);
@@ -52,20 +55,23 @@ void Octree::updateTexture()
             }
             else
             {
-                int acc = 0;
-                int other=0;
+                acc = 0;
+                other=0;
                 //compute Identity
                 for (int j = 0; j < 3; j++)
                 {
                     other = i+idenoffset[i][j];
                     if (this->children[other].type != EMPTY)
                     {
-                        //cout << this->children[other].voxel->occ << endl;
+                        
                         this->brick[index] = this->brick[index]+*this->children[other].voxel;
                         acc++;
                     }
                 }
+                if(acc>0)
+                {
                 this->brick[index] = this->brick[index] / (float) acc;
+                }
             }
         }
         this->mipmap();
@@ -89,6 +95,7 @@ void Octree::updateTexture()
                 cell = cell + * this->children[i].voxel;
                 count++;
             }
+            
             /*
             if (this->children[i].type!= EMPTY)
             {
@@ -96,8 +103,12 @@ void Octree::updateTexture()
                 count++;
             }
             */
+
         }
+        if (count >0)
+        {
         *this->voxel = cell / (float) count;
+        }
     }
 }
 
@@ -125,9 +136,23 @@ void Octree::mipmap()
             {
                 index = k + mipmapoffset[i][k] + j * mipmapoffset[4][i]; // edge assignment
                 this->brick[index] = this->brick[index + mipmapoffset[3][i]];
+if(isnan(brick[index].occ))
+            {
+                asm("int $3");
+            }
                 index = k + mipmapoffset[i][k] + j * mipmapoffset[4][i] + mipmapoffset[3][i]; // edge assignment
+if(isnan(brick[index].occ))
+            {
+                asm("int $3");
+            }
                 this->brick[index] = this->brick[index]+this->brick[index + mipmapoffset[3][i]];
                 this->brick[index] = this->brick[index]/ 2;
+                if(isnan(brick[index].occ))
+            {
+                asm("int $3");
+            }
+
+
             }
         }
     }
