@@ -27,16 +27,23 @@ Octree::Octree()
 Octree::Octree(vector<Object *> objects, BoundingVolume bv, Light l, BVH * bvh)
 {
     // Set up root tree.
-    this->boxHalfSize = (bv.max - bv.min) / 2.f  * (1+EPSILON);
+    this->boxHalfSize = (bv.max - bv.min) / 2.f *(1+2*EPSILON);
     this->centre = bv.min + boxHalfSize;
+    this->voxel = NULL;
+    this->brick = NULL;
+
     this->makeKids(objects, l, bvh, 0.); 
 }
 
 Octree::Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int depth, Light l, BVH * bvh)
 {
     // Set up root tree.
-    this->boxHalfSize = boxhalfsize * (1 + EPSILON);
+    this->type = EMPTY;
+    this->boxHalfSize = boxhalfsize *(1 + 2*EPSILON);
     this->centre = center;
+    this->voxel = NULL;
+    this->brick = NULL;
+
     this->makeKids(objects, l, bvh, depth); 
 }
 
@@ -49,7 +56,6 @@ void Octree::makeKids(vector<Object *> objects, Light l, BVH* bvh, int depth)
         {
             this->type = NODE;
             makeTexture(colour);
-
             this->children = new Octree[8];
             for (int i = 0; i < 8; i++)
             {
@@ -60,7 +66,7 @@ void Octree::makeKids(vector<Object *> objects, Light l, BVH* bvh, int depth)
                         l,
                         bvh);
             }
-            this->updateTexture();
+            updateTexture();
         }
         else
         {
@@ -118,12 +124,8 @@ bool Octree::collision(Ray r, Intersection &inter, int d_depth, int c_depth)
             dist = glm::l2Norm(vec3(r.initial), this->centre);
             if (dist < inter.distance)
             {
-                PrintBrick();
                 inter.position = vec4(this->centre,0);
                 inter.colour = vec3(this->brick[13].col);
-                cout << "AV" << endl;
-                cout << to_string(this->voxel->col) << endl;
-                cout << this->voxel->occ << endl;
                 inter.distance = dist;
                 return true;
             }

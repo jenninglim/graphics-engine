@@ -17,7 +17,7 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist);
 bool ClosestVoxelLeaf(Octree * root, const vec3 point, CloseVox &vox);
 bool insideCube(vec3 p, float e) { return abs(p.x) < 1 && abs(p.y) < 1 && abs(p.z);}
 
-#define AMB_RAY 5
+#define AMB_RAY 8
 Trace ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
 {
     Intersection inter;
@@ -25,8 +25,11 @@ Trace ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     vec3 e1, e2;
     vec4 point(point1, 0);
     vox.diff = 20;
-    float theta = DEG_TO_RAD(30);
-    float deg = DEG_TO_RAD(30);
+    float theta = DEG_TO_RAD(20);
+    float deg = DEG_TO_RAD(50);
+    float theta1 = DEG_TO_RAD(20);
+    float deg1 = DEG_TO_RAD(20);
+
 
     static const mat3 rotx(vec3(1,0,0),
             vec3(0,glm::cos(deg), glm::sin(deg)),
@@ -34,6 +37,13 @@ Trace ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     static const mat3 rotz(vec3(cos(deg),sin(deg),0),
             vec3(-sin(deg),cos(deg),0),
             vec3(0,0,1));
+    static const mat3 rotx1(vec3(cos(deg1),sin(deg1),0),
+            vec3(-sin(deg1),cos(deg1),0),
+            vec3(0,0,1));
+    static const mat3 rotz1(vec3(cos(deg1),sin(deg1),0),
+            vec3(-sin(deg1),cos(deg1),0),
+            vec3(0,0,1));
+
     
     // Find Basis Vectors
     e1 = findOthor(normal);
@@ -45,12 +55,15 @@ Trace ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     r[1] = Cone(point, glm::inverse(projMat) * rotz * inverse(rotx) * projMat* normal, theta); //0.025
     r[2] = Cone(point, glm::inverse(projMat) * inverse(rotz) * rotx  * projMat * normal,theta);
     r[3] = Cone(point, glm::inverse(projMat) * inverse(rotz) * inverse(rotx) *projMat*normal,theta);
-    r[4] = Cone(point, normal,theta);
+    r[4] = Cone(point, glm::inverse(projMat) * rotz1*rotx1 *projMat*normal,theta);
+    r[5] = Cone(point, glm::inverse(projMat) * rotz1*inverse(rotx1) *projMat*normal,theta);
+    r[6] = Cone(point, glm::inverse(projMat) * inverse(rotz1)*rotx1 *projMat*normal,theta);
+    r[7] = Cone(point, glm::inverse(projMat) * inverse(rotz1) * inverse(rotx1) *projMat*normal,theta);
 
 #if (AMB_RAY >1)
-    for (int i = 0; i < AMB_RAY - 1; i++)
+    for (int i = 0; i < AMB_RAY ; i++)
     {
-        r[i].initial = r[i].initial + 0.02f * vec4(normal,0);
+        r[i].initial = r[i].initial + 0.1f * vec4(normal,0);
     }
 #endif 
     
@@ -59,12 +72,16 @@ Trace ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     vec3 colorAcc = vec3(0);
     for (int i = 0; i < AMB_RAY; i ++)
     {
-        singleConeTrace(root, r[i], t, 2);
-        acc += glm::pow(1-t.occ,2);
-        colorAcc += t.colour;
+        singleConeTrace(root, r[i], t, 0.45);
+        acc += glm::pow(1-t.occ,1);
+        colorAcc += vec3(glm::pow(t.colour.x,2),
+                         glm::pow(t.colour.y,2),
+                         glm::pow(t.colour.z,2));
+
     }
     acc /= AMB_RAY;
     colorAcc /= AMB_RAY;
+
     Trace ret;
     ret.colour = colorAcc;
     ret.occ = acc;
@@ -106,7 +123,7 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
         vox.tree= NULL;
         vox.diff = 20;
         point = vec3(r.initial) + dist * r.direction;
-        weight = 1/(1+dist);
+        weight = 1/(1+5 *dist);
 
         if (!insideCube(point,0)) {
             a += glm::pow(weight,10) * (1-a);
@@ -114,12 +131,13 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
         }
         if (ClosestVoxel(root, point, dist * tantheta, vox))
         {
-    //        occ = vox.tree->interOcc(point);
+            //occ = vox.tree->interOcc(point);
             occ = vox.tree->voxel->occ;
             col = vox.tree->interCol(point);
+            //col = vox.tree->voxel->col;
             c += col * (vec3(1) - c)
                 * (1.f - occ) * (float) glm::pow(weight,2);
-            a += glm::pow(weight,1) *(1 - a) * glm::pow(occ,1);
+            a += glm::pow(weight,1) *(1 - a) * glm::pow(occ,2);
             a = 1 - glm::pow(1 - a, dist / glm::l2Norm(vox.tree->boxHalfSize)); // correction
 
             // Interpolate

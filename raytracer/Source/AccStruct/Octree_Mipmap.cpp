@@ -15,10 +15,19 @@ const static int weightoffset[8][4] = {{26,25,23,17},
                                 {24,25,21,15},
                                 {20,19,23,11},
                                 {18,19,21,9},
-                                {8,7,5,11},
+                                {8,7,5,18},
                                 {6,7,3,15},
                                 {2,1,5,11},
                                 {0,1,3,9}};
+
+const static int idenoffset[8][3] = {{1,2,4},
+                                      {-1,2,4},
+                                      {1,-2,4},
+                                      {-1,-2,4},
+                                      {1,2,-4},
+                                      {-1,2,-4},
+                                      {1,-2,-4},
+                                      {-1,-2,-4}};
 
 void EdgeCopy(Cell * brick1, Cell * brick2, int orient);
 void ChildrenEdgeCopy(Octree * t, int c1, int c2);
@@ -27,9 +36,8 @@ void Octree::updateTexture()
 {
     if (this->type == NODE)
     {
-        BrickEdgeCopy();
-        this->brick = new Cell[3 * 3 * 3];
-        for (int i = 0; i < 3 * 3 *3; i++)
+        //BrickEdgeCopy();
+                for (int i = 0; i < 3 * 3 *3; i++)
         {
             this->brick[i] = Cell();
         }
@@ -44,12 +52,26 @@ void Octree::updateTexture()
             }
             else
             {
-                //this->brick[index].
+                int acc = 0;
+                int other=0;
+                //compute Identity
+                for (int j = 0; j < 3; j++)
+                {
+                    other = i+idenoffset[i][j];
+                    if (this->children[other].type != EMPTY)
+                    {
+                        //cout << this->children[other].voxel->occ << endl;
+                        this->brick[index] = this->brick[index]+*this->children[other].voxel;
+                        acc++;
+                    }
+                }
+                this->brick[index] = this->brick[index] / (float) acc;
             }
         }
         this->mipmap();
 
         Cell cell = Cell();
+        int count =0;;
 
         for (int i = 0; i < 8; i++)
         {
@@ -59,24 +81,36 @@ void Octree::updateTexture()
                     (this->children[i].brick[weightoffset[i][0]] * 0.4f
                      + this->children[i].brick[weightoffset[i][1]] * 0.2f
                      + this->children[i].brick[weightoffset[i][2]] * 0.2f
-                     + this->children[i].brick[weightoffset[i][3]] * 0.2f) * 1/8.f;
+                     + this->children[i].brick[weightoffset[i][3]] * 0.2f);
+                count++;
             }
             else if (this->children[i].type == LEAF)
             {
-                cell= cell +  *this->voxel * 1.f/8.f;
+                cell = cell + * this->children[i].voxel;
+                count++;
             }
+            /*
+            if (this->children[i].type!= EMPTY)
+            {
+                cell = cell + *this->children[i].voxel;
+                count++;
+            }
+            */
         }
-        *this->voxel = cell;
+        *this->voxel = cell / (float) count;
     }
 }
 
 void Octree::makeTexture(const vec3 colour)
 {
     this->voxel = new Cell();
-    this->voxel->occ = 0;
     if (this->type == LEAF)
     {
         this->voxel->col = colour;
+    }
+    else if (this->type == NODE)
+    {
+        this->brick = new Cell[3 * 3 * 3];
     }
 }
 
