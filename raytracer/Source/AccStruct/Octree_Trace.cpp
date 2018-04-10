@@ -17,7 +17,7 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist);
 bool ClosestVoxelLeaf(Octree * root, const vec3 point, CloseVox &vox);
 bool insideCube(vec3 p, float e) { return abs(p.x) < 1 && abs(p.y) < 1 && abs(p.z);}
 
-#define AMB_RAY 8
+#define AMB_RAY 5
 Trace ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
 {
     Intersection inter;
@@ -25,8 +25,8 @@ Trace ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     vec3 e1, e2;
     vec4 point(point1, 0);
     vox.diff = 20;
-    float theta = DEG_TO_RAD(20);
-    float deg = DEG_TO_RAD(50);
+    float theta = DEG_TO_RAD(40);
+    float deg = DEG_TO_RAD(40);
     float theta1 = DEG_TO_RAD(20);
     float deg1 = DEG_TO_RAD(20);
 
@@ -55,10 +55,12 @@ Trace ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     r[1] = Cone(point, glm::inverse(projMat) * rotz * inverse(rotx) * projMat* normal, theta); //0.025
     r[2] = Cone(point, glm::inverse(projMat) * inverse(rotz) * rotx  * projMat * normal,theta);
     r[3] = Cone(point, glm::inverse(projMat) * inverse(rotz) * inverse(rotx) *projMat*normal,theta);
+#if (AMB_RAY == 8)
     r[4] = Cone(point, glm::inverse(projMat) * rotz1*rotx1 *projMat*normal,theta);
     r[5] = Cone(point, glm::inverse(projMat) * rotz1*inverse(rotx1) *projMat*normal,theta);
     r[6] = Cone(point, glm::inverse(projMat) * inverse(rotz1)*rotx1 *projMat*normal,theta);
     r[7] = Cone(point, glm::inverse(projMat) * inverse(rotz1) * inverse(rotx1) *projMat*normal,theta);
+#endif
 
 #if (AMB_RAY >1)
     for (int i = 0; i < AMB_RAY ; i++)
@@ -72,12 +74,9 @@ Trace ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l)
     vec3 colorAcc = vec3(0);
     for (int i = 0; i < AMB_RAY; i ++)
     {
-        singleConeTrace(root, r[i], t, 0.45);
-        acc += glm::pow(1-t.occ,1);
-        colorAcc += vec3(glm::pow(t.colour.x,2),
-                         glm::pow(t.colour.y,2),
-                         glm::pow(t.colour.z,2));
-
+        singleConeTrace(root, r[i], t, 2);
+        acc += glm::pow(1-t.occ,2);
+        colorAcc += t.colour;
     }
     acc /= AMB_RAY;
     colorAcc /= AMB_RAY;
@@ -131,8 +130,8 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
         }
         if (ClosestVoxel(root, point, dist * tantheta, vox))
         {
-            //occ = vox.tree->interOcc(point);
-            occ = vox.tree->voxel->occ;
+            occ = vox.tree->interOcc(point);
+            //occ = vox.tree->voxel->occ;
             col = vox.tree->interCol(point);
             //col = vox.tree->voxel->col;
             c += col * (vec3(1) - c)
