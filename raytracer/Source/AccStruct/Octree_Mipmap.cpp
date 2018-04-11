@@ -58,7 +58,7 @@ void Octree::updateTexture()
                 acc = 0;
                 other= 0;
                 //compute Identity
-                for (int j = 0; j < 9; j++)
+                for (int j = 0; j < 8; j++)
                 {
                     other = j;//+idenoffset[i][j];
                     if (this->children[other].type != EMPTY)

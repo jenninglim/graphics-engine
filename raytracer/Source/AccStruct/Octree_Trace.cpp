@@ -17,7 +17,7 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist);
 bool ClosestVoxelLeaf(Octree * root, const vec3 point, CloseVox &vox);
 bool insideCube(vec3 p, float e) { return abs(p.x) < 1 + EPSILON && abs(p.y) < 1 +EPSILON && abs(p.z) < 1 + EPSILON;}
 
-#define AMB_RAY 9
+#define AMB_RAY 5
 Trace ambientOcclusion(Octree * root, vec3 point, vec3 normal, Light l)
 {
     Intersection inter;
@@ -124,7 +124,7 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
         vox.tree= NULL;
         vox.diff = 20;
         point = vec3(r.initial) + dist * r.direction;
-        weight = 1/(1+5 *dist);
+        weight = 1/(1+10 *dist);
 
         if (!insideCube(point,0)) {
             a += glm::pow(weight, 10) * (1-a);
@@ -137,8 +137,8 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
             col = vox.tree->interCol(point);
             c += col * (vec3(1) - c)
                 * (1.f - occ) * (float) glm::pow(weight,2);
-            a += glm::pow(weight,1) *(1 - a) * glm::pow(occ,1);
-            a = 1 - glm::pow(1 - a, dist / glm::l2Norm(vox.tree->boxHalfSize)); // correction
+            a += glm::pow(weight,2) * (1 - a) * glm::pow(occ,1);
+//            a = 1 - glm::pow(1 - a, dist / glm::l2Norm(vox.tree->boxHalfSize)); // correction
 
             // Interpolate
             prev = next;
