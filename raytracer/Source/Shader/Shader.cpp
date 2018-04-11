@@ -1,5 +1,6 @@
 #include "Shader.h"
 #include "Collision.h"
+#include "Trace.h"
 #include <stack>
 
 #ifdef DEBUG
@@ -73,15 +74,26 @@ void fresnel(const Ray r, const Intersection i, float &kr)
     // kt = 1 - kr;
 }
 
-vec3 shootRay(const Ray r, vec3 &colour, Octree tree, BVH bvh, Light l)
+void shootRay(const Ray r, vec3 &colour, Octree tree, BVH bvh, Light l)
 {
     Intersection i;
-    Amb_t amb;
+    Trace trace;
     i.distance = 20;
+    i.colour = vec3(0.5);
     if (bvh.collision(r, i))
+        //(tree.collision(r,i, OCT_DEPTH-5,0)) //(bvh.collision(r, i))
     {
-        amb = ambientOcclusion(&tree, vec3(i.position),vec3(i.normal), l);
-        colour = 0.9f * colour * amb.occ + 0.1f * amb.occ*amb.colour;
+        trace = ambientOcclusion(&tree, vec3(i.position),vec3(i.normal), l);
+ //       colour= 1.f-vec3(castShadowCone(&tree, vec3(i.position), l, 0.5));
+
+//        colour= i.colour;
+        //colour = trace.colour;
+        colour = 0.9f * colour * trace.occ + 0.1f * trace.occ*trace.colour;
+        //colour = vec3(trace.occ);
+    }
+    else
+    {
+
     }
 }
 

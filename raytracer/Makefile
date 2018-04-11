@@ -6,8 +6,8 @@ SRC_DIRS ?= Source
 SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
-CXX := g++
-CC := g++
+CXX := g++-7
+CC := g++-7
 
 INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
@@ -18,10 +18,10 @@ SDL_CFLAGS := $(shell sdl2-config --cflags)
 GLM_CFLAGS := -I../glm/
 SDL_LDFLAGS := $(shell sdl2-config --libs)
 
-CPPFLAGS ?= $(INC_FLAGS) -pipe -Wall -Wno-switch -ggdb -g3 -O3
+CPPFLAGS ?= $(INC_FLAGS) -pipe -Wall -Wno-switch -g -g3 -ggdb -O3
 
 $(BUILD_DIR)/$(TARGET_EXEC): $(OBJS)
-	$(CC) $(CPPFLAGS) $(OBJS) -o $@ $(LDFLAGS) $(SDL_LDFLAGS)
+	$(CC) $(CPPFLAGS) -o $@ $(OBJS) $(LDFLAGS) $(SDL_LDFLAGS)
 
 # assembly
 $(BUILD_DIR)/%.s.o: %.s
@@ -36,7 +36,7 @@ $(BUILD_DIR)/%.c.o: %.c
 # c++ source
 $(BUILD_DIR)/%.cpp.o: %.cpp
 	$(MKDIR_P) $(dir $@)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@ $(SDL_CFLAGS) $(GLM_CFLAGS)
+	$(CXX) -g $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@ $(SDL_CFLAGS) $(GLM_CFLAGS)
 
 
 .PHONY: clean

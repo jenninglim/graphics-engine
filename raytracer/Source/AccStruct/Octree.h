@@ -7,26 +7,18 @@
 #include <vector>
 #include "Light.h"
 #include "BVH.h"
+#include "Cell.h"
 
 #define SCALING 5.f
 
 using glm::vec3;
 
+const static float VOXEL_SIZE = glm::pow(2.f,3)/ glm::pow(8.f, OCT_DEPTH);
+
 enum Type {
     LEAF,
     NODE,
     EMPTY,
-};
-
-struct Amb_t {
-    vec3 colour;
-    float occ;
-};
-
-struct Trace
-{
-    vec3 colour;
-    float occlusion;
 };
 
 class Octree
@@ -36,22 +28,25 @@ class Octree
         Octree * children;
         vec3 centre;
         vec3 boxHalfSize;
-        
-        vec3 colour;
-        vec3 directLight;
-        float occlusion;
 
-        bool toDivide(vector<Object *> objects, Light l);
+        Cell * brick;
+        Cell * voxel;
+
+        bool toDivide(vector<Object *> objects, vec3 &colour);
         void makeKids(vector<Object *> objects, Light l, BVH * bvh, int depth);
+        Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int depth, Light light, BVH * bvh);
+        void makeTexture(const vec3 colour);
+        void updateTexture();
+        void mipmap();
+        void BrickEdgeCopy();
+        void PrintBrick();
+        void LeafEdgeCopy();
+        float interOcc(vec3 point);
+        vec3 interCol(vec3 point);
 
     public:
         Octree();
         Octree(vector<Object *> objects, BoundingVolume bv, Light light, BVH * bvh);
-        Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int depth, Light light, BVH * bvh);
-        bool collision(Ray r, Intersection &inter);
+        bool collision(Ray r, Intersection &inter, int d_depth, int c_depth);
 };
-
-float castShadowCone(Octree * root, vec3 point, Light l, float theta);
-Amb_t ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l);
-
 #endif

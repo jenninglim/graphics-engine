@@ -5,6 +5,9 @@
 #include "Object.h"
 #include "BoundingVolume.h"
 #include "Intersection.h"
+#include <vector>
+
+class Object;
 
 class BVH
 {
@@ -15,7 +18,7 @@ class BVH
         Object * object;
         BoundingVolume bv;
         BVH();
-        BVH(vector<Object*> objects);
+        BVH(std::vector<Object *> objects);
         bool collision(Ray r, Intersection &closestI);
 };
 
