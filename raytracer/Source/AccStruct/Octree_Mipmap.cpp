@@ -41,7 +41,7 @@ void Octree::updateTexture()
 
     if (this->type == NODE)
     {
-        BrickEdgeCopy();
+        //BrickEdgeCopy();
         for (int i = 0; i < 3 * 3 *3; i++)
         {
             this->brick[i] = Cell();
@@ -56,14 +56,13 @@ void Octree::updateTexture()
             else
             {
                 acc = 0;
-                other=0;
+                other= 0;
                 //compute Identity
-                for (int j = 0; j < 3; j++)
+                for (int j = 0; j < 9; j++)
                 {
-                    other = i+idenoffset[i][j];
+                    other = j;//+idenoffset[i][j];
                     if (this->children[other].type != EMPTY)
                     {
-                        
                         this->brick[index] = this->brick[index]+*this->children[other].voxel;
                         acc++;
                     }
@@ -161,7 +160,7 @@ void Octree::PrintBrick()
 
 void Octree::BrickEdgeCopy()
 {    
-    LeafEdgeCopy(); 
+    //LeafEdgeCopy(); 
     for (int i = 0; i < 4; i++)
     {
         if (this->children[i + (int)floor(i/2) *2].type == NODE &&
