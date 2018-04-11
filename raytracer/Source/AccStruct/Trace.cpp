@@ -1,5 +1,22 @@
 #include "Trace.h"
 
+using namespace glm;
+
+Trace::Trace()
+{
+    this->col= vec3(0);
+    this->occ = 0.f;
+}
+
+Trace operator+(const Trace c1, const Trace c2)
+{
+    Trace t;
+    t.col = c1.col + c2.col;
+    t.occ = c1.occ + c2.occ;
+    return t;
+}
+
+
 bool insideCube(vec3 p, float e) { return abs(p.x) < 1 + EPSILON && abs(p.y) < 1 +EPSILON && abs(p.z) < 1 + EPSILON;}
 
 bool ClosestVoxel(Octree * root, const vec3 point, const float threshold, CloseVox &vox)

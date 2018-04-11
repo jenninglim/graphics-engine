@@ -66,7 +66,7 @@ void Octree::makeKids(vector<Object *> objects, Light l, BVH* bvh, int depth)
                         l,
                         bvh);
             }
-            updateTexture();
+            updateTexture(depth);
         }
         else
         {

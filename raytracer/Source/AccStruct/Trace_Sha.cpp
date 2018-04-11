@@ -1,53 +1,41 @@
 #include "Trace.h"
 
-float castShadowCone(Octree * root, vec3 point, Light direction, float l)
+void singleShadowConeTrace(Octree * root, Cone r, float &occ, float maxDist);
+
+float castShadowCone(Octree * root, vec3 point, vec3 normal, vec3 dir, float maxDist)
 {
-    /*
-    Trace t;
-    vec3 ab = vec3(l.position) - point;
-    Cone r(vec4(point,0), glm::normalize(ab), theta);
-    r.initial = r.initial + vec4(0.1f * r.direction,0);
-    singleConeTrace(root, r,t, 1);
-    return t.occ;
-    */
-    return 0.f;
+    float occ;
+    vec4 start = vec4(point + 0.03f * normal - 0.03 *dir ,0);
+    Cone r(start, dir, 0.3);
+    singleShadowConeTrace(root, r, occ, maxDist);
+    return 1-occ;
 }
 
-void singleShadowConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
+void singleShadowConeTrace(Octree * root, Cone r, float &occ, float maxDist)
 {
-    float tantheta = glm::tan(r.theta);
-    float start = 0.03;
-    float dist = start;
-
-    vec3 point = vec3(r.initial);
-    float a = 0.f;
+    const float tantheta = glm::tan(r.theta);
+    float dist = 0.03;
+    vec3 point;
     float delta = 0.f;
-    vec3 c = vec3(0);
 
     // For accumulation
-    float weight, occ;
-    vec3 col(0);
+    float weight;
     CloseVox vox;
-    while (dist < maxDist)
+    occ = 0;
+    while (dist < maxDist && occ < 1)
     {
         vox.tree= NULL;
         vox.diff = 20;
         point = vec3(r.initial) + dist * r.direction;
         weight = 1/(1+10 *dist);
-
         if (!insideCube(point,0)) {
-            a += glm::pow(weight, 10) * (1-a);
+            occ += glm::pow(weight, 10) * (1-occ);
             break;
         }
         if (ClosestVoxel(root, point, dist * tantheta, vox))
         {
-            occ = vox.tree->voxel->occ;
-            col = vox.tree->interCol(point);
-            c += col * (vec3(1) - c)
-                * (1.f - occ) * (float) glm::pow(weight,2);
-            a += glm::pow(weight,2) * (1 - a) * glm::pow(occ,1);
-
-           delta = glm::pow(dist,2);
+            occ += (1 - occ) * glm::pow(vox.tree->voxel->occ,1);
+            delta = glm::pow(dist,2);
         }
         else
         {
@@ -55,6 +43,5 @@ void singleShadowConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
         }
         dist += delta;
     }
-    t.colour = c;
-    t.occ = (a > 1) ? 1 : a;
+    occ = (occ > 1) ? 1 : occ;
 }

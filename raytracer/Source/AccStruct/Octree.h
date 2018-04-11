@@ -36,13 +36,14 @@ class Octree
         void makeKids(vector<Object *> objects, Light l, BVH * bvh, int depth);
         Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int depth, Light light, BVH * bvh);
         void makeTexture(const vec3 colour);
-        void updateTexture();
+        void updateTexture(int dept);
         void mipmap();
         void BrickEdgeCopy();
         void PrintBrick();
         void LeafEdgeCopy();
         float interOcc(vec3 point);
         vec3 interCol(vec3 point);
+        void AverageBrick();
 
     public:
         Octree();

@@ -33,7 +33,7 @@ const static int idenoffset[8][3] = {{1,2,4},
 void EdgeCopy(Cell * brick1, Cell * brick2, int orient);
 void ChildrenEdgeCopy(Octree * t, int c1, int c2);
 
-void Octree::updateTexture()
+void Octree::updateTexture(int depth)
 {
     int index = 0;
     int acc=0;
@@ -41,7 +41,7 @@ void Octree::updateTexture()
 
     if (this->type == NODE)
     {
-        //BrickEdgeCopy();
+        BrickEdgeCopy();
         for (int i = 0; i < 3 * 3 *3; i++)
         {
             this->brick[i] = Cell();
@@ -63,7 +63,7 @@ void Octree::updateTexture()
                     other = j;//+idenoffset[i][j];
                     if (this->children[other].type != EMPTY)
                     {
-                        this->brick[index] = this->brick[index]+*this->children[other].voxel;
+                        this->brick[index] = this->brick[index]+*this->children[other].voxel /(float) (OCT_DEPTH-depth+1);
                         acc++;
                     }
                 }
@@ -74,39 +74,7 @@ void Octree::updateTexture()
             }
         }
         this->mipmap();
-
-        Cell cell = Cell();
-        int count =0;;
-
-        for (int i = 0; i < 8; i++)
-        {
-            if (this->children[i].type == NODE)
-            {
-                cell = cell +
-                    (this->children[i].brick[weightoffset[i][0]] * 0.4f
-                     + this->children[i].brick[weightoffset[i][1]] * 0.2f
-                     + this->children[i].brick[weightoffset[i][2]] * 0.2f
-                     + this->children[i].brick[weightoffset[i][3]] * 0.2f);
-                count++;
-            }
-            else if (this->children[i].type == LEAF)
-            {
-                cell = cell + * this->children[i].voxel;
-                count++;
-            }
-            
-            /*
-            if (this->children[i].type!= EMPTY)
-            {
-                cell = cell + *this->children[i].voxel;
-                count++;
-            }
-            */
-        }
-        if (count >0)
-        {
-            *this->voxel = cell / (float) count;
-        }
+        this->AverageBrick();
     }
 }
 
@@ -141,23 +109,58 @@ void Octree::mipmap()
         }
     }
 }
-
-void Octree::PrintBrick()
+void Octree::AverageBrick()
 {
-    for (int i = 0; i < 3; i++)
+    Cell cell = Cell();
+    int count =0;;
+
+    for (int i = 0; i < 8; i++)
     {
-        for(int j=0; j <3; j++)
+        if (this->children[i].type == NODE)
         {
-            for(int k=0; k<3; k++)
+            cell = cell +
+                (this->children[i].brick[weightoffset[i][0]] * 0.4f
+                 + this->children[i].brick[weightoffset[i][1]] * 0.2f
+                 + this->children[i].brick[weightoffset[i][2]] * 0.2f
+                 + this->children[i].brick[weightoffset[i][3]] * 0.2f);
+            count++;
+        }
+        else if (this->children[i].type == LEAF)
+        {
+            cell = cell + * this->children[i].voxel;
+            count++;
+        }
+
+           if (this->children[i].type!= EMPTY)
+           {
+           cell = cell + *this->children[i].voxel;
+           count++;
+           }
+    }
+    if (count >0)
+    {
+        *this->voxel = cell / (float) count;
+    }
+    /*
+    if (this->type == NODE)
+    {
+        *this->voxel = cell;
+
+        for (int i = 0; i < 8; i++)
+        {
+            if (this->children[i].type != EMPTY)
             {
-                 cout << to_string(this->brick[i*9+j*3+k].col) << " ";
-                 cout << (this->brick[i*9+j*3+k].occ) << " ";
+                *this->voxel = *this->voxel + *this->children[i].voxel;
+                count ++;
             }
-            cout << endl;
+        }
+        if (count >0)
+        {
+            *this->voxel = cell / (float) count;
         }
     }
+    */
 }
-
 void Octree::BrickEdgeCopy()
 {    
     //LeafEdgeCopy(); 
@@ -169,6 +172,8 @@ void Octree::BrickEdgeCopy()
             EdgeCopy(this->children[i+ (int)floor(i/2) * 2].brick,
                     this->children[i+2+ (int)floor(i/2) *2].brick,
                     0);
+            this->children[i+ (int)floor(i/2) * 2].AverageBrick();
+            this->children[i+2+ (int)floor(i/2) * 2].AverageBrick();
         }
 
         if (this->children[2*i].type == NODE &&
@@ -177,6 +182,8 @@ void Octree::BrickEdgeCopy()
             EdgeCopy(this->children[2*i].brick,
                     this->children[2*i+1].brick,
                     1);
+            this->children[2*i].AverageBrick();
+            this->children[2*i+1].AverageBrick();
         }
 
         if (this->children[i].type == NODE &&
@@ -185,6 +192,8 @@ void Octree::BrickEdgeCopy()
             EdgeCopy(this->children[i].brick,
                     this->children[i+4].brick,
                     2);
+            this->children[i].AverageBrick();
+            this->children[i+4].AverageBrick();
         }
     }
 }
@@ -229,5 +238,21 @@ void EdgeCopy(Cell * brick1, Cell * brick2, int orient)
         brick1[index1] = brick1[index1]/ 2;
 
         brick2[index2] = brick1[index1];
+    }
+}
+
+void Octree::PrintBrick()
+{
+    for (int i = 0; i < 3; i++)
+    {
+        for(int j=0; j <3; j++)
+        {
+            for(int k=0; k<3; k++)
+            {
+                 cout << to_string(this->brick[i*9+j*3+k].col) << " ";
+                 cout << (this->brick[i*9+j*3+k].occ) << " ";
+            }
+            cout << endl;
+        }
     }
 }

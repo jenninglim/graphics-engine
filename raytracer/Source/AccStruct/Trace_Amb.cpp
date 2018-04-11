@@ -7,14 +7,14 @@ using namespace glm;
 
 void singleAmbConeTrace(Octree * root, Cone r, Trace &t, float maxDist);
 
-#define AMB_RAY 5
-Trace ambientOcclusion(Octree * root, vec3 point, vec3 normal, Light l)
+#define AMB_RAY 9
+Trace ambientOcclusion(Octree * root, vec3 point, vec3 normal)
 {
     Intersection inter;
     CloseVox vox;
     vox.diff = 20;
 
-    const float theta = 0.3125;
+    const float theta = AMBIEN_CONE;
 
     // Find Basis Vectors
     const vec3 e1 = findOthor(normal);
@@ -28,9 +28,13 @@ Trace ambientOcclusion(Octree * root, vec3 point, vec3 normal, Light l)
 
     // Front Cone
     Cone r[AMB_RAY];
+
+#if (AMB_RAY >=1)
     //Front Cone
     r[0] = Cone(initial + vec4(cone_offset * normal,0), normal, theta); //0.03
+#endif
 
+#if (AMB_RAY >=5)
     // Side Cone
     const vec3 s1 = mix(normal, e1, 0.5f);
     const vec3 s2 = mix(normal, -e1, 0.5f);
@@ -41,6 +45,7 @@ Trace ambientOcclusion(Octree * root, vec3 point, vec3 normal, Light l)
     r[2] = Cone(initial - vec4(cone_offset * e1,0), s2, theta); //0.03
     r[3] = Cone(initial + vec4(cone_offset * e2,0), s3, theta); //0.03
     r[4] = Cone(initial - vec4(cone_offset * e2,0), s4, theta); //0.03
+#endif
 
     // Corner Cone?
 #if (AMB_RAY == 9)
@@ -65,13 +70,13 @@ Trace ambientOcclusion(Octree * root, vec3 point, vec3 normal, Light l)
     {
         singleAmbConeTrace(root, r[i], t, 1);
         acc += glm::pow(1-t.occ,2);
-        colorAcc += t.colour;
+        colorAcc += t.col;
     }
     acc /= AMB_RAY;
     colorAcc /= AMB_RAY;
 
     Trace ret;
-    ret.colour = colorAcc;
+    ret.col = colorAcc;
     ret.occ = acc;
     return ret;
 }
@@ -99,7 +104,6 @@ void singleAmbConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
         weight = 1/(1+10 *dist);
 
         if (!insideCube(point,0)) {
-            a += glm::pow(weight, 10) * (1-a);
             break;
         }
         if (ClosestVoxel(root, point, dist * tantheta, vox))
@@ -118,6 +122,6 @@ void singleAmbConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
         }
         dist += delta;
     }
-    t.colour = c;
+    t.col = c;
     t.occ = (a > 1) ? 1 : a;
 }
