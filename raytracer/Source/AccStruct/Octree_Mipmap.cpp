@@ -114,6 +114,7 @@ void Octree::AverageBrick()
     Cell cell = Cell();
     int count =0;;
 
+    /*
     for (int i = 0; i < 8; i++)
     {
         if (this->children[i].type == NODE)
@@ -141,25 +142,24 @@ void Octree::AverageBrick()
     {
         *this->voxel = cell / (float) count;
     }
-    /*
+    */
+
     if (this->type == NODE)
     {
         *this->voxel = cell;
-
         for (int i = 0; i < 8; i++)
         {
             if (this->children[i].type != EMPTY)
             {
-                *this->voxel = *this->voxel + *this->children[i].voxel;
+                *this->voxel = *this->voxel + this->brick[i];
                 count ++;
             }
         }
         if (count >0)
         {
-            *this->voxel = cell / (float) count;
+            *this->voxel = *this->voxel/ (float) count;
         }
     }
-    */
 }
 void Octree::BrickEdgeCopy()
 {    
@@ -175,7 +175,9 @@ void Octree::BrickEdgeCopy()
             this->children[i+ (int)floor(i/2) * 2].AverageBrick();
             this->children[i+2+ (int)floor(i/2) * 2].AverageBrick();
         }
-
+    }
+    for (int i = 0; i < 4; i++)
+    {
         if (this->children[2*i].type == NODE &&
                 this->children[2*i+1].type == NODE)
         {
@@ -185,7 +187,9 @@ void Octree::BrickEdgeCopy()
             this->children[2*i].AverageBrick();
             this->children[2*i+1].AverageBrick();
         }
-
+    }
+    for (int i = 0; i < 4; i++)
+    {
         if (this->children[i].type == NODE &&
                 this->children[i+4].type == NODE)
         {
@@ -200,7 +204,7 @@ void Octree::BrickEdgeCopy()
 
 const static int edgeoffsets[3][3] = {{6,1,9}, //
                                   {2,3,9}, // LEFT/RIGHT
-                                  {9,1,3}}; // TOP/DOWN
+                                  {18,1,3}}; // TOP/DOWN
 
 
 void Octree::LeafEdgeCopy()
