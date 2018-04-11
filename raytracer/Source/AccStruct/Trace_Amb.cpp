@@ -5,14 +5,7 @@
 
 using namespace glm;
 
-struct CloseVox{
-    Octree * tree;
-    float diff;
-};
-
-bool ClosestVoxel(Octree * root, const vec3 point, const float threshold, CloseVox &voxel);
-void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist);
-bool insideCube(vec3 p, float e) { return abs(p.x) < 1 + EPSILON && abs(p.y) < 1 +EPSILON && abs(p.z) < 1 + EPSILON;}
+void singleAmbConeTrace(Octree * root, Cone r, Trace &t, float maxDist);
 
 #define AMB_RAY 5
 Trace ambientOcclusion(Octree * root, vec3 point, vec3 normal, Light l)
@@ -70,7 +63,7 @@ Trace ambientOcclusion(Octree * root, vec3 point, vec3 normal, Light l)
     vec3 colorAcc = vec3(0);
     for (int i = 0; i < AMB_RAY; i ++)
     {
-        singleConeTrace(root, r[i], t, 1);
+        singleAmbConeTrace(root, r[i], t, 1);
         acc += glm::pow(1-t.occ,2);
         colorAcc += t.colour;
     }
@@ -83,20 +76,7 @@ Trace ambientOcclusion(Octree * root, vec3 point, vec3 normal, Light l)
     return ret;
 }
 
-float castShadowCone(Octree * root, vec3 point, Light direction, float l)
-{
-    /*
-    Trace t;
-    vec3 ab = vec3(l.position) - point;
-    Cone r(vec4(point,0), glm::normalize(ab), theta);
-    r.initial = r.initial + vec4(0.1f * r.direction,0);
-    singleConeTrace(root, r,t, 1);
-    return t.occ;
-    */
-    return 0.f;
-}
-
-void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
+void singleAmbConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
 {
     float tantheta = glm::tan(r.theta);
     float start = 0.03;
@@ -140,39 +120,4 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
     }
     t.colour = c;
     t.occ = (a > 1) ? 1 : a;
-}
-
-bool ClosestVoxel(Octree * root, const vec3 point, const float threshold, CloseVox &vox)
-{
-    bool found = false;
-    vec3 min, max;
-    max = root->centre + root->boxHalfSize;
-    min = root->centre - root->boxHalfSize;
-    float norm;
-    if (pointInsideAABB(point, min, max) && !found)
-    {
-        norm = glm::l2Norm(root->boxHalfSize);
-        if (root->type == NODE && norm < threshold)
-
-        {
-            if (glm::abs(norm - threshold) < vox.diff)
-            {
-                vox.tree = root;
-                vox.diff = glm::abs(norm-threshold);
-                return true;
-            }
-        }
-        else if (root->type == NODE)
-        {
-            for (int i = 0; i < 8; i++)
-            {
-                found |= ClosestVoxel(&root->children[i], point, threshold, vox);
-            }
-        }
-        else if (root->type == EMPTY)
-        {
-            return false;
-        }
-    }
-    return found;
 }
