@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include <vector>
 #include <string.h>
+#include <stdio.h>
 
 using namespace std;
 using glm::vec4;
