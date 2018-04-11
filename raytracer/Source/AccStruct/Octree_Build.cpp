@@ -31,11 +31,17 @@ Octree::Octree(vector<Object *> objects, BoundingVolume bv, Light l, BVH * bvh)
     this->centre = bv.min + boxHalfSize;
     this->voxel = NULL;
     this->brick = NULL;
-
+    this->parent = NULL;
     this->makeKids(objects, l, bvh, 0.); 
 }
 
-Octree::Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int depth, Light l, BVH * bvh)
+Octree::Octree(vector<Object *> objects,
+        vec3 center,
+        vec3 boxhalfsize,
+        int depth,
+        Light l,
+        BVH * bvh,
+        Octree * parent)
 {
     // Set up root tree.
     this->type = EMPTY;
@@ -43,6 +49,7 @@ Octree::Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int dept
     this->centre = center;
     this->voxel = NULL;
     this->brick = NULL;
+    this->parent = parent;
 
     this->makeKids(objects, l, bvh, depth); 
 }
@@ -64,7 +71,8 @@ void Octree::makeKids(vector<Object *> objects, Light l, BVH* bvh, int depth)
                         this->boxHalfSize/2.f,
                         depth+1,
                         l,
-                        bvh);
+                        bvh,
+                        this);
             }
             updateTexture(depth);
         }

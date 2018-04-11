@@ -7,7 +7,7 @@ using namespace glm;
 
 void singleAmbConeTrace(Octree * root, Cone r, Trace &t, float maxDist);
 
-#define AMB_RAY 9
+#define AMB_RAY 5
 Trace ambientOcclusion(Octree * root, vec3 point, vec3 normal)
 {
     Intersection inter;
