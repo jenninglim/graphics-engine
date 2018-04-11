@@ -1,5 +1,6 @@
 #include "Shader.h"
 #include "Collision.h"
+#include "Trace.h"
 #include <stack>
 
 #ifdef DEBUG

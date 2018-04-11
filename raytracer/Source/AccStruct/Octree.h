@@ -21,12 +21,6 @@ enum Type {
     EMPTY,
 };
 
-struct Trace
-{
-    vec3 colour;
-    float occ;
-};
-
 class Octree
 {
     public:
@@ -55,8 +49,4 @@ class Octree
         Octree(vector<Object *> objects, BoundingVolume bv, Light light, BVH * bvh);
         bool collision(Ray r, Intersection &inter, int d_depth, int c_depth);
 };
-
-float castShadowCone(Octree * root, vec3 point, Light l, float theta);
-Trace ambientOcclusion(Octree * root, vec3 point1, vec3 normal, Light l);
-
 #endif

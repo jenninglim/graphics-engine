@@ -1,6 +1,4 @@
-#include "glm/ext.hpp"
-#include "Octree.h"
-#include "Config.h"
+#include "Trace.h"
 #include "MyMath.h"
 
 #define MAX_DEPTH OCT_DEPTH
@@ -14,7 +12,6 @@ struct CloseVox{
 
 bool ClosestVoxel(Octree * root, const vec3 point, const float threshold, CloseVox &voxel);
 void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist);
-bool ClosestVoxelLeaf(Octree * root, const vec3 point, CloseVox &vox);
 bool insideCube(vec3 p, float e) { return abs(p.x) < 1 + EPSILON && abs(p.y) < 1 +EPSILON && abs(p.z) < 1 + EPSILON;}
 
 #define AMB_RAY 5
@@ -102,7 +99,7 @@ float castShadowCone(Octree * root, vec3 point, Light direction, float l)
 void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
 {
     float tantheta = glm::tan(r.theta);
-    float start = 0.003;
+    float start = 0.03;
     float dist = start;
 
     vec3 point = vec3(r.initial);
@@ -114,11 +111,6 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
     float weight, occ;
     vec3 col(0);
     CloseVox vox;
-
-    // For intepolation.
-    Octree * prev = NULL;
-    Octree * next = NULL;
-    float diff, fract, d;
     while (dist < maxDist)
     {
         vox.tree= NULL;
@@ -132,37 +124,13 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
         }
         if (ClosestVoxel(root, point, dist * tantheta, vox))
         {
-     //       occ = vox.tree->interOcc(point);
             occ = vox.tree->voxel->occ;
             col = vox.tree->interCol(point);
             c += col * (vec3(1) - c)
                 * (1.f - occ) * (float) glm::pow(weight,2);
             a += glm::pow(weight,2) * (1 - a) * glm::pow(occ,1);
-//            a = 1 - glm::pow(1 - a, dist / glm::l2Norm(vox.tree->boxHalfSize)); // correction
 
-            // Interpolate
-            prev = next;
-            next = vox.tree;
-            /*
-            if (prev != NULL)
-            {
-                d = l2Norm(
-                    next->boxHalfSize - prev->boxHalfSize) * 0.5f;
-                fract = (d - l2Norm(prev->boxHalfSize));
-
-                if (fract <= 0)
-                {
-                }
-                else
-                {
-                    fract /= (l2Norm(next->boxHalfSize) - l2Norm(prev->boxHalfSize));
-                    a += weight * (next->voxel->occ - prev->voxel->occ) * fract;
-                }
-                //a = 1 - glm::pow(1 - a, l2Norm(prev->centre + d) / d);
-            }
-            */
-
-            delta = glm::pow(dist,2);
+           delta = glm::pow(dist,2);
         }
         else
         {
@@ -170,7 +138,6 @@ void singleConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
         }
         dist += delta;
     }
-
     t.colour = c;
     t.occ = (a > 1) ? 1 : a;
 }
@@ -201,35 +168,6 @@ bool ClosestVoxel(Octree * root, const vec3 point, const float threshold, CloseV
             {
                 found |= ClosestVoxel(&root->children[i], point, threshold, vox);
             }
-        }
-        else if (root->type == EMPTY)
-        {
-            return false;
-        }
-    }
-    return found;
-}
-
-bool ClosestVoxelLeaf(Octree * root, const vec3 point, CloseVox &vox)
-{
-    bool found = false;
-    vec3 min, max;
-    max = root->centre + root->boxHalfSize;
-    min = root->centre - root->boxHalfSize;
-    if (pointInsideAABB(point, min, max) && !found)
-    {
-        if (root->type == NODE)
-        {
-            vox.tree = root;
-            for (int i = 0; i < 8; i++)
-            {
-                found |= ClosestVoxelLeaf(&root->children[i], point, vox);
-            }
-        }
-        else if (root->type == LEAF)
-        {
-            vox.tree = root;
-            return true;
         }
         else if (root->type == EMPTY)
         {
