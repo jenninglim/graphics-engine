@@ -81,7 +81,6 @@ void Octree::updateTexture()
 
         for (int i = 0; i < 8; i++)
         {
-            /*
             if (this->children[i].type == NODE)
             {
                 cell = cell +
@@ -96,13 +95,14 @@ void Octree::updateTexture()
                 cell = cell + * this->children[i].voxel;
                 count++;
             }
-            */
             
+            /*
             if (this->children[i].type!= EMPTY)
             {
                 cell = cell + *this->children[i].voxel;
                 count++;
             }
+            */
         }
         if (count >0)
         {
@@ -135,23 +135,9 @@ void Octree::mipmap()
             {
                 index = k + mipmapoffset[i][k] + j * mipmapoffset[4][i]; // edge assignment
                 this->brick[index] = this->brick[index + mipmapoffset[3][i]];
-if(isnan(brick[index].occ))
-            {
-                asm("int $3");
-            }
                 index = k + mipmapoffset[i][k] + j * mipmapoffset[4][i] + mipmapoffset[3][i]; // edge assignment
-if(isnan(brick[index].occ))
-            {
-                asm("int $3");
-            }
                 this->brick[index] = this->brick[index]+this->brick[index + mipmapoffset[3][i]];
                 this->brick[index] = this->brick[index]/ 2;
-                if(isnan(brick[index].occ))
-            {
-                asm("int $3");
-            }
-
-
             }
         }
     }
