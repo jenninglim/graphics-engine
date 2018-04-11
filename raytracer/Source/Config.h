@@ -6,8 +6,8 @@
 #define VOL_APPROX_INT 0.01
 
 // Screen Setup
-#define SCREEN_WIDTH 200
-#define SCREEN_HEIGHT 200
+#define SCREEN_WIDTH 300
+#define SCREEN_HEIGHT 300
 #define FULLSCREEN_MODE true
 
 // Camera
@@ -38,7 +38,6 @@
 
 // OCTREE
 #define OCT_DEPTH 9
-
 // CONE ANGLES
 #define SHADOW_ANG 0.5
 #endif

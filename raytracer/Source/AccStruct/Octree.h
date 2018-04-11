@@ -13,6 +13,8 @@
 
 using glm::vec3;
 
+const static float VOXEL_SIZE = glm::pow(2.f,3)/ glm::pow(8.f, OCT_DEPTH);
+
 enum Type {
     LEAF,
     NODE,
