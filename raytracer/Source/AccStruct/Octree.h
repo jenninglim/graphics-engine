@@ -8,6 +8,9 @@
 #include "Light.h"
 #include "BVH.h"
 #include "Cell.h"
+#include <queue>
+
+#define NEIGHBOURS 6
 
 using glm::vec3;
 
@@ -24,7 +27,7 @@ class Octree
     public:
         Type type;
         Octree * children;
-        Octree * parent;
+        Octree * neighbours[6];
         vec3 centre;
         vec3 boxHalfSize;
 
@@ -32,15 +35,19 @@ class Octree
         Cell * voxel;
 
     public:
-        bool toDivide(vector<Object *> objects, vec3 &colour);
-        void makeKids(vector<Object *> objects, Light l, BVH * bvh, int depth);
-        Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int depth, Light light, BVH * bvh, Octree * parent);
+        // Building Octree Ops
+        bool toDivide(vec3 &colour);
+        void AssignType();
+        void connectKids();
+        void makeKids(int depth, queue<Octree *> &q);
+
         void makeTexture(const vec3 colour);
         void updateTexture(int dept);
         void mipmap();
         void BrickEdgeCopy();
         void PrintBrick();
         void LeafEdgeCopy();
+
         float interOcc(vec3 point);
         vec3 interCol(vec3 point);
         void AverageBrick();

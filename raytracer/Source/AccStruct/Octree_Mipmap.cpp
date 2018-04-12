@@ -80,14 +80,17 @@ void Octree::updateTexture(int depth)
 
 void Octree::makeTexture(const vec3 colour)
 {
-    this->voxel = new Cell();
-    if (this->type == LEAF)
+    if (this->type != EMPTY)
     {
-        this->voxel->col = colour;
-    }
-    else if (this->type == NODE)
-    {
-        this->brick = new Cell[3 * 3 * 3];
+        this->voxel = new Cell();
+        if (this->type == LEAF)
+        {
+            this->voxel->col = colour;
+        }
+        else if (this->type == NODE)
+        {
+            this->brick = new Cell[3 * 3 * 3];
+        }
     }
 }
 
