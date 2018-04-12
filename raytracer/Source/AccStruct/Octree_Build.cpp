@@ -48,7 +48,7 @@ Octree::Octree(vector<Object *> objects, BoundingVolume bv, Light l, BVH * bvh)
     int depth =0;
 
     // Set up root tree.
-    this->boxHalfSize = (bv.max - bv.min) / 2.f * (1 + 2 * EPSILON);
+    this->boxHalfSize = (bv.max - bv.min) / 2.f;
     this->centre = bv.min + boxHalfSize;
     this->voxel = NULL;
     this->brick = NULL;
@@ -100,7 +100,7 @@ void Octree::makeKids(int depth, queue<Octree *> &q)
         {
             // Assign centres and halfsizes
             this->children[i].centre = offsets[i]
-                * this->boxHalfSize/2.f;
+                * this->boxHalfSize/2.f + this->centre;
             this->children[i].boxHalfSize =  this->boxHalfSize /2.f;
             this->children[i].AssignType();
 
@@ -157,13 +157,10 @@ void ConnectNodes( Octree * t1, Octree * t2)
 // In: Centre and HalfBox
 void Octree::AssignType()
 {
-    float size;
     vec3 colour;
     if (this->toDivide(colour))
     {
-        this->makeTexture(colour);
-        size = l2Norm(this->boxHalfSize);
-        if (size - VOXEL_SIZE > EPSILON)
+        if (this->boxHalfSize[0] - VOXEL_SIZE > 0)
         {
             this->type = NODE;
             this->children = new Octree[8];
@@ -172,12 +169,14 @@ void Octree::AssignType()
         {
             this->type = LEAF;
         }
+        this->makeTexture(colour);
     }
     else
     {
         this->type = EMPTY;
     }
 }
+
 // Connect is good.
 // Assumes Octree is typed.
 void Octree::connectKids()
@@ -212,7 +211,7 @@ bool Octree::collision(Ray r, Intersection &inter, int d_depth, int c_depth)
     min = this->centre - this->boxHalfSize;
     float dist = 0;
 
-    if (d_depth == c_depth && this->type != EMPTY)
+    if (this->type == LEAF)
     {
         max = this->centre + this->boxHalfSize;
         min = this->centre - this->boxHalfSize;
@@ -222,7 +221,7 @@ bool Octree::collision(Ray r, Intersection &inter, int d_depth, int c_depth)
             if (dist < inter.distance)
             {
                 inter.position = vec4(this->centre,0);
-                inter.colour = vec3(this->voxel->occ);
+                inter.colour = vec3(this->voxel->col);
                 inter.distance = dist;
                 return true;
             }
