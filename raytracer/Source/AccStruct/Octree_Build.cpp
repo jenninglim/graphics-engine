@@ -13,10 +13,10 @@
 
 const static vec3 offsets[8] = { vec3(1,1,1),
                             vec3(-1,1,1),
-                            vec3(1,-1,1),
-                            vec3(-1,-1,1),
                             vec3(1,1,-1),
                             vec3(-1,1,-1),
+                            vec3(1,-1,1),
+                            vec3(-1,-1,1),
                             vec3(1,-1,-1),
                             vec3(-1,-1,-1)};
 
@@ -78,7 +78,6 @@ Octree::Octree(vector<Object *> objects, BoundingVolume bv, Light l, BVH * bvh)
                     && current->type == NODE
                     && current->neighbours[i]->type == NODE)
             {
-        asm("int $1");
                 ConnectNodes(current, current->neighbours[i], i);
             }
         }
@@ -128,7 +127,6 @@ void ConnectNodes( Octree * t1, Octree * t2, int orient)
         index1 = orientoffsets[orient][i];
         index2 = childrenoffsets[index1][(int) floor(orient/2)];
         ConnectKid(&t1->children[index1], &t2->children[index2], orient);
-asm("int $1");
     }
 }
 
