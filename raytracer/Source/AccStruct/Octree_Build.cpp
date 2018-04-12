@@ -20,18 +20,18 @@ const static vec3 offsets[8] = { vec3(1,1,1),
                             vec3(1,-1,-1),
                             vec3(-1,-1,-1)};
 
-const static int connectOffset[8][3] = {{1,2,4}, // 0
-                                         {0,3,5}, // 1
-                                         {3,0,6}, // 2
-                                         {2,1,7}, // 3
-                                         {5,6,0}, // 4
-                                         {4,7,1}, // 5
-                                         {7,4,2}, // 6
-                                         {6,5,3}};// 7
+const static int connectOffset[8][3] = {{2,1,4}, // 0
+                                        {3,0,5}, // 1
+                                        {0,3,6}, // 2
+                                        {1,2,7}, // 3
+                                        {6,5,0}, // 4
+                                        {7,4,1}, // 5
+                                        {4,7,2}, // 6
+                                        {5,6,3}};// 7
 
 
 void ConnectKid(Octree * kid1, Octree * kid2, int orient);
-void ConnectNodes(Octree * t1, Octree * t2 );
+void ConnectNodes(Octree * t1, Octree * t2, int orient);
 
 Octree::Octree()
 {
@@ -79,10 +79,9 @@ Octree::Octree(vector<Object *> objects, BoundingVolume bv, Light l, BVH * bvh)
                     && current->type == NODE
                     && current->neighbours[i]->type == NODE)
             {
-                ConnectNodes(current, current->neighbours[i]);
+               // ConnectNodes(current, current->neighbours[i], i);
             }
         }
-
     }
 }
 
@@ -112,39 +111,22 @@ void Octree::makeKids(int depth, queue<Octree *> &q)
     }
 }
 
+const static int orientoffsets[6][4] = {{0,1,4,5},
+                                       {2,3,6,7},
+                                       {1,3,5,7},
+                                       {0,2,4,6},
+                                       {0,1,2,3},
+                                       {4,5,6,7}};
+
 // Connects Two Octrees Children
-void ConnectNodes( Octree * t1, Octree * t2)
+void ConnectNodes( Octree * t1, Octree * t2, int orient)
 {
-    int index, orient, orientoffset;
-    if (t1 != t2)
+    int index1, index2; 
+    for (int i = 0; i < 4; i++)
     {
-        orientoffset = 1;
-    }
-    else
-    {
-        orientoffset = 0;
-    }
-
-    for (int i = 0; i < 8; i++)
-    {
-        for (int j = 0; j < 3; j++)
-        {
-            index = connectOffset[i][j];
-            if (j == 0) // 2/3
-            {
-                orient = 2 + (orientoffset+ i % 2) % 2;
-            }
-            else if (j == 1) // 0/1
-            {
-                orient = 1 - (orientoffset + int(i / 2) % 2) %2;
-            }
-            else if (j == 2) // 4/5
-            {
-                orient = 5 - (orientoffset + (int) floor(i / 4)) % 2;
-            }
-
-            ConnectKid(&t1->children[i], &t2->children[index], orient);
-        }
+        index1 = orientoffsets[orient][i];
+        index2 = connectOffset[index1][(int) floor(orient/2)];
+        ConnectKid(&t1->children[index1], &t2->children[index2], orient);
     }
 }
 
@@ -176,7 +158,10 @@ void Octree::AssignType()
 // Assumes Octree is typed.
 void Octree::connectKids()
 {
-    ConnectNodes(this, this);
+    for(int i = 0; i < 6; i++)
+    {
+        ConnectNodes(this, this, i);
+    }
 }
 
 void ConnectKid(Octree * kid1, Octree * kid2, int orient)
@@ -216,7 +201,7 @@ bool Octree::collision(Ray r, Intersection &inter, int d_depth, int c_depth)
             if (dist < inter.distance)
             {
                 inter.position = vec4(this->centre,0);
-                inter.colour = vec3(this->voxel->occ);
+                inter.colour = vec3(this->voxel->col);
                 inter.distance = dist;
                 return true;
             }
