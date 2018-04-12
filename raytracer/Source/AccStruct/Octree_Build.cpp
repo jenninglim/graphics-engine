@@ -206,7 +206,7 @@ bool Octree::collision(Ray r, Intersection &inter, int d_depth, int c_depth)
     min = this->centre - this->boxHalfSize;
     float dist = 0;
 
-    if (this->type == LEAF)
+    if (d_depth == c_depth && this->type != EMPTY)
     {
         max = this->centre + this->boxHalfSize;
         min = this->centre - this->boxHalfSize;
