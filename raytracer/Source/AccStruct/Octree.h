@@ -16,6 +16,8 @@ using glm::vec3;
 
 const static float VOXEL_SIZE = 1/ glm::pow(2.f, OCT_DEPTH);
 
+static vector<Object *> * m_objects;
+
 enum Type {
     LEAF,
     NODE,
@@ -42,7 +44,7 @@ class Octree
         void makeKids(int depth, queue<Octree *> &q);
 
         void makeTexture(const vec3 colour);
-        void updateTexture(Light l);
+        void updateTexture(Light l, BVH * bvh);
         void mipmap();
         void BrickEdgeCopy();
         void PrintBrick();

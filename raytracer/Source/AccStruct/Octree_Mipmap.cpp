@@ -33,18 +33,57 @@ const static int idenoffset[8][3] = {{1,2,4},
 void EdgeCopy(Cell * brick1, Cell * brick2, int orient);
 void ChildrenEdgeCopy(Octree * t, int c1, int c2);
 
-void Octree::updateTexture(Light l)
+void Octree::updateTexture(Light l, BVH * bvh)
 {
     if (this->type == NODE)
     {
+        int index = 0;
+        int acc=0;
+        int other=0;
+
         for (int i = 0; i < 8; i++)
         {
-            this->children[i].updateTexture(l);
+            this->children[i].updateTexture(l, bvh);
         }
+        
+        // Blur Nodes
+        BrickEdgeCopy();
+        for (int i = 0; i < 3 * 3 *3; i++)
+        {
+            this->brick[i] = Cell();
+        }
+        for (int i = 0; i < 8; i ++)
+        {
+            index = (i % 4) + cubeOffset[i % 4] + 9*floor(i / 4);
+            if (this->children[i].type != EMPTY)
+            {
+                this->brick[index] = *children[i].voxel;
+            }
+            else
+            {
+                acc = 0;
+                other= 0;
+                //compute Identity
+                for (int j = 0; j < 8; j++)
+                {
+                    other = j;//+idenoffset[i][j];
+                    if (this->children[other].type != EMPTY)
+                    {
+                        this->brick[index] = this->brick[index]+*this->children[other].voxel /(float) (OCT_DEPTH-depth+1);
+                        acc++;
+                    }
+                }
+                if(acc>0)
+                {
+                    this->brick[index] = this->brick[index] / (float) acc;
+                }
+            }
+        }
+        this->mipmap();
+        this->AverageBrick();
     }
     else if (this->type == LEAF)
     {
-        /*
         Intersection i;
         vec3 distance = vec3(l.position) - this->centre;
         i.distance = l2Norm(distance) - 0.05;
@@ -57,7 +96,6 @@ void Octree::updateTexture(Light l)
         {
             this->voxel->occ = 0;
         }        
-        */
     }
 }
 

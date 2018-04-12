@@ -30,10 +30,6 @@ const static int connectOffset[8][3] = {{1,2,4}, // 0
                                          {6,5,3}};// 7
 
 
-static vector<Object *> * m_objects;
-
-static BVH * m_bvh;
-
 void ConnectKid(Octree * kid1, Octree * kid2, int orient);
 void ConnectNodes(Octree * t1, Octree * t2 );
 
@@ -44,7 +40,6 @@ Octree::Octree()
 Octree::Octree(vector<Object *> objects, BoundingVolume bv, Light l, BVH * bvh)
 {
     m_objects =&objects;
-    m_bvh = bvh;
     int depth =0;
 
     // Set up root tree.
@@ -221,7 +216,7 @@ bool Octree::collision(Ray r, Intersection &inter, int d_depth, int c_depth)
             if (dist < inter.distance)
             {
                 inter.position = vec4(this->centre,0);
-                inter.colour = vec3(this->voxel->col);
+                inter.colour = vec3(this->voxel->occ);
                 inter.distance = dist;
                 return true;
             }
