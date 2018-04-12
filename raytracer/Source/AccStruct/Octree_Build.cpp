@@ -75,8 +75,8 @@ Octree::Octree(vector<Object *> objects, BoundingVolume bv, Light l, BVH * bvh)
         for (int i = 0; i < NEIGHBOURS; i++)
         {
             if (current->neighbours[i] != NULL
-                    && current->type == NODE
-                    && current->neighbours[i]->type == NODE)
+            && current->type == NODE
+            && current->neighbours[i]->type == NODE)
             {
                 ConnectNodes(current, current->neighbours[i], i);
             }
@@ -125,8 +125,20 @@ void ConnectNodes( Octree * t1, Octree * t2, int orient)
     for (int i = 0; i < 4; i++)
     {
         index1 = orientoffsets[orient][i];
-        index2 = childrenoffsets[index1][(int) floor(orient/2)];
-        ConnectKid(&t1->children[index1], &t2->children[index2], orient);
+        if (orient == 0 || orient == 1)
+        {
+            index2 = childrenoffsets[index1][1];
+        }
+         if (orient == 2 || orient == 3)
+        {
+            index2 = childrenoffsets[index1][0];
+        }
+         if (orient == 4 || orient == 5)
+        {
+            index2 = childrenoffsets[index1][2];
+        }
+        
+                ConnectKid(&t1->children[index1], &t2->children[index2], orient);
     }
 }
 
