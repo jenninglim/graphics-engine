@@ -79,7 +79,7 @@ Octree::Octree(vector<Object *> objects, BoundingVolume bv, Light l, BVH * bvh)
                     && current->type == NODE
                     && current->neighbours[i]->type == NODE)
             {
-               // ConnectNodes(current, current->neighbours[i], i);
+                ConnectNodes(current, current->neighbours[i], i);
             }
         }
     }
@@ -111,6 +111,7 @@ void Octree::makeKids(int depth, queue<Octree *> &q)
     }
 }
 
+// Starting position
 const static int orientoffsets[6][4] = {{0,1,4,5},
                                        {2,3,6,7},
                                        {1,3,5,7},
@@ -158,9 +159,10 @@ void Octree::AssignType()
 // Assumes Octree is typed.
 void Octree::connectKids()
 {
-    for(int i = 0; i < 6; i++)
+    static int indices[3] = {1,3,4};
+    for(int i = 0; i < 3; i++)
     {
-        ConnectNodes(this, this, i);
+        ConnectNodes(this, this, indices[i]);
     }
 }
 

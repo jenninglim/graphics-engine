@@ -5,7 +5,7 @@ void singleShadowConeTrace(Octree * root, Cone r, float &occ, float maxDist);
 float castShadowCone(Octree * root, vec3 point, vec3 normal, vec3 dir, float maxDist)
 {
     float occ;
-    vec4 start = vec4(point + 0.03f * normal - 0.03 *dir ,0);
+    vec4 start = vec4(point + 0.03f * normal - 0.03f *dir ,0);
     Cone r(start, dir, 0.3);
     singleShadowConeTrace(root, r, occ, maxDist);
     return 1-occ;
