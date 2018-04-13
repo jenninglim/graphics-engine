@@ -44,7 +44,6 @@ class Octree
         void makeKids(int depth, queue<Octree *> &q);
 
         void makeTexture(const vec3 colour);
-        void updateTexture(Light l, BVH * bvh);
         void mipmap();
         void BrickEdgeCopy();
         void PrintBrick();
@@ -58,4 +57,7 @@ class Octree
         Octree(vector<Object *> objects, BoundingVolume bv, Light light, BVH * bvh);
         bool collision(Ray r, Intersection &inter, int d_depth, int c_depth);
 };
+
+void updateTextureOctree(Octree * tree, Light l, BVH * bvh);
+
 #endif

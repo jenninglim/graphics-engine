@@ -29,7 +29,7 @@ void Scene::Draw(screen* screen)
     vec4 rayFromOrigin, rayFromCam;
     vec3 d = vec3();
     Ray r;
-    this->octree.updateTexture(light, &this->bvh);
+    updateTextureOctree(&this->octree, light, &this->bvh);
 
     for(int y = 0; y < SCREEN_HEIGHT; y++){
         for(int x = 0; x < SCREEN_WIDTH; x++){
