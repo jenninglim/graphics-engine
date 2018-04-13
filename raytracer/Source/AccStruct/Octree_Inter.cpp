@@ -1,16 +1,17 @@
 #include "Octree.h"
 #include "MyMath.h"
 
+static const int corners[8] = {0,3,6,8,18,21,24,26};
 float Octree::interOcc(vec3 point)
 {
-    float data[8]; 
 
+    float data[8];
     for (int i = 0; i < 8; i++)
     {
         data[i] = 0;
         if (this->children[i].voxel != NULL && this->children[i].type != EMPTY)
         {
-            data[i] = this->children[i].voxel->occ;
+            data[i] = this->brick[corners[i]].occ;
         }
     }
     return trilinear<float>(point - this->centre + this->boxHalfSize,

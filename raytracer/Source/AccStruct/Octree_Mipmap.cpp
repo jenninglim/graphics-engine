@@ -41,6 +41,7 @@ void updateTextureOctree(Octree * tree, Light l, BVH * bvh)
     que.push(tree);
 
     Octree * current;
+    Octree * node; // TODO: remove this
     while (!que.empty())
     {
         current = que.front();
@@ -49,6 +50,7 @@ void updateTextureOctree(Octree * tree, Light l, BVH * bvh)
 
         for (int i = 0; i < 8; i++)
         {
+            node = &current->children[i];
             if (current->children[i].type == NODE)
             {
                 que.push(&current->children[i]);
@@ -57,16 +59,16 @@ void updateTextureOctree(Octree * tree, Light l, BVH * bvh)
             {
                 // Shadow Filling
                 Intersection i;
-                vec3 distance = vec3(l.position) - current->centre;
+                vec3 distance = vec3(l.position) - node->centre;
                 i.distance = l2Norm(distance) - 0.05;
                 vec3 dir = normalize(distance);
-                if (bvh->collision(Ray(vec4(current->centre + dir*(0.05f),0), glm::normalize(dir)), i))
+                if (bvh->collision(Ray(vec4(node->centre + dir*(0.05f),0), glm::normalize(dir)), i))
                 {
-                    current->voxel->occ = 1;
+                    node->voxel->occ = 1;
                 }
                 else
                 {
-                    current->voxel->occ = 0;
+                    node->voxel->occ = 0;
                 }     
             }
         }
@@ -89,7 +91,7 @@ void updateTextureOctree(Octree * tree, Light l, BVH * bvh)
         *current->voxel = Cell();
 
         // Blur Nodes
-        //current->BrickEdgeCopy();
+        current->BrickEdgeCopy();
         for (int i = 0; i < 8; i ++)
         {
             index = (i % 4) + cubeOffset[i % 4] + 9*floor(i / 4);
@@ -201,11 +203,9 @@ void Octree::BrickEdgeCopy()
             if (this->children[i].type == NODE &&
                     this->children[i].neighbours[1]->type == NODE)
             {
-                /*
                 EdgeCopy(this->children[i].neighbours[1]->brick,
                         this->children[i].brick,
                         0);
-                        */
                 this->children[i].AverageBrick();
                 this->children[i].neighbours[1]->AverageBrick();
             }
@@ -225,7 +225,6 @@ void Octree::BrickEdgeCopy()
                 this->children[i].neighbours[3]->AverageBrick();
             }
         }
-        /*
         if (this->children[i].neighbours[2] != NULL)
         {
             if (this->children[i].type == NODE &&
@@ -238,11 +237,9 @@ void Octree::BrickEdgeCopy()
                 this->children[i].neighbours[2]->AverageBrick();
             }
         }
-        */
     }
     for (int i = 0; i < 8; i++)
     {
-        /*
         if (this->children[i].neighbours[5] != NULL)
         {
             if (this->children[i].type == NODE &&
@@ -255,8 +252,6 @@ void Octree::BrickEdgeCopy()
                 this->children[i].neighbours[5]->AverageBrick();
             }  
         }
-        */
-
         if (this->children[i].neighbours[4] != NULL)
         {
             if (this->children[i].type == NODE &&

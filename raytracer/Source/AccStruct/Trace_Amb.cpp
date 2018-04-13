@@ -22,9 +22,9 @@ Trace ambientOcclusion(Octree * root, vec3 point, vec3 normal)
 
     // Find initial position
     const vec3 n_offset = normal * VOXEL_SIZE;
-    const vec4 initial = vec4(point + n_offset * normal,0);
+    const vec4 initial = vec4(point + n_offset,0);
 
-    const float cone_offset =0.01f;
+    const float cone_offset = -0.01f;
 
     // Front Cone
     Cone r[AMB_RAY];
@@ -68,7 +68,7 @@ Trace ambientOcclusion(Octree * root, vec3 point, vec3 normal)
     vec3 colorAcc = vec3(0);
     for (int i = 0; i < AMB_RAY; i ++)
     {
-        singleAmbConeTrace(root, r[i], t, 1);
+        singleAmbConeTrace(root, r[i], t, 2);
         acc += glm::pow(1-t.occ,2);
         colorAcc += t.col;
     }
@@ -104,15 +104,16 @@ void singleAmbConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
         weight = 1/(1+10 *dist);
 
         if (!insideCube(point,0)) {
+            a += glm::pow(weight,5) * (1-a);
             break;
         }
         if (ClosestVoxel(root, point, dist * tantheta, vox))
         {
-            occ = vox.tree->voxel->occ;
+            occ = vox.tree->interOcc(point);
             col = vox.tree->interCol(point);
             c += col * (vec3(1) - c)
                 * (1.f - occ) * (float) glm::pow(weight,2);
-            a += glm::pow(weight,2) * (1 - a) * glm::pow(occ,1);
+            a += glm::pow(weight,1) * (1 - a) * glm::pow(occ,1);
 
            delta = glm::pow(dist,2);
         }
