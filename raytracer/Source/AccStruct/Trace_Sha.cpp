@@ -40,6 +40,7 @@ void singleShadowConeTrace(Octree * root, Cone r, float &occ, float maxDist)
         else
         {
             delta = dist * tantheta;
+            
         }
         dist += delta;
     }

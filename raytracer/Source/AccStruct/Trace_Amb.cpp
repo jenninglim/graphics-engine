@@ -96,32 +96,27 @@ void singleAmbConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
     float weight, occ;
     vec3 col(0);
     CloseVox vox;
-    while (dist < maxDist)
+
+    float radius = 0;
+
+    for (int i = MAX_DEPTH - 1; i > 0; i--)
     {
-        vox.tree= NULL;
-        vox.diff = 20;
+        radius = 1.f/ glm::pow(2,i);
+        dist = radius/tantheta;
         point = vec3(r.initial) + dist * r.direction;
-        weight = 1/(1+10 *dist);
+        weight = 1 / (1+ dist);
 
         if (!insideCube(point,0)) {
-            a += glm::pow(weight,5) * (1-a);
+            a += glm::pow(weight,10) * (1-a);
             break;
         }
-        if (ClosestVoxel(root, point, dist * tantheta, vox))
+        if (getVoxel(root, point, i, vox))
         {
-            occ = vox.tree->interOcc(point);
-            col = vox.tree->interCol(point);
-            c += col * (vec3(1) - c)
-                * (1.f - occ) * (float) glm::pow(weight,2);
+            occ = vox.tree->voxel->occ;
+            col = vox.tree->voxel->col;
+            c += col * (vec3(1) - c);
             a += glm::pow(weight,1) * (1 - a) * glm::pow(occ,1);
-
-           delta = glm::pow(dist,2);
         }
-        else
-        {
-            delta = dist * tantheta;
-        }
-        dist += delta;
     }
     t.col = c;
     t.occ = (a > 1) ? 1 : a;
