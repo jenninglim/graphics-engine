@@ -44,6 +44,7 @@ void Octree::updateTexture(Light l, BVH * bvh)
         {
             this->brick[i] = Cell();
         }
+        *this->voxel = Cell();
  
         for (int i = 0; i < 8; i++)
         {
@@ -133,10 +134,11 @@ void Octree::mipmap()
         }
     }
 }
+
 void Octree::AverageBrick()
 {
     Cell cell = Cell();
-    int count =0;;
+    int count =0;
 
     if (this->type == NODE)
     {
@@ -157,15 +159,15 @@ void Octree::AverageBrick()
 }
 void Octree::BrickEdgeCopy()
 {    
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < 8; i++)
     {
         if (this->children[i].neighbours[0] != NULL)
         {
             if (this->children[i].type == NODE &&
                     this->children[i].neighbours[0]->type == NODE)
             {
-                EdgeCopy(this->children[i].neighbours[0]->brick,
-                        this->children[i].brick,
+                EdgeCopy(this->children[i].brick,
+                        this->children[i].neighbours[0]->brick,
                         0);
                 this->children[i].AverageBrick();
                 this->children[i].neighbours[0]->AverageBrick();
@@ -176,11 +178,72 @@ void Octree::BrickEdgeCopy()
             if (this->children[i].type == NODE &&
                     this->children[i].neighbours[1]->type == NODE)
             {
-                EdgeCopy(this->children[i].brick,
-                        this->children[i].neighbours[1]->brick,
+                /*
+                EdgeCopy(this->children[i].neighbours[1]->brick,
+                        this->children[i].brick,
                         0);
+                        */
                 this->children[i].AverageBrick();
                 this->children[i].neighbours[1]->AverageBrick();
+            }
+        }
+    }
+    for (int i = 0; i < 8; i++)
+    {
+        if (this->children[i].neighbours[3] != NULL)
+        {
+            if (this->children[i].type == NODE &&
+                    this->children[i].neighbours[3]->type == NODE)
+            {
+                EdgeCopy(this->children[i].neighbours[3]->brick,
+                        this->children[i].brick,
+                        1);
+                this->children[i].AverageBrick();
+                this->children[i].neighbours[3]->AverageBrick();
+            }
+        }
+        /*
+        if (this->children[i].neighbours[2] != NULL)
+        {
+            if (this->children[i].type == NODE &&
+                    this->children[i].neighbours[2]->type == NODE)
+            {
+                EdgeCopy(this->children[i].brick,
+                        this->children[i].neighbours[2]->brick,
+                        1);
+                this->children[i].AverageBrick();
+                this->children[i].neighbours[2]->AverageBrick();
+            }
+        }
+        */
+    }
+    for (int i = 0; i < 8; i++)
+    {
+        /*
+        if (this->children[i].neighbours[5] != NULL)
+        {
+            if (this->children[i].type == NODE &&
+                    this->children[i].neighbours[5]->type == NODE)
+            {
+                EdgeCopy(this->children[i].neighbours[5]->brick,
+                        this->children[i].brick,
+                        2);
+                this->children[i].AverageBrick();
+                this->children[i].neighbours[5]->AverageBrick();
+            }  
+        }
+        */
+
+        if (this->children[i].neighbours[4] != NULL)
+        {
+            if (this->children[i].type == NODE &&
+                    this->children[i].neighbours[4]->type == NODE)
+            {
+                EdgeCopy(this->children[i].brick,
+                        this->children[i].neighbours[4]->brick,
+                        2);
+                this->children[i].AverageBrick();
+                this->children[i].neighbours[4]->AverageBrick();
             }
         }
     }

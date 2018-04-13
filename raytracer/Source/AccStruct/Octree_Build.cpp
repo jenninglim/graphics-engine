@@ -137,8 +137,7 @@ void ConnectNodes( Octree * t1, Octree * t2, int orient)
         {
             index2 = childrenoffsets[index1][2];
         }
-        
-                ConnectKid(&t1->children[index1], &t2->children[index2], orient);
+         ConnectKid(&t1->children[index1], &t2->children[index2], orient);
     }
 }
 
@@ -231,7 +230,7 @@ bool Octree::collision(Ray r, Intersection &inter, int d_depth, int c_depth)
             if (dist < inter.distance)
             {
                 inter.position = vec4(this->centre,0);
-                inter.colour = vec3(this->voxel->col);
+                inter.colour = vec3(this->voxel->occ);
                 inter.distance = dist;
                 return true;
             }
