@@ -8,12 +8,15 @@
 #include "Light.h"
 #include "BVH.h"
 #include "Cell.h"
+#include <queue>
 
-#define SCALING 5.f
+#define NEIGHBOURS 6
 
 using glm::vec3;
 
-const static float VOXEL_SIZE = glm::pow(2.f,3)/ glm::pow(8.f, OCT_DEPTH);
+const static float VOXEL_SIZE = 1/ glm::pow(2.f, OCT_DEPTH);
+
+static vector<Object *> * m_objects;
 
 enum Type {
     LEAF,
@@ -26,27 +29,35 @@ class Octree
     public:
         Type type;
         Octree * children;
+        Octree * neighbours[6];
         vec3 centre;
         vec3 boxHalfSize;
 
         Cell * brick;
         Cell * voxel;
 
-        bool toDivide(vector<Object *> objects, vec3 &colour);
-        void makeKids(vector<Object *> objects, Light l, BVH * bvh, int depth);
-        Octree(vector<Object *> objects, vec3 center, vec3 boxhalfsize, int depth, Light light, BVH * bvh);
+    public:
+        // Building Octree Ops
+        bool toDivide(vec3 &colour);
+        void AssignType();
+        void connectKids();
+        void makeKids(int depth, queue<Octree *> &q);
+
         void makeTexture(const vec3 colour);
-        void updateTexture();
         void mipmap();
         void BrickEdgeCopy();
         void PrintBrick();
         void LeafEdgeCopy();
+
         float interOcc(vec3 point);
         vec3 interCol(vec3 point);
+        void AverageBrick();
 
-    public:
         Octree();
         Octree(vector<Object *> objects, BoundingVolume bv, Light light, BVH * bvh);
         bool collision(Ray r, Intersection &inter, int d_depth, int c_depth);
 };
+
+void updateTextureOctree(Octree * tree, Light l, BVH * bvh);
+
 #endif
