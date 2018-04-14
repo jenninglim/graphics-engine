@@ -79,23 +79,22 @@ void shootRay(const Ray r, vec3 &colour, Octree tree, BVH bvh, Light l)
     Intersection i;
     Trace trace;
     i.distance = 20;
+    float shadow;
     if (bvh.collision(r, i))
        //(tree.collision(r,i, OCT_DEPTH -5,0)) //(bvh.collision(r, i))
     {
                 
         
         trace = ambientOcclusion(&tree, vec3(i.position),vec3(i.normal));
-        /*
-        colour= vec3(castShadowCone(&tree,
+        shadow= castShadowCone(&tree,
                     vec3(i.position),
                     vec3(i.normal),
                     normalize(vec3(l.position - i.position)),
-                    l2Norm(vec3(i.position - l.position))));
-                    */
+                    l2Norm(vec3(i.position - l.position)));
 
 //        colour= i.colour;
-        //colour = 0.9f * colour * trace.occ + 0.1f * trace.occ*trace.col;
-        colour = vec3(trace.occ);
+        colour = 0.5f * colour * shadow + 0.5f * colour * trace.occ;
+        //colour = vec3(shadow);
     }
     else
     {

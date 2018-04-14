@@ -16,11 +16,11 @@ float castShadowCone(Octree * root, vec3 point, vec3 normal, vec3 dir, float max
     const vec3 s1 = normalize(mix(dir, e1, mix_delta));
     const vec3 s2 = normalize(mix(dir, -e1, mix_delta));
 #if (SHADOW_RAY == 4)
-    const vec3 s3 = mix(dir, e2, mix_delta);
+    const vec3 s3 = normalize(mix(dir, e2, mix_delta));
     const vec3 s4 = normalize(mix(dir, -e2, mix_delta));
 #endif
 
-    const vec4 offset = vec4(VOXEL_SIZE * normal,0);
+    const vec4 offset = vec4(0.00f * normal,0);
     const vec4 initial = vec4(point,0) + offset;
 
     const float coneoffset = -0.01f;
@@ -28,7 +28,7 @@ float castShadowCone(Octree * root, vec3 point, vec3 normal, vec3 dir, float max
     const Cone r[SHADOW_RAY] =
     { Cone(initial + vec4(coneoffset * s1,0), s1, theta),
       Cone(initial + vec4(coneoffset * s2,0), s2, theta)
-#if (SHADOW_RAY ==4)
+#if (SHADOW_RAY == 4)
      ,Cone(initial + vec4(coneoffset * s3,0), s3, theta),
       Cone(initial + vec4(coneoffset * s4,0), s4, theta)
 #endif
