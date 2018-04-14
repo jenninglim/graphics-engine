@@ -10,6 +10,7 @@ void singleAmbConeTrace(Octree * root, Cone r, Trace &t, float maxDist);
 #define AMB_RAY 5
 Trace ambientOcclusion(Octree * root, vec3 point, vec3 normal)
 {
+    const float max_dist = 0.2;
     Intersection inter;
     CloseVox vox;
     vox.diff = 20;
@@ -36,10 +37,10 @@ Trace ambientOcclusion(Octree * root, vec3 point, vec3 normal)
 
 #if (AMB_RAY >=5)
     // Side Cone
-    const vec3 s1 = mix(normal, e1, 0.5f);
-    const vec3 s2 = mix(normal, -e1, 0.5f);
-    const vec3 s3 = mix(normal, e2, 0.5f);
-    const vec3 s4 = mix(normal, -e2, 0.5f);
+    const vec3 s1 = normalize(mix(normal, e1, 0.5f));
+    const vec3 s2 = normalize(mix(normal, -e1, 0.5f));
+    const vec3 s3 = normalize(mix(normal, e2, 0.5f));
+    const vec3 s4 = normalize(mix(normal, -e2, 0.5f));
 
     r[1] = Cone(initial + vec4(cone_offset * e1,0), s1, theta); //0.03
     r[2] = Cone(initial - vec4(cone_offset * e1,0), s2, theta); //0.03
@@ -52,10 +53,10 @@ Trace ambientOcclusion(Octree * root, vec3 point, vec3 normal)
     const vec3 e3 = 0.5f * (e1 + e2);
     const vec3 e4 = 0.5f * (e1 - e2);
 
-    const vec3 c1 = mix(normal, e3, 0.5f);
-    const vec3 c2 = mix(normal, -e3, 0.5f);
-    const vec3 c3 = mix(normal, e4, 0.5f);
-    const vec3 c4 = mix(normal, -e4, 0.5f);
+    const vec3 c1 = normalize(mix(normal, e3, 0.5f));
+    const vec3 c2 = normalize(mix(normal, -e3, 0.5f));
+    const vec3 c3 = normalize(mix(normal, e4, 0.5f));
+    const vec3 c4 = normalize(mix(normal, -e4, 0.5f));
 
     r[5] = Cone(initial + vec4(cone_offset * e3,0), c1, theta); //0.03
     r[6] = Cone(initial - vec4(cone_offset * e3,0), c2, theta); //0.03
@@ -68,7 +69,7 @@ Trace ambientOcclusion(Octree * root, vec3 point, vec3 normal)
     vec3 colorAcc = vec3(0);
     for (int i = 0; i < AMB_RAY; i ++)
     {
-        singleAmbConeTrace(root, r[i], t, 2);
+        singleAmbConeTrace(root, r[i], t, max_dist);
         acc += glm::pow(1-t.occ,2);
         colorAcc += t.col;
     }
@@ -104,18 +105,24 @@ void singleAmbConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
         radius = 1.f/ glm::pow(2,i);
         dist = radius/tantheta;
         point = vec3(r.initial) + dist * r.direction;
-        weight = 1 / (1+ dist);
+        weight = 1 / (1+ 20 *dist);
 
         if (!insideCube(point,0)) {
-            a += glm::pow(weight,10) * (1-a);
+            //a += glm::pow(weight,2) * (1-a);
             break;
         }
-        if (getVoxel(root, point, i, vox))
+        if (l2Norm(point - vec3(r.initial)) < maxDist)
         {
-            occ = vox.tree->voxel->occ;
-            col = vox.tree->voxel->col;
-            c += col * (vec3(1) - c);
-            a += glm::pow(weight,1) * (1 - a) * glm::pow(occ,1);
+            if (getVoxel(root, point, i, vox))
+            {
+                col = vox.tree->voxel->col;
+                c += (1-a) *occ * (vec3(1) - c);
+                a += glm::pow(weight,2) * (1 - a);
+            }
+        }
+        else
+        {
+            break;
         }
     }
     t.col = c;

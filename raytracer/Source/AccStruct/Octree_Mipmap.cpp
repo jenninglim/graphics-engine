@@ -38,8 +38,10 @@ void updateTextureOctree(Octree * tree, Light l, BVH * bvh)
 {
     queue<Octree *> que;
     stack<Octree *> sta;
-    que.push(tree);
+    Intersection inter;
 
+    que.push(tree);
+    
     Octree * current;
     Octree * node; // TODO: remove this
     while (!que.empty())
@@ -58,11 +60,10 @@ void updateTextureOctree(Octree * tree, Light l, BVH * bvh)
             else if (current->children[i].type == LEAF)
             {
                 // Shadow Filling
-                Intersection i;
                 vec3 distance = vec3(l.position) - node->centre;
-                i.distance = l2Norm(distance) - 0.05;
+                inter.distance = l2Norm(distance) - 0.05;
                 vec3 dir = normalize(distance);
-                if (bvh->collision(Ray(vec4(node->centre + dir*(0.05f),0), glm::normalize(dir)), i))
+                if (bvh->collision(Ray(vec4(node->centre + dir*(0.05f),0), glm::normalize(dir)), inter))
                 {
                     node->voxel->occ = 1;
                 }
