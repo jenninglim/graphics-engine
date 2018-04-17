@@ -36,6 +36,9 @@ public:
 	  normal.w = 1.0;
 	}
 };
+
+vec3 triangleMin(Triangle triangle);
+
+vec3 triangleMax(Triangle triangle);
+
 #endif
-
-
