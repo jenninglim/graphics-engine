@@ -145,8 +145,8 @@ void ConnectNodes( Octree * t1, Octree * t2, int orient)
 // In: Centre and HalfBox
 void Octree::AssignType()
 {
-    vec3 colour;
-    if (this->toDivide(colour))
+    Intersection inter;
+    if (this->toDivide(inter))
     {
         if (this->boxHalfSize[0] - VOXEL_SIZE > 0)
         {
@@ -157,7 +157,7 @@ void Octree::AssignType()
         {
             this->type = LEAF;
         }
-        this->makeTexture(colour);
+        this->makeTexture(inter);
     }
     else
     {
@@ -198,14 +198,14 @@ void ConnectKid(Octree * kid1, Octree * kid2, int orient)
     kid1->neighbours[orient] = kid2;
 }
 
-bool Octree::toDivide(vec3 & colour)
+bool Octree::toDivide(Intersection & inter)
 {
-    Intersection inter;
+    Intersection out;
     for (int i = 0; i < m_objects->size(); i++)
     {
         if (m_objects->at(i)->boxOverlap(this->centre, this->boxHalfSize, inter))
         {
-            colour = inter.colour;
+            out = inter;  
             return true;
         }
     }
@@ -230,7 +230,7 @@ bool Octree::collision(Ray r, Intersection &inter, int d_depth, int c_depth)
             if (dist < inter.distance)
             {
                 inter.position = vec4(this->centre,0);
-                inter.colour = vec3(this->voxel->occ);
+                inter.colour = vec3(this->voxel->irrad);
                 inter.distance = dist;
                 return true;
             }

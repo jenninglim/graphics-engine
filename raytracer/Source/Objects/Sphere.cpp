@@ -55,7 +55,7 @@ bool Sphere::intersection(const Ray r, Intersection &closestI)
 
     if (t > EPSILON && t < closestI.distance)
     {
-        closestI.position = t * vec4(r.direction,0) + r.initial;
+        closestI.position = t * vec4(r.direction,0) + vec4(r.initial,0);
         closestI.distance = t;
         closestI.colour = this->colour;
         closestI.normal = glm::normalize(closestI.position - this->centre);
@@ -68,7 +68,7 @@ bool Sphere::intersection(const Ray r, Intersection &closestI)
 
 bool Sphere::intersection(const Cone r, Intersection &closestI)
 {
-    vec3 AB = vec3(this->centre - r.initial);
+    vec3 AB = vec3(this->centre) - r.initial;
     float T = glm::dot(AB, r.direction) / glm::dot(r.direction,r.direction);
     vec3 closestPoint = vec3(r.initial) +  T * r.direction;
     float d = T * glm::tan(r.theta) + this->radius/glm::cos(r.theta);

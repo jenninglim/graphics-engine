@@ -31,7 +31,7 @@ const static int idenoffset[8][3] = {{1,2,4},
                                       {1,-2,-4},
                                       {-1,-2,-4}};
 
-void EdgeCopy(Cell * brick1, Cell * brick2, int orient);
+void EdgeCopy(Voxel * brick1, Voxel * brick2, int orient);
 void ChildrenEdgeCopy(Octree * t, int c1, int c2);
 
 void updateTextureOctree(Octree * tree, Light l, BVH * bvh)
@@ -41,6 +41,7 @@ void updateTextureOctree(Octree * tree, Light l, BVH * bvh)
     Intersection inter;
 
     que.push(tree);
+    vec3 norm;
     
     Octree * current;
     Octree * node; // TODO: remove this
@@ -63,7 +64,7 @@ void updateTextureOctree(Octree * tree, Light l, BVH * bvh)
                 vec3 distance = vec3(l.position) - node->centre;
                 inter.distance = l2Norm(distance) - 0.05;
                 vec3 dir = normalize(distance);
-                if (bvh->collision(Ray(vec4(node->centre + dir*(0.05f),0), glm::normalize(dir)), inter))
+                if (bvh->collision(Ray(node->centre + dir*(0.05f), glm::normalize(dir)), inter))
                 {
                     node->voxel->occ = 1;
                 }
@@ -71,6 +72,13 @@ void updateTextureOctree(Octree * tree, Light l, BVH * bvh)
                 {
                     node->voxel->occ = 0;
                 }     
+
+                // Radiance filling
+                norm = node->voxel->getNorm();
+                node->voxel->irrad = DirectLight( vec4(node->centre, 0),
+                        norm,
+                        l);
+                                            
             }
         }
     }
@@ -87,9 +95,9 @@ void updateTextureOctree(Octree * tree, Light l, BVH * bvh)
 
         for (int i = 0; i < 3 * 3 *3; i++)
         {
-            current->brick[i] = Cell();
+            current->brick[i] = Voxel();
         }
-        *current->voxel = Cell();
+        *current->voxel = Voxel();
 
         // Blur Nodes
         current->BrickEdgeCopy();
@@ -126,18 +134,18 @@ void updateTextureOctree(Octree * tree, Light l, BVH * bvh)
 }
 
 
-void Octree::makeTexture(const vec3 colour)
+void Octree::makeTexture(const Intersection inter)
 {
     if (this->type != EMPTY)
     {
-        this->voxel = new Cell();
         if (this->type == LEAF)
         {
-            this->voxel->col = colour;
+            this->voxel = new VoxelLeaf(inter);
         }
         else if (this->type == NODE)
         {
-            this->brick = new Cell[3 * 3 * 3];
+            this->voxel = new Voxel();
+            this->brick = new Voxel[3 * 3 * 3];
         }
     }
 }
@@ -163,7 +171,7 @@ void Octree::mipmap()
 
 void Octree::AverageBrick()
 {
-    Cell cell = Cell();
+    Voxel cell = Voxel();
     int count =0;
 
     if (this->type == NODE)
@@ -283,7 +291,7 @@ void ChildrenEdgeCopy(Octree * t, int c1, int c2)
     }
 }
 
-void EdgeCopy(Cell * brick1, Cell * brick2, int orient)
+void EdgeCopy(Voxel * brick1, Voxel * brick2, int orient)
 {
     int index1, index2;
     for (int i = 0; i < 9; i++)

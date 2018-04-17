@@ -29,7 +29,7 @@ Ray reflect(const Ray I, const Intersection i)
     vec3 norm = vec3(i.normal);
     vec3 dir = I.direction - 2 * glm::dot(I.direction, norm) * norm;
     dir = glm::normalize(dir);
-    return  Ray(i.position, dir);
+    return  Ray(vec3(i.position), dir);
 } 
 
 Ray refract(const Ray r, const Intersection i)
@@ -46,7 +46,7 @@ Ray refract(const Ray r, const Intersection i)
     float k = 1 - eta * eta * (1 - cosi * cosi); 
     vec3 dir =  k < 0.f ? vec3(0) : eta * idir + (eta * cosi - glm::sqrt(k)) * norm;  
     dir = glm::normalize(dir);
-    return Ray(i.position, dir);
+    return Ray(vec3(i.position), dir);
 }
 
 void fresnel(const Ray r, const Intersection i, float &kr)
@@ -80,20 +80,22 @@ void shootRay(const Ray r, vec3 &colour, Octree tree, BVH bvh, Light l)
     Trace trace;
     i.distance = 20;
     float shadow;
-    if (bvh.collision(r, i))
-       //(tree.collision(r,i, OCT_DEPTH -5,0)) //(bvh.collision(r, i))
+    if //(bvh.collision(r, i))
+       (tree.collision(r,i, OCT_DEPTH -1,0)) //(bvh.collision(r, i))
     {
                 
         
-        trace = ambientOcclusion(&tree, vec3(i.position),vec3(i.normal));
+        //trace = ambientOcclusion(&tree, vec3(i.position),vec3(i.normal));
+        /*
         shadow= castShadowCone(&tree,
                     vec3(i.position),
                     vec3(i.normal),
                     normalize(vec3(l.position - i.position)),
                     l2Norm(vec3(i.position - l.position)));
+                    */
 
-//        colour= i.colour;
-        colour = 0.5f * colour * shadow + 0.5f * colour * trace.occ;
+        colour= i.colour;
+//        colour = 0.5f * colour * shadow + 0.5f * colour * trace.occ;
         //colour = vec3(shadow);
     }
     else
@@ -134,7 +136,7 @@ void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
             }
             fresnel(c_ray.r, intersect, kr);
 
-            lightColor = DirectLight(intersect.position,
+            lightColor = intersect.colour *DirectLight(intersect.position,
                     vec3(intersect.normal),
                     light) * ShadowLight(intersect,
                         bvh,

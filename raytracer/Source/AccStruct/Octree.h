@@ -7,7 +7,7 @@
 #include <vector>
 #include "Light.h"
 #include "BVH.h"
-#include "Cell.h"
+#include "Voxel.h"
 #include <queue>
 
 #define NEIGHBOURS 6
@@ -33,17 +33,17 @@ class Octree
         vec3 centre;
         vec3 boxHalfSize;
 
-        Cell * brick;
-        Cell * voxel;
+        Voxel * brick;
+        Voxel * voxel;
 
     public:
         // Building Octree Ops
-        bool toDivide(vec3 &colour);
+        bool toDivide(Intersection &inter);
         void AssignType();
         void connectKids();
         void makeKids(int depth, queue<Octree *> &q);
 
-        void makeTexture(const vec3 colour);
+        void makeTexture(const Intersection inter);
         void mipmap();
         void BrickEdgeCopy();
         void PrintBrick();

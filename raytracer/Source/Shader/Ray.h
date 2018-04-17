@@ -8,36 +8,37 @@ using namespace glm;
 class Ray
 {
     public:
-        glm::vec4 initial;
+        glm::vec3 initial;
         glm::vec3 direction;
 
     Ray()
     {
-        initial = vec4(0);
+        initial = vec3(0);
         direction = vec3(0);
     }
-    Ray(glm::vec4 start, glm::vec3 dir)
+    Ray(glm::vec3 start, glm::vec3 dir)
         :initial(start), direction(dir)
     {}
-
+    
+    Ray reflect(vec3 norm, vec3 point);
 };
 
 class Cone
 {
     public:
-        vec4 initial;
+        vec3 initial;
         vec3 direction;
         float theta;
         Cone()
     {
-        initial = vec4(0);
+        initial = vec3(0);
         direction = vec3(0);
     }
 
-        Cone(glm::vec4 start, glm::vec3 dir, float theta)
+        Cone(glm::vec3 start, glm::vec3 dir, float theta)
         :initial(start), direction(dir), theta(theta)
     {}
 
-
+    Cone reflect(vec3 norm, vec3 point);
 };
 #endif

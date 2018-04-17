@@ -17,7 +17,7 @@ Scene::Scene()
     this->cam = Camera(CAM_FOCAL_LENGTH, camPos);
     this-> light = Light(
             vec4(0, -0.5, -0.2, 1),
-            14.f * vec3(1,1,1));
+            14.f );
     LoadTestModel(this->objects);
     this->bvh = BVH(objects);
     this->octree = Octree(this->objects, bvh.bv, light, &this->bvh);
@@ -46,7 +46,7 @@ void Scene::Draw(screen* screen)
                         rayFromCam[1],
                         rayFromCam[2]));
 
-            r.initial = cam.position;
+            r.initial = vec3(cam.position);
             r.direction = d;
 
             shootRay(r, color, bvh, light);

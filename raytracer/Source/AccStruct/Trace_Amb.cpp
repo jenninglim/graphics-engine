@@ -23,7 +23,7 @@ Trace ambientOcclusion(Octree * root, vec3 point, vec3 normal)
 
     // Find initial position
     const vec3 n_offset = normal * VOXEL_SIZE;
-    const vec4 initial = vec4(point + n_offset,0);
+    const vec3 initial = point + n_offset;
 
     const float cone_offset = -0.01f;
 
@@ -32,7 +32,7 @@ Trace ambientOcclusion(Octree * root, vec3 point, vec3 normal)
 
 #if (AMB_RAY >=1)
     //Front Cone
-    r[0] = Cone(initial + vec4(cone_offset * normal,0), normal, theta); //0.03
+    r[0] = Cone(initial + cone_offset * normal, normal, theta); //0.03
 #endif
 
 #if (AMB_RAY >=5)
@@ -42,10 +42,11 @@ Trace ambientOcclusion(Octree * root, vec3 point, vec3 normal)
     const vec3 s3 = normalize(mix(normal, e2, 0.5f));
     const vec3 s4 = normalize(mix(normal, -e2, 0.5f));
 
-    r[1] = Cone(initial + vec4(cone_offset * e1,0), s1, theta); //0.03
-    r[2] = Cone(initial - vec4(cone_offset * e1,0), s2, theta); //0.03
-    r[3] = Cone(initial + vec4(cone_offset * e2,0), s3, theta); //0.03
-    r[4] = Cone(initial - vec4(cone_offset * e2,0), s4, theta); //0.03
+    r[1] = Cone(initial + cone_offset * e1, s1, theta); //0.03
+    r[2] = Cone(initial - cone_offset * e1, s2, theta); //0.03
+    r[3] = Cone(initial + cone_offset * e2, s3, theta); //0.03
+    r[4] = Cone(initial - cone_offset * e2, s4, theta); //0.03
+
 #endif
 
     // Corner Cone?
@@ -58,10 +59,10 @@ Trace ambientOcclusion(Octree * root, vec3 point, vec3 normal)
     const vec3 c3 = normalize(mix(normal, e4, 0.5f));
     const vec3 c4 = normalize(mix(normal, -e4, 0.5f));
 
-    r[5] = Cone(initial + vec4(cone_offset * e3,0), c1, theta); //0.03
-    r[6] = Cone(initial - vec4(cone_offset * e3,0), c2, theta); //0.03
-    r[7] = Cone(initial + vec4(cone_offset * e4,0), c3, theta); //0.03
-    r[8] = Cone(initial - vec4(cone_offset * e4,0), c4, theta); //0.03
+    r[5] = Cone(initial + cone_offset * e3, c1, theta); //0.03
+    r[6] = Cone(initial - cone_offset * e3, c2, theta); //0.03
+    r[7] = Cone(initial + cone_offset * e4, c3, theta); //0.03
+    r[8] = Cone(initial - cone_offset * e4, c4, theta); //0.03
 #endif
 
     Trace t;

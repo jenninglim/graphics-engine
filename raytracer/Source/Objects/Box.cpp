@@ -66,7 +66,7 @@ bool Box::intersection(const Ray r, Intersection &closestI)
         a = glm::dot(h, e1);
         
         f = 1/a;
-        s = vec3(r.initial - triangles[i].v0);
+        s = r.initial - vec3(triangles[i].v0);
         u = f * (glm::dot(s,h));
         
         q = glm::cross(e1, s);
@@ -81,7 +81,7 @@ bool Box::intersection(const Ray r, Intersection &closestI)
             {
                 intersectionFound = true;
 
-                closestI.position = r.initial + vec4(t * r.direction,0);
+                closestI.position = vec4(r.initial,0) + vec4(t * r.direction,0);
                 closestI.distance = t;
                 closestI.colour = triangles[i].color;
                 closestI.normal = triangles[i].normal;
