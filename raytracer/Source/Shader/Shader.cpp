@@ -80,13 +80,19 @@ void shootRay(const Ray r, vec3 &colour, Octree tree, BVH bvh, Light l)
     Trace trace;
     i.distance = 20;
     float shadow;
-    if //(bvh.collision(r, i))
-       (tree.collision(r,i, OCT_DEPTH -1,0)) //(bvh.collision(r, i))
+    vec3 spec;
+    if (bvh.collision(r, i))
+       //(tree.collision(r,i, OCT_DEPTH -3,0)) //(bvh.collision(r, i))
     {
-                
-        
-        //trace = ambientOcclusion(&tree, vec3(i.position),vec3(i.normal));
+        spec = castSpecCone(&tree,
+                    vec3(i.position),
+                    vec3(i.normal),
+                    r.direction,
+                    l2Norm(vec3(i.position - l.position)));
+        colour =  spec * i.colour;
+
         /*
+        trace = ambientOcclusion(&tree, vec3(i.position),vec3(i.normal));
         shadow= castShadowCone(&tree,
                     vec3(i.position),
                     vec3(i.normal),
@@ -94,9 +100,10 @@ void shootRay(const Ray r, vec3 &colour, Octree tree, BVH bvh, Light l)
                     l2Norm(vec3(i.position - l.position)));
                     */
 
-        colour= i.colour;
-//        colour = 0.5f * colour * shadow + 0.5f * colour * trace.occ;
-        //colour = vec3(shadow);
+        //colour= i.colour;
+//        colour = vec3(spec);
+        //colour = 0.5f * colour * shadow + 0.3f * colour * trace.occ;
+         //   + 0.02f * spec;
     }
     else
     {
@@ -136,7 +143,7 @@ void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
             }
             fresnel(c_ray.r, intersect, kr);
 
-            lightColor = intersect.colour *DirectLight(intersect.position,
+            lightColor = intersect.colour * DirectLight(intersect.position,
                     vec3(intersect.normal),
                     light) * ShadowLight(intersect,
                         bvh,

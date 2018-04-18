@@ -230,7 +230,7 @@ bool Octree::collision(Ray r, Intersection &inter, int d_depth, int c_depth)
             if (dist < inter.distance)
             {
                 inter.position = vec4(this->centre,0);
-                inter.colour = vec3(this->voxel->irrad);
+                inter.colour = vec3(this->voxel->col * this->voxel->irrad);
                 inter.distance = dist;
                 return true;
             }

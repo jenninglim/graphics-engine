@@ -78,7 +78,6 @@ void updateTextureOctree(Octree * tree, Light l, BVH * bvh)
                 node->voxel->irrad = DirectLight( vec4(node->centre, 0),
                         norm,
                         l);
-                                            
             }
         }
     }
