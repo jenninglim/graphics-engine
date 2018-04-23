@@ -71,6 +71,12 @@ void updateTextureOctree(Octree * tree, Light l, BVH * bvh)
                 {
                     node->voxel->occ = 0;
                 }     
+
+                // Radiance filling
+                vec3 norm = node->voxel->getNorm();
+                node->voxel->irrad = DirectLight( vec4(node->centre, 0),
+                        norm,
+                        l);
             }
         }
     }
@@ -93,12 +99,39 @@ void updateTextureOctree(Octree * tree, Light l, BVH * bvh)
 
         // Blur Nodes
         current->BrickEdgeCopy();
-        for (int i = 0; i < 8; i ++)
+        current->mipmap();
+        current->AverageBrick();
+    }
+}
+
+
+void Octree::makeTexture(const Intersection inter)
+{
+    if (this->type != EMPTY)
+    {
+        if (this->type == LEAF)
+        {
+            this->voxel = new CellLeaf(inter);
+        }
+        else if (this->type == NODE)
+        {
+            this->voxel = new Cell();
+            this->brick = new Cell[3 * 3 * 3];
+        }
+    }
+}
+
+void Octree::mipmap()
+{
+     int acc;
+    int other;
+     int index;
+    for (int i = 0; i < 8; i ++)
         {
             index = (i % 4) + cubeOffset[i % 4] + 9*floor(i / 4);
-            if (current->children[i].type != EMPTY)
+            if (this->children[i].type != EMPTY)
             {
-                current->brick[index] = *current->children[i].voxel;
+                this->brick[index] = *this->children[i].voxel;
             }
             else
             {
@@ -108,44 +141,19 @@ void updateTextureOctree(Octree * tree, Light l, BVH * bvh)
                 for (int j = 0; j < 8; j++)
                 {
                     other = j;//+idenoffset[i][j];
-                    if (current->children[other].type != EMPTY)
+                    if (this->children[other].type != EMPTY)
                     {
-                        current->brick[index] = current->brick[index]+*current->children[other].voxel;//(float) (OCT_DEPTH-depth+1);
+                        this->brick[index] = this->brick[index]+*this->children[other].voxel;//(float) (OCT_DEPTH-depth+1);
                         acc++;
                     }
                 }
                 if(acc>0)
                 {
-                    current->brick[index] = current->brick[index] / (float) acc;
+                    this->brick[index] = this->brick[index] / (float) acc;
                 }
             }
-        }
-        current->mipmap();
-        current->AverageBrick();
-    }
-}
-
-
-void Octree::makeTexture(const vec3 colour)
-{
-    if (this->type != EMPTY)
-    {
-        this->voxel = new Cell();
-        if (this->type == LEAF)
-        {
-            this->voxel->col = colour;
-        }
-        else if (this->type == NODE)
-        {
-            this->brick = new Cell[3 * 3 * 3];
-        }
-    }
-}
-
-void Octree::mipmap()
-{
-    int index;
-    for (int i = 0; i < 3; i++) // X Y Z PASS
+   }
+       for (int i = 0; i < 3; i++) // X Y Z PASS
     {
         for (int j = 0; j < 3; j++) // CUBE ASSIGMENT;
         {

@@ -81,20 +81,18 @@ void shootRay(const Ray r, vec3 &colour, Octree tree, BVH bvh, Light l)
     i.distance = 20;
     float shadow;
     if (bvh.collision(r, i))
-       //(tree.collision(r,i, OCT_DEPTH -5,0)) //(bvh.collision(r, i))
+       //(tree.collision(r,i, OCT_DEPTH -2,0)) //(bvh.collision(r, i))
     {
-                
-        
-        trace = ambientOcclusion(&tree, vec3(i.position),vec3(i.normal));
+       trace = ambientOcclusion(&tree, vec3(i.position),vec3(i.normal));
         shadow= castShadowCone(&tree,
                     vec3(i.position),
                     vec3(i.normal),
                     normalize(vec3(l.position - i.position)),
                     l2Norm(vec3(i.position - l.position)));
 
-//        colour= i.colour;
-        colour = 0.5f * colour * shadow + 0.5f * colour * trace.occ;
-        //colour = vec3(shadow);
+       //colour= i.colour;
+        //colour = 0.7f * colour * shadow + 0.2f * colour * trace.occ + 0.1f * trace.col ;
+        colour = trace.col;
     }
     else
     {
@@ -138,7 +136,7 @@ void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
                     vec3(intersect.normal),
                     light) * ShadowLight(intersect,
                         bvh,
-                        light);
+                        light) * vec3(1);
 
             if (kr < 1)
             {

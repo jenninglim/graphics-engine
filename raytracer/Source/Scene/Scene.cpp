@@ -2,7 +2,7 @@
 #include "TestModelH.h"
 #include "Post.h"
 #include "Octree.h"
-
+#include <omp.h>
 #define SCALE 0.3f
 using namespace glm;
 using glm::vec3;
@@ -17,7 +17,7 @@ Scene::Scene()
     this->cam = Camera(CAM_FOCAL_LENGTH, camPos);
     this-> light = Light(
             vec4(0, -0.5, -0.2, 1),
-            14.f * vec3(1,1,1));
+            14.f);
     LoadTestModel(this->objects);
     this->bvh = BVH(objects);
     this->octree = Octree(this->objects, bvh.bv, light, &this->bvh);
@@ -30,7 +30,7 @@ void Scene::Draw(screen* screen)
     vec3 d = vec3();
     Ray r;
     updateTextureOctree(&this->octree, light, &this->bvh);
-
+#pragma omp parallel for num_threads(4) private(rayFromOrigin,rayFromCam,color,d,r) schedule(dynamic)
     for(int y = 0; y < SCREEN_HEIGHT; y++){
         for(int x = 0; x < SCREEN_WIDTH; x++){
             rayFromOrigin.x = x - SCREEN_WIDTH/2;

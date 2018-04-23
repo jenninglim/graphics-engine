@@ -7,14 +7,20 @@ float singleShadowConeTrace(Octree * root, Cone r, float maxDist);
 float castShadowCone(Octree * root, vec3 point, vec3 normal, vec3 dir, float maxDist)
 {
     const float mix_delta = 0.3f;
-    const float theta = 0.3f;
+    const float theta = 0.4f;
 
     float occ = 0;
     const vec3 e1 = findOthor(dir);
     const vec3 e2 = findOthor(dir, e1);
-    
+
+#if (SHADOW_RAY ==1)   
+    const vec3 s1 = normalize(dir);
+#endif
+
+#if (SHADOW_RAY >1)   
     const vec3 s1 = normalize(mix(dir, e1, mix_delta));
     const vec3 s2 = normalize(mix(dir, -e1, mix_delta));
+#endif
 #if (SHADOW_RAY == 4)
     const vec3 s3 = normalize(mix(dir, e2, mix_delta));
     const vec3 s4 = normalize(mix(dir, -e2, mix_delta));
@@ -26,8 +32,10 @@ float castShadowCone(Octree * root, vec3 point, vec3 normal, vec3 dir, float max
     const float coneoffset = -0.01f;
 
     const Cone r[SHADOW_RAY] =
-    { Cone(initial + vec4(coneoffset * s1,0), s1, theta),
-      Cone(initial + vec4(coneoffset * s2,0), s2, theta)
+    { Cone(initial + vec4(coneoffset * s1,0), s1, theta)
+#if (SHADOW_RAY >1)
+     ,Cone(initial + vec4(coneoffset * s2,0), s2, theta)
+#endif
 #if (SHADOW_RAY == 4)
      ,Cone(initial + vec4(coneoffset * s3,0), s3, theta),
       Cone(initial + vec4(coneoffset * s4,0), s4, theta)
@@ -35,7 +43,9 @@ float castShadowCone(Octree * root, vec3 point, vec3 normal, vec3 dir, float max
     };
 
     occ += singleShadowConeTrace(root, r[0], maxDist);
+#if (SHADOW_RAY >1)
     occ += singleShadowConeTrace(root, r[1], maxDist);
+#endif
 #if (SHADOW_RAY == 4)
     occ += singleShadowConeTrace(root, r[2], maxDist);
     occ += singleShadowConeTrace(root, r[3], maxDist);
@@ -56,11 +66,10 @@ float singleShadowConeTrace(Octree * root, Cone r, float maxDist)
     vec3 point = vec3(r.initial);
     float a = 0.f;
     float delta = 0.f;
-    vec3 c = vec3(0);
 
     // For accumulation
-    vec3 col(0);
     CloseVox vox;
+    Cell average;
 
     float radius = 0;
 
@@ -69,7 +78,7 @@ float singleShadowConeTrace(Octree * root, Cone r, float maxDist)
         radius = 1.f/ glm::pow(2,i);
         dist = radius/tantheta;
         point = vec3(r.initial) + dist * r.direction;
-        weight = 1 / (1+ dist);
+        weight = 1 / (1+ 20 *dist);
 
         if (!insideCube(point,0)) {
             a += glm::pow(weight,10) * (1-a);
@@ -79,11 +88,12 @@ float singleShadowConeTrace(Octree * root, Cone r, float maxDist)
         {
             if (getVoxel(root, point, i, vox))
             {
-                occ = vox.tree->voxel->occ;
-                col = vox.tree->voxel->col;
-                c += col * (vec3(1) - c);
-                a += glm::pow(weight,1) * (1 - a) * glm::pow(occ,1);
+                {
+                    occ = vox.tree->interOcc(point);
+                    a += glm::pow(weight,1) * (1 - a) * glm::pow(occ,1);
+                }
             }
+
         }
     }
     occ = (a > 1) ? 1 : a;

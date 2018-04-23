@@ -38,12 +38,12 @@ class Octree
 
     public:
         // Building Octree Ops
-        bool toDivide(vec3 &colour);
+        bool toDivide(Intersection &inter);
         void AssignType();
         void connectKids();
         void makeKids(int depth, queue<Octree *> &q);
 
-        void makeTexture(const vec3 colour);
+        void makeTexture(const Intersection inter);
         void mipmap();
         void BrickEdgeCopy();
         void PrintBrick();
@@ -56,6 +56,8 @@ class Octree
         Octree();
         Octree(vector<Object *> objects, BoundingVolume bv, Light light, BVH * bvh);
         bool collision(Ray r, Intersection &inter, int d_depth, int c_depth);
+        Cell interVox(vec3 point);
+
 };
 
 void updateTextureOctree(Octree * tree, Light l, BVH * bvh);

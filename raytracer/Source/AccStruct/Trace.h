@@ -10,7 +10,7 @@ bool insideCube(vec3 p, float e);
 
 struct CloseVox{
     Octree * tree;
-    float diff;
+    Octree * tree2;
 };
 
 struct Trace
@@ -24,9 +24,9 @@ Trace operator+(const Trace c1, const Trace c2);
     //Trace operator+(const Trace c1, const Cell &c);
 
 bool getVoxel(Octree * root, const vec3 point, const int depth, CloseVox &vox);
-bool ClosestVoxel(Octree * root, const vec3 point, const float threshold, CloseVox &voxel);
 float castShadowCone(Octree * root, vec3 point, Light l, float theta);
 Trace ambientOcclusion(Octree * root, vec3 point1, vec3 normal);
 float castShadowCone(Octree * root, vec3 point, vec3 normal, vec3 dir, float maxDist);
+Cell averageNeighVoxel(Octree * root);
 
 #endif

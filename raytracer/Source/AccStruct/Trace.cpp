@@ -19,6 +19,44 @@ Trace operator+(const Trace c1, const Trace c2)
 
 bool insideCube(vec3 p, float e) { return abs(p.x) < 1 + EPSILON && abs(p.y) < 1 +EPSILON && abs(p.z) < 1 + EPSILON;}
 
+bool getPrecVoxel(Octree * root, const vec3 point, const float threshold, CloseVox &vox)
+{
+    bool found = false;
+    int t_l_depth = glm::floor( - glm::log2(root->boxHalfSize[0])); // Lower depth
+    int t_u_depth = glm::ceil( - glm::log2(root->boxHalfSize[0])); // Upper depth
+    int c_depth = glm::round(-glm::log2(root->boxHalfSize[0]));
+    
+    // ASSUME t_u_depth > t_l_depth
+    vec3 max = root->centre + root->boxHalfSize;
+    vec3 min = root->centre - root->boxHalfSize;
+    if (pointInsideAABB(point, min, max) && !found)
+    {
+        if (c_depth == t_u_depth)
+        {
+            vox.tree2 = root;
+            return false;
+        }
+        if (c_depth == t_l_depth)
+        {
+            vox.tree = root;
+            return true;
+        }
+        else if (root->type == NODE)
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                found |= getPrecVoxel(&root->children[i], point, threshold, vox);
+            }
+        }
+        else if (root->type == EMPTY)
+        {
+            return false;
+        }
+    }
+    return found;
+
+}
+
 bool getVoxel(Octree * root, const vec3 point, const int depth, CloseVox &vox)
 {
     bool found = false;
@@ -28,7 +66,7 @@ bool getVoxel(Octree * root, const vec3 point, const int depth, CloseVox &vox)
     min = root->centre - root->boxHalfSize;
     if (pointInsideAABB(point, min, max) && !found)
     {
-        if (depth == c_depth && root->type != EMPTY)
+        if (depth == c_depth)
         {
             vox.tree = root;
             return true;
@@ -48,37 +86,21 @@ bool getVoxel(Octree * root, const vec3 point, const int depth, CloseVox &vox)
     return found;
 }
 
-bool ClosestVoxel(Octree * root, const vec3 point, float threshold, CloseVox &vox)
+Cell averageNeighVoxel(Octree * root)
 {
-    bool found = false;
-    vec3 min, max;
-    max = root->centre + root->boxHalfSize;
-    min = root->centre - root->boxHalfSize;
-    float norm;
-    if (pointInsideAABB(point, min, max) && !found)
+    Cell vox = Cell();
+    int count = 0;
+    for (int i = 0; i < NEIGHBOURS; i++)
     {
-        norm = glm::l2Norm(root->boxHalfSize);
-        if (root->type == NODE && norm < threshold)
-
+        if (root->neighbours[i] != NULL)
         {
-            if (glm::abs(norm - threshold) < vox.diff)
+            if (root->neighbours[i]->type != EMPTY)
             {
-                vox.tree = root;
-                vox.diff = glm::abs(norm-threshold);
-                return true;
+                vox = vox + *root->neighbours[i]->voxel;
+                count++;
             }
-        }
-        else if (root->type == NODE)
-        {
-            for (int i = 0; i < 8; i++)
-            {
-                found |= ClosestVoxel(&root->children[i], point, threshold, vox);
-            }
-        }
-        else if (root->type == EMPTY)
-        {
-            return false;
         }
     }
-    return found;
+    vox = (count == 0) ? vox : vox / (float) count;
+    return vox;
 }

@@ -7,22 +7,21 @@ using namespace glm;
 
 void singleAmbConeTrace(Octree * root, Cone r, Trace &t, float maxDist);
 
-#define AMB_RAY 5
+#define AMB_RAY 9
 Trace ambientOcclusion(Octree * root, vec3 point, vec3 normal)
 {
-    const float max_dist = 0.2;
+    const float max_dist = 0.5;
     Intersection inter;
     CloseVox vox;
-    vox.diff = 20;
 
-    const float theta = AMBIEN_CONE;
+    const float theta = 0.3;
 
     // Find Basis Vectors
     const vec3 e1 = findOthor(normal);
     const vec3 e2 = findOthor(normal, e1);
 
     // Find initial position
-    const vec3 n_offset = normal * VOXEL_SIZE;
+    const vec3 n_offset = 3 * normal * VOXEL_SIZE;
     const vec4 initial = vec4(point + n_offset,0);
 
     const float cone_offset = -0.01f;
@@ -70,7 +69,7 @@ Trace ambientOcclusion(Octree * root, vec3 point, vec3 normal)
     for (int i = 0; i < AMB_RAY; i ++)
     {
         singleAmbConeTrace(root, r[i], t, max_dist);
-        acc += glm::pow(1-t.occ,2);
+        acc += glm::pow(1-t.occ,1);
         colorAcc += t.col;
     }
     acc /= AMB_RAY;
@@ -97,6 +96,7 @@ void singleAmbConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
     float weight, occ;
     vec3 col(0);
     CloseVox vox;
+    Cell averages = Cell();
 
     float radius = 0;
 
@@ -105,19 +105,31 @@ void singleAmbConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
         radius = 1.f/ glm::pow(2,i);
         dist = radius/tantheta;
         point = vec3(r.initial) + dist * r.direction;
-        weight = 1 / (1+ 20 *dist);
+        weight = 1 / (1+ 1 *dist);
 
         if (!insideCube(point,0)) {
-            //a += glm::pow(weight,2) * (1-a);
+            a += glm::pow(weight,1) * (1-a);
             break;
         }
         if (l2Norm(point - vec3(r.initial)) < maxDist)
         {
             if (getVoxel(root, point, i, vox))
             {
-                col = vox.tree->voxel->col;
-                c += (1-a) *occ * (vec3(1) - c);
-                a += glm::pow(weight,2) * (1 - a);
+                if (vox.tree->type == LEAF)
+                {
+                   a += glm::pow(weight,1) * (1 - a);
+                }
+                else if (vox.tree->type == NODE)
+                {
+                    //col = vox.tree->voxel->col;
+                    averages = vox.tree->interVox(point);
+                    c += (vec3(1) - c) * averages.col * averages.irrad;
+                }
+                else
+                {
+                    Cell average = averageNeighVoxel(vox.tree);
+                    c +=  0.25f * (vec3(1) - c) * average.col * average.irrad;
+                }
             }
         }
         else
