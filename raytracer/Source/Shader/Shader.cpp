@@ -2,6 +2,8 @@
 #include "Collision.h"
 #include "Trace.h"
 #include <stack>
+#include "glm/ext.hpp"
+
 
 #ifdef DEBUG
 #include "glm/ext.hpp"
@@ -74,7 +76,7 @@ void fresnel(const Ray r, const Intersection i, float &kr)
     // kt = 1 - kr;
 }
 
-void shootRay(const Ray r, vec3 &colour, Octree tree, BVH bvh, Light l)
+void shootRay(Ray r, vec3 &colour, Octree tree, BVH bvh, Light l)
 {
     Intersection i;
     Trace trace;
@@ -84,25 +86,33 @@ void shootRay(const Ray r, vec3 &colour, Octree tree, BVH bvh, Light l)
     if (bvh.collision(r, i))
        //(tree.collision(r,i, OCT_DEPTH -3,0)) //(bvh.collision(r, i))
     {
+        /*
+        cout << "new " << endl;
+        cout << to_string(i.position) << endl;
+        cout << to_string(r.direction) << endl;
+        cout << to_string(i.normal) << endl;
+        */
+
+        /*
         spec = castSpecCone(&tree,
                     vec3(i.position),
                     vec3(i.normal),
-                    r.direction,
+                    reflect(r.direction, vec3(i.normal)),
                     l2Norm(vec3(i.position - l.position)));
-        colour =  spec * i.colour;
+        colour =  spec; //* i.colour;
+        */
 
-        /*
         trace = ambientOcclusion(&tree, vec3(i.position),vec3(i.normal));
+
         shadow= castShadowCone(&tree,
                     vec3(i.position),
                     vec3(i.normal),
                     normalize(vec3(l.position - i.position)),
                     l2Norm(vec3(i.position - l.position)));
-                    */
 
-        //colour= i.colour;
-//        colour = vec3(spec);
-        //colour = 0.5f * colour * shadow + 0.3f * colour * trace.occ;
+       //colour= i.colour;
+        //colour = vec3(trace.occ);
+       // colour = 0.5f * colour * shadow + 0.5f * colour * trace.occ;
          //   + 0.02f * spec;
     }
     else
@@ -143,11 +153,9 @@ void shootRay(const Ray r, vec3 &colour, BVH bvh, Light light)
             }
             fresnel(c_ray.r, intersect, kr);
 
-            lightColor = intersect.colour * DirectLight(intersect.position,
+            lightColor = vec3(DirectLight(intersect.position,
                     vec3(intersect.normal),
-                    light) * ShadowLight(intersect,
-                        bvh,
-                        light);
+                    light));
 
             if (kr < 1)
             {

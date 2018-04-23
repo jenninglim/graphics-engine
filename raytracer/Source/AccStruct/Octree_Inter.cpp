@@ -9,10 +9,7 @@ float Octree::interOcc(vec3 point)
     for (int i = 0; i < 8; i++)
     {
         data[i] = 0;
-        if (this->children[i].voxel != NULL && this->children[i].type != EMPTY)
-        {
-            data[i] = this->brick[corners[i]].occ;
-        }
+        data[i] = this->brick[corners[i]].occ;
     }
     return trilinear<float>(point - this->centre + this->boxHalfSize,
             data[7], //  c000

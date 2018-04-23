@@ -22,13 +22,13 @@ bool insideCube(vec3 p, float e) { return abs(p.x) < 1 + EPSILON && abs(p.y) < 1
 bool getVoxel(Octree * root, const vec3 point, const int depth, CloseVox &vox)
 {
     bool found = false;
-    int c_depth = - glm::log2(root->boxHalfSize[0]);
+    int c_depth = glm::round(- glm::log2(root->boxHalfSize[0]));
     vec3 min, max;
-    max = root->centre + root->boxHalfSize;
-    min = root->centre - root->boxHalfSize;
+    max = root->centre + (1+0.05)*root->boxHalfSize;
+    min = root->centre - (1+0.05)*root->boxHalfSize;
     if (pointInsideAABB(point, min, max) && !found)
     {
-        if (depth == c_depth && root->type != EMPTY)
+        if (depth == c_depth)
         {
             vox.tree = root;
             return true;
@@ -39,10 +39,6 @@ bool getVoxel(Octree * root, const vec3 point, const int depth, CloseVox &vox)
             {
                 found |= getVoxel(&root->children[i], point, depth, vox);
             }
-        }
-        else if (root->type == EMPTY)
-        {
-            return false;
         }
     }
     return found;
@@ -59,9 +55,8 @@ bool ClosestVoxel(Octree * root, const vec3 point, float threshold, CloseVox &vo
     {
         norm = glm::l2Norm(root->boxHalfSize);
         if (root->type == NODE && norm < threshold)
-
         {
-            if (glm::abs(norm - threshold) < vox.diff)
+            //if (glm::abs(norm - threshold) < vox.diff)
             {
                 vox.tree = root;
                 vox.diff = glm::abs(norm-threshold);
@@ -81,4 +76,26 @@ bool ClosestVoxel(Octree * root, const vec3 point, float threshold, CloseVox &vo
         }
     }
     return found;
+}
+Voxel averageNeighbourVox(Octree * node)
+{
+    Voxel vox = Voxel();
+    int count = 0;
+    for (int i = 0; i < NEIGHBOURS; i++)
+    {
+        if (node->neighbours[i] != NULL)
+        {
+            if (node->neighbours[i]->type != EMPTY)
+            {
+                vox = vox + *node->neighbours[i]->voxel;
+                count++; 
+            }
+        }
+    }
+
+    if (count > 0)
+    {
+        vox = vox / count;
+    }
+    return vox;
 }

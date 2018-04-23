@@ -32,7 +32,7 @@ void Scene::Draw(screen* screen)
     Ray r;
     updateTextureOctree(&this->octree, light, &this->bvh);
 
-    #pragma omp parallel for num_threads(4) private(rayFromOrigin,rayFromCam,color,d,r) schedule(dynamic)
+//    #pragma omp parallel for num_threads(4) private(rayFromOrigin,rayFromCam,color,d,r) schedule(dynamic)
     for(int y = 0; y < SCREEN_HEIGHT; y++){
         for(int x = 0; x < SCREEN_WIDTH; x++){
             rayFromOrigin.x = x - SCREEN_WIDTH/2;
@@ -52,7 +52,7 @@ void Scene::Draw(screen* screen)
             r.direction = d;
 
             shootRay(r, color, bvh, light);
-            shootRay(r, color, this->octree, this->bvh, light);
+            //shootRay(r, color, this->octree, this->bvh, light);
             pixels[x][y] = color;
         }
     }

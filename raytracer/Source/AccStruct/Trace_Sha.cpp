@@ -6,8 +6,8 @@ float singleShadowConeTrace(Octree * root, Cone r, float maxDist);
 #define SHADOW_RAY 4
 float castShadowCone(Octree * root, vec3 point, vec3 normal, vec3 dir, float maxDist)
 {
-    const float mix_delta = 0.3f;
-    const float theta = 0.3f;
+    const float mix_delta = 0.2f;
+    const float theta = 0.2f;
 
     float occ = 0;
     const vec3 e1 = findOthor(dir);
@@ -56,33 +56,38 @@ float singleShadowConeTrace(Octree * root, Cone r, float maxDist)
     vec3 point = vec3(r.initial);
     float a = 0.f;
     float delta = 0.f;
-    vec3 c = vec3(0);
 
     // For accumulation
-    vec3 col(0);
     CloseVox vox;
+    Voxel average = Voxel();
 
     float radius = 0;
 
-    for (int i = OCT_DEPTH - 1; i > 0; i--)
+    for (int i = OCT_DEPTH -1; i > 0; i--)
     {
         radius = 1.f/ glm::pow(2,i);
         dist = radius/tantheta;
         point = vec3(r.initial) + dist * r.direction;
-        weight = 1 / (1+ dist);
+        weight = 1 / (1+  10 * dist);
 
         if (!insideCube(point,0)) {
-            a += glm::pow(weight,10) * (1-a);
+//            a += glm::pow(weight,2) * (1-a);
             break;
         }
-        if (l2Norm(point - vec3(r.initial))< maxDist)
+        if (l2Norm(point - vec3(r.initial))< maxDist || occ > 1.f)
         {
             if (getVoxel(root, point, i, vox))
             {
-                occ = vox.tree->voxel->occ;
-                col = vox.tree->voxel->col;
-                c += col * (vec3(1) - c);
-                a += glm::pow(weight,1) * (1 - a) * glm::pow(occ,1);
+                if (vox.tree->type != EMPTY)
+                {
+                    occ = vox.tree->interOcc(point);
+                    a += glm::pow(weight,1) * (1 - a) * glm::pow(occ,1);
+                }
+                else // is EMPTY => Average
+                {
+                    average = averageNeighbourVox(vox.tree);
+                    a += (1-occ) *average.occ;
+                }
             }
         }
     }

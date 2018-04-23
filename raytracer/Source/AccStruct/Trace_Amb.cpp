@@ -98,6 +98,7 @@ void singleAmbConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
     float weight, occ;
     vec3 col(0);
     CloseVox vox;
+    Voxel average;
 
     float radius = 0;
 
@@ -116,10 +117,20 @@ void singleAmbConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
         {
             if (getVoxel(root, point, i, vox))
             {
-                col = vox.tree->voxel->col;
-                c += (1-a) *occ * (vec3(1) - c);
-                a += glm::pow(weight,2) * (1 - a);
+                if (vox.tree->type != EMPTY)
+                {
+                    col = vox.tree->voxel->col;
+                    c += (1-a) *occ * (vec3(1) - c);
+                    a += glm::pow(weight,2) * (1 - a);
+                }
+                else // is EMPTY => Average
+                {
+                    average = averageNeighbourVox(vox.tree);
+                    //a +=glm::pow(weight,1)* (1-a) *average.occ;
+                    //col +=glm::pow(weight,1)* (1-a) *average.col;
+                }
             }
+
         }
         else
         {

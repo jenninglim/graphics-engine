@@ -29,6 +29,7 @@ float castShadowCone(Octree * root, vec3 point, Light l, float theta);
 Trace ambientOcclusion(Octree * root, vec3 point1, vec3 normal);
 float castShadowCone(Octree * root, vec3 point, vec3 normal, vec3 dir, float maxDist);
 vec3 castSpecCone(Octree * root, vec3 point, vec3 normal, vec3 dir, float maxDist);
+Voxel averageNeighbourVox(Octree * node);
 
 
 #endif
