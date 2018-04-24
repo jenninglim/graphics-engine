@@ -59,7 +59,7 @@ void ClipOnWAxis(vector<Pixel> &conicalPixels, Camera *cam){
 
 
   vector<Pixel> newConicalPixels;
-  for(int i = 0; i < conicalPixels.size(); i++ ){
+  for(size_t i = 0; i < conicalPixels.size(); i++ ){
     int current = i;
     float proportion;
     int prev = (i - 1 + conicalPixels.size()) % conicalPixels.size();
@@ -163,7 +163,7 @@ void PixelShader(screen* screen,
     int x = p.x ;
     int y = p.y ;
     if(x >= 0 && y >= 0 && x < SCREEN_WIDTH && y < SCREEN_HEIGHT){
-      if(Draw::SHADOWS_OFF &&  p.zinv > cam->depthBuffer[y][x] || (Draw::SCENE_SHADOW && p.zinv == cam->depthBuffer[y][x] && cam->stencilBuffer[y][x] <= 0)){
+      if((type == Draw::SHADOWS_OFF &&  p.zinv > cam->depthBuffer[y][x]) || (Draw::SCENE_SHADOW && p.zinv == cam->depthBuffer[y][x] && cam->stencilBuffer[y][x] <= 0)){
         //PHONG SHADING
         vec4 l_hat = glm::normalize(light->position - (p.pos3d/p.zinv));
         float dist = glm::length(light->position - (p.pos3d/p.zinv));
@@ -310,7 +310,7 @@ void Sutherland_Hodgman(vector<Pixel> &outputVertex){
 }
 
 void WDivision(vector<Pixel>&conicalPixels){
-  for(int i = 0; i < conicalPixels.size(); i++){
+  for(size_t i = 0; i < conicalPixels.size(); i++){
     if(conicalPixels[i].conicalPos.w != 1){
       conicalPixels[i].conicalPos.x /= conicalPixels[i].conicalPos.w;
       conicalPixels[i].conicalPos.y /= conicalPixels[i].conicalPos.w;
@@ -362,7 +362,7 @@ void DrawPolygonRasterisation(screen* screen,
 
 
   if(conicalPixel.size() > 0){
-    for(int y = 1; y < conicalPixel.size() - 1; y++ ){
+    for(size_t y = 1; y < conicalPixel.size() - 1; y++ ){
 
       vertexPixels[0] = conicalPixel[0];
       vertexPixels[1] = conicalPixel[y];

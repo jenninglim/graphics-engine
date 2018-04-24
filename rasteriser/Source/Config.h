@@ -13,7 +13,7 @@
 #define CAM_FOCAL_LENGTH  300
 
 // Lighting
-#define SPECULAR_INTENSITY 10
+#define SPECULAR_INTENSITY 14
 #define DIFFUSE_INTENSITY 2
 #define AMBIENT_INTENSITY 0.3
 
@@ -27,7 +27,7 @@
 #define THRESHOLD 0.5
 
 //Shadows on/off
-#define SHADOWS true
+#define SHADOWS false
 #define BUNNYSHADOWS false
 
 
