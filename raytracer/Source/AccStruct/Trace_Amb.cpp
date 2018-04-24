@@ -7,21 +7,22 @@ using namespace glm;
 
 void singleAmbConeTrace(Octree * root, Cone r, Trace &t, float maxDist);
 
-#define AMB_RAY 9
+#define AMB_RAY 1
 Trace ambientOcclusion(Octree * root, vec3 point, vec3 normal)
 {
-    const float max_dist = 0.5;
+    const float max_dist = 0.2;
     Intersection inter;
     CloseVox vox;
 
     const float theta = 0.3;
+    const float mix_ratio = 0.4f;
 
     // Find Basis Vectors
     const vec3 e1 = findOthor(normal);
     const vec3 e2 = findOthor(normal, e1);
 
     // Find initial position
-    const vec3 n_offset = 3 * normal * VOXEL_SIZE;
+    const vec3 n_offset = 2 * normal * VOXEL_SIZE;
     const vec4 initial = vec4(point + n_offset,0);
 
     const float cone_offset = -0.01f;
@@ -36,10 +37,10 @@ Trace ambientOcclusion(Octree * root, vec3 point, vec3 normal)
 
 #if (AMB_RAY >=5)
     // Side Cone
-    const vec3 s1 = normalize(mix(normal, e1, 0.5f));
-    const vec3 s2 = normalize(mix(normal, -e1, 0.5f));
-    const vec3 s3 = normalize(mix(normal, e2, 0.5f));
-    const vec3 s4 = normalize(mix(normal, -e2, 0.5f));
+    const vec3 s1 = normalize(mix(normal, e1, mix_ratio));
+    const vec3 s2 = normalize(mix(normal, -e1, mix_ratio));
+    const vec3 s3 = normalize(mix(normal, e2, mix_ratio));
+    const vec3 s4 = normalize(mix(normal, -e2, mix_ratio));
 
     r[1] = Cone(initial + vec4(cone_offset * e1,0), s1, theta); //0.03
     r[2] = Cone(initial - vec4(cone_offset * e1,0), s2, theta); //0.03
@@ -52,10 +53,10 @@ Trace ambientOcclusion(Octree * root, vec3 point, vec3 normal)
     const vec3 e3 = 0.5f * (e1 + e2);
     const vec3 e4 = 0.5f * (e1 - e2);
 
-    const vec3 c1 = normalize(mix(normal, e3, 0.5f));
-    const vec3 c2 = normalize(mix(normal, -e3, 0.5f));
-    const vec3 c3 = normalize(mix(normal, e4, 0.5f));
-    const vec3 c4 = normalize(mix(normal, -e4, 0.5f));
+    const vec3 c1 = normalize(mix(normal, e3, mix_ratio));
+    const vec3 c2 = normalize(mix(normal, -e3, mix_ratio));
+    const vec3 c3 = normalize(mix(normal, e4, mix_ratio));
+    const vec3 c4 = normalize(mix(normal, -e4, mix_ratio));
 
     r[5] = Cone(initial + vec4(cone_offset * e3,0), c1, theta); //0.03
     r[6] = Cone(initial - vec4(cone_offset * e3,0), c2, theta); //0.03
@@ -105,7 +106,7 @@ void singleAmbConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
         radius = 1.f/ glm::pow(2,i);
         dist = radius/tantheta;
         point = vec3(r.initial) + dist * r.direction;
-        weight = 1 / (1+ 1 *dist);
+        weight = 1 / (1+ 20 *dist);
 
         if (!insideCube(point,0)) {
             a += glm::pow(weight,1) * (1-a);
@@ -121,15 +122,19 @@ void singleAmbConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
                 }
                 else if (vox.tree->type == NODE)
                 {
-                    //col = vox.tree->voxel->col;
+                    a += glm::pow(weight,2) * (1 - a);
                     averages = vox.tree->interVox(point);
-                    c += (vec3(1) - c) * averages.col * averages.irrad;
+                    c += weight* (vec3(1) - c) * averages.col * pow(1-a,3);
+                    //c += (vec3(1) - c) * col * averages.irrad;
                 }
-                else
+                else if (i < MAX_DEPTH -4)
                 {
                     Cell average = averageNeighVoxel(vox.tree);
-                    c +=  0.25f * (vec3(1) - c) * average.col * average.irrad;
+                    c += weight*(vec3(1) - c) * average.col *pow(1-a,2) * 0.25;
                 }
+            }
+            else
+            {
             }
         }
         else

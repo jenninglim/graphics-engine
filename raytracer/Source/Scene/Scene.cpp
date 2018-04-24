@@ -54,7 +54,7 @@ void Scene::Draw(screen* screen)
             pixels[x][y] = color;
         }
     }
-    //post_processing(pixels);
+    post_processing(pixels);
     drawPixels(screen);
 }
 

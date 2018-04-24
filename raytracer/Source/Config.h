@@ -6,8 +6,8 @@
 #define VOL_APPROX_INT 0.01
 
 // Screen Setup
-#define SCREEN_WIDTH 300
-#define SCREEN_HEIGHT 300
+#define SCREEN_WIDTH 1000
+#define SCREEN_HEIGHT 1000
 #define FULLSCREEN_MODE true
 
 // Camera

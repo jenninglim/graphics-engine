@@ -1,6 +1,7 @@
 #include "Octree.h"
 #include "MyMath.h"
 
+// TODO: FIX interpolation to account for orientation of the cube.
 static const int corners[8] = {0,2,6,8,18,20,24,26};
 float Octree::interOcc(vec3 point)
 {

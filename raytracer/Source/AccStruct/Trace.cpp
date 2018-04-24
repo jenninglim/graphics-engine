@@ -62,8 +62,8 @@ bool getVoxel(Octree * root, const vec3 point, const int depth, CloseVox &vox)
     bool found = false;
     int c_depth = - glm::log2(root->boxHalfSize[0]);
     vec3 min, max;
-    max = root->centre + root->boxHalfSize;
-    min = root->centre - root->boxHalfSize;
+    max = root->centre + root->boxHalfSize * (1.f + EPSILON);
+    min = root->centre - root->boxHalfSize * (1.f + EPSILON);
     if (pointInsideAABB(point, min, max) && !found)
     {
         if (depth == c_depth)
