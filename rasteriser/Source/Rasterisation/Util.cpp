@@ -123,34 +123,67 @@ void PixelShader(screen* screen,
                  Camera *cam,
                  Light* light,
                  vec4 currentNormal,
-                 vec3 currentReflectance)
+                 vec3 currentReflectance,
+                 Draw type)
 {
-  vec4 l_hat = glm::normalize(light->position - (p.pos3d/p.zinv));
-  float dist = glm::length(light->position - (p.pos3d/p.zinv));
-  vec3 diffuseColor = light->diffuseLightIntensity * glm::max(glm::dot(l_hat, currentNormal), 0.0f) /
-    (float) (4.0f * glm::pi<float>() * glm::pow<float>(dist,2));
+  if(type == Draw::SCENE_AMBIENT){
+    vec3 finalColour = currentReflectance * light -> ambientLightIntensity;
+    int x = p.x;
+    int y = p.y;
+    if(x >= 0 && y >= 0 && x < SCREEN_WIDTH && y < SCREEN_HEIGHT){
+      if( p.zinv > cam->depthBuffer[y][x] ){
+        cam->depthBuffer[y][x] = p.zinv;
+        cam->pixels[x][y] = finalColour* currentColor;
+      }
+    }
+  }else if(type == Draw::SHADOW){
+    int x = p.x;
+    int y = p.y;
+    if(x >= 0 && y >= 0 && x < SCREEN_WIDTH && y < SCREEN_HEIGHT){
+      if(p.zinv > cam->depthBuffer[y][x]){
+        auto it = std::find_if(cam->stencilInvStore[y][x].begin(), cam->stencilInvStore[y][x].end(),
+                [=] (float value){
+                  return p.zinv == value;
+                });
+        if(it == cam->stencilInvStore[y][x].end() ){
+          //Not contained in stencil inv store
+          if(cam->stencilWritten[y][x] == 1){
+            //HAS BEEN WRITTEN FOR THIS OBJECT
+            cam->stencilBuffer[y][x] = (cam->stencilBuffer[y][x] - 1.0f);
+            cam->stencilInvStore[y][x].push_back(p.zinv);
+          }else{
+            cam->stencilBuffer[y][x] = (cam->stencilBuffer[y][x] + 1.0f);
+            cam->stencilWritten[y][x] = 1;
+            cam->stencilInvStore[y][x].push_back(p.zinv);
+          }
+        }
+      }
+    }
+  }else{
+    int x = p.x ;
+    int y = p.y ;
+    if(x >= 0 && y >= 0 && x < SCREEN_WIDTH && y < SCREEN_HEIGHT){
+      if(Draw::SHADOWS_OFF &&  p.zinv > cam->depthBuffer[y][x] || (Draw::SCENE_SHADOW && p.zinv == cam->depthBuffer[y][x] && cam->stencilBuffer[y][x] <= 0)){
+        //PHONG SHADING
+        vec4 l_hat = glm::normalize(light->position - (p.pos3d/p.zinv));
+        float dist = glm::length(light->position - (p.pos3d/p.zinv));
+        vec3 diffuseColor = light->diffuseLightIntensity * glm::max(glm::dot(l_hat, currentNormal), 0.0f) /
+          (float) (4.0f * glm::pi<float>() * glm::pow<float>(dist,2));
 
-  vec4 r_hat = glm::normalize((2 * glm::max(glm::dot(l_hat, currentNormal), 0.0f) * currentNormal) - l_hat);
-  vec4 v_hat = glm::normalize(cam->cameraPos - (p.pos3d/p.zinv));
-  vec3 specularColor = light->specularLightIntensity * glm::pow(glm::max(glm::dot(r_hat, v_hat), 0.0f), 3.0f) /
-    (float) (4.0f * glm::pi<float>() * glm::pow<float>(dist,2));;
+        vec4 r_hat = glm::normalize((2 * glm::max(glm::dot(l_hat, currentNormal), 0.0f) * currentNormal) - l_hat);
+        vec4 v_hat = glm::normalize(cam->cameraPos - (p.pos3d/p.zinv));
+        vec3 specularColor = light->specularLightIntensity * glm::pow(glm::max(glm::dot(r_hat, v_hat), 0.0f), 3.0f) /
+          (float) (4.0f * glm::pi<float>() * glm::pow<float>(dist,2));
+        vec3 finalColour = currentReflectance * ((diffuseColor != vec3(0) ? specularColor + diffuseColor : vec3(0)) + light->ambientLightIntensity);
 
-  //Diffuse surface
-
-  vec3 finalColour = currentReflectance * ((diffuseColor != vec3(0) ? specularColor + diffuseColor : vec3(0)) + light->ambientLightIntensity);
-
-  int x = p.x ;
-  int y = p.y ;
-  if(x >= 0 && y >= 0 && x < SCREEN_WIDTH && y < SCREEN_HEIGHT){
-    if( p.zinv > cam->depthBuffer[y][x] )
-    {
-
-      cam->depthBuffer[y][x] = p.zinv;
-      cam->pixels[x][y] = finalColour* currentColor;
-      //PutPixelSDL( screen, x, y, finalColour* currentColor );
+        cam->depthBuffer[y][x] = p.zinv;
+        cam->pixels[x][y] = finalColour* currentColor;
+      }
     }
   }
 }
+
+
 
 void ComputePolygonRows(const vector<Pixel>& vertexPixels, vector<Pixel>& leftPixels, vector<Pixel>& rightPixels)
 {
@@ -198,7 +231,8 @@ void DrawPolygonRows(screen* screen,
         Camera* cam,
         Light* light,
         vec4 currentNormal,
-        vec3 currentReflectance)
+        vec3 currentReflectance,
+        Draw type)
 {
 
     for(unsigned int row = 0; row < leftPixels.size(); row++)
@@ -207,7 +241,7 @@ void DrawPolygonRows(screen* screen,
       Interpolate(leftPixels[row], rightPixels[row], pixxes);
       for (size_t i = 0; i < pixxes.size(); i++)
       {
-        PixelShader(screen,pixxes[i],color,cam, light, currentNormal,currentReflectance);
+        PixelShader(screen,pixxes[i],color,cam, light, currentNormal,currentReflectance,type);
       }
     }
 }
@@ -292,7 +326,8 @@ void DrawPolygonRasterisation(screen* screen,
         Camera* cam,
         Light* light,
         vec4 currentNormal,
-        vec3 currentReflectance)
+        vec3 currentReflectance,
+        Draw type)
 {
 
 
@@ -341,7 +376,7 @@ void DrawPolygonRasterisation(screen* screen,
       for(size_t testvertex = 0; testvertex < leftPixels.size(); testvertex++){
 
       }
-      DrawPolygonRows(screen,leftPixels, rightPixels, color, cam, light, currentNormal, currentReflectance);
+      DrawPolygonRows(screen,leftPixels, rightPixels, color, cam, light, currentNormal, currentReflectance, type);
     }
   }
 }

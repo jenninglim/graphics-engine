@@ -2,6 +2,7 @@
 #define CAMERA_H
 
 #include "Config.h"
+#include <vector>
 #include "glm/gtx/string_cast.hpp"
 using namespace glm;
 
@@ -10,7 +11,6 @@ class Camera
 {
 
     public:
-
         float focalLength;
         float yaw;
         glm::vec4 cameraPos;
@@ -20,7 +20,9 @@ class Camera
         mat4 increR;
         float depthBuffer[SCREEN_HEIGHT][SCREEN_WIDTH];
         glm::vec3 pixels[SCREEN_WIDTH][SCREEN_HEIGHT];
-
+        float stencilBuffer[SCREEN_HEIGHT][SCREEN_WIDTH];
+        bool stencilWritten[SCREEN_HEIGHT][SCREEN_WIDTH];
+        std::vector<float> stencilInvStore[SCREEN_HEIGHT][SCREEN_WIDTH];
 
     Camera()
     {

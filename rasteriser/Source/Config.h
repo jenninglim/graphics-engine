@@ -15,7 +15,7 @@
 // Lighting
 #define SPECULAR_INTENSITY 10
 #define DIFFUSE_INTENSITY 2
-#define AMBIENT_INTENSITY 0.5
+#define AMBIENT_INTENSITY 0.3
 
 //Clipping
 #define W_CLIPPING_PLANE 0.00001
@@ -25,6 +25,10 @@
 
 // AA
 #define THRESHOLD 0.5
+
+//Shadows on/off
+#define SHADOWS true
+#define BUNNYSHADOWS false
 
 
 

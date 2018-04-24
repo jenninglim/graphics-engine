@@ -27,8 +27,45 @@ public:
 	    vertices[0].position = triangles[i].v0;
 	    vertices[1].position = triangles[i].v1;
 	    vertices[2].position = triangles[i].v2;
-	    DrawPolygonRasterisation(screen, vertices, triangles[i].color, cam, light, currentNormal, currentReflectance);
+	    DrawPolygonRasterisation(screen, vertices, triangles[i].color, cam, light, currentNormal, currentReflectance, Draw::SHADOWS_OFF);
 	  }
+	}
+
+	void DrawPolygonAmbient(screen* screen, Camera* cam, Light* light){
+		for(uint32_t i=0; i<triangles.size(); ++i){
+
+			vec4 currentNormal = glm::normalize(triangles[i].normal);
+	    vec3 currentReflectance = vec3(1,1,1);
+	    vector<Vertex> vertices(3);
+	    vertices[0].position = triangles[i].v0;
+	    vertices[1].position = triangles[i].v1;
+	    vertices[2].position = triangles[i].v2;
+	    DrawPolygonRasterisation(screen, vertices, triangles[i].color, cam, light, currentNormal, currentReflectance, Draw::SCENE_AMBIENT);
+	  }
+	}
+
+	void DrawPolygonShadow(screen* screen, Camera* cam, Light* light){
+		for(uint32_t i=0; i<triangles.size(); ++i){
+			vec4 currentNormal = glm::normalize(triangles[i].normal);
+			vec3 currentReflectance = vec3(1,1,1);
+			vector<Vertex> vertices(3);
+			vertices[0].position = triangles[i].v0;
+			vertices[1].position = triangles[i].v1;
+			vertices[2].position = triangles[i].v2;
+			DrawPolygonRasterisation(screen, vertices, triangles[i].color, cam, light, currentNormal, currentReflectance, Draw::SCENE_SHADOW);
+		}
+	}
+
+	void DrawShadowVolume(screen *screen, Camera* cam, Light* light){
+		for(uint32_t i=0; i<shadowVolume.size(); ++i){
+			vec4 currentNormal = glm::normalize(shadowVolume[i].normal);
+			vec3 currentReflectance = vec3(1,1,1);
+			vector<Vertex> vertices(3);
+			vertices[0].position = shadowVolume[i].v0;
+			vertices[1].position = shadowVolume[i].v1;
+			vertices[2].position = shadowVolume[i].v2;
+			DrawPolygonRasterisation(screen, vertices, shadowVolume[i].color, cam, light, currentNormal, currentReflectance, Draw::SHADOW);
+		}
 	}
 
 private:
