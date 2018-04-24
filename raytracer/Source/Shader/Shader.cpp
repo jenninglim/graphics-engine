@@ -91,8 +91,8 @@ void shootRay(const Ray r, vec3 &colour, Octree tree, BVH bvh, Light l)
                     l2Norm(vec3(i.position - l.position)));
 
        //colour= i.colour;
-       colour = 0.2f * colour * shadow + 0.5f * colour * trace.occ + 0.3f * trace.col;
-       //colour = 0.5f * colour * shadow + 0.5f * colour * trace.occ;
+       //colour = 0.2f * colour * shadow + 0.5f * colour * trace.occ + 0.3f * trace.col;
+       colour = 0.5f * colour * shadow + 0.5f * colour * trace.occ;
 
        // colour = vec3(trace.col);
     }
