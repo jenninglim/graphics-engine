@@ -7,10 +7,10 @@ using namespace glm;
 
 void singleAmbConeTrace(Octree * root, Cone r, Trace &t, float maxDist);
 
-#define AMB_RAY 1
+#define AMB_RAY 9
 Trace ambientOcclusion(Octree * root, vec3 point, vec3 normal)
 {
-    const float max_dist = 0.2;
+    const float max_dist = 0.5;
     Intersection inter;
     CloseVox vox;
 
@@ -101,7 +101,7 @@ void singleAmbConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
 
     float radius = 0;
 
-    for (int i = MAX_DEPTH - 1; i > 0; i--)
+    for (int i = MAX_DEPTH -2; i > 0; i--)
     {
         radius = 1.f/ glm::pow(2,i);
         dist = radius/tantheta;
@@ -124,13 +124,13 @@ void singleAmbConeTrace(Octree * root, Cone r, Trace &t, float maxDist)
                 {
                     a += glm::pow(weight,2) * (1 - a);
                     averages = vox.tree->interVox(point);
-                    c += weight* (vec3(1) - c) * averages.col * pow(1-a,3);
-                    //c += (vec3(1) - c) * col * averages.irrad;
+                    c += 2.f *pow(1-weight,3)* (vec3(1) - c) * averages.col * averages.irrad;
+                    //c += (vec3(1) - c) * col * averages.irrad
                 }
-                else if (i < MAX_DEPTH -4)
+                else 
                 {
                     Cell average = averageNeighVoxel(vox.tree);
-                    c += weight*(vec3(1) - c) * average.col *pow(1-a,2) * 0.25;
+                   c += (1-weight)*(vec3(1) - c) * average.col *pow(1-a,2) * 0.25;
                 }
             }
             else
