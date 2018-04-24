@@ -1,5 +1,6 @@
 #include "TestModelH.h"
 
+//ADD BOX OBJECT
 void push_box(std::vector<Object *> &objects, std::vector<Triangle> &object_tri){
   Box *object = new Box(object_tri);
   printf("end result %f\n", object->triangles[0].v0.x);
@@ -7,10 +8,14 @@ void push_box(std::vector<Object *> &objects, std::vector<Triangle> &object_tri)
   object_tri.clear();
 }
 
-void LoadCornellBox(Object * cornellBox){
-
+//ADD BUNNY OBJECT
+void push_bunny(std::vector<Object *> &objects, std::vector<Triangle> &object_tri){
+  Bunny *object = new Bunny(object_tri);
+  objects.push_back(object);
+  object_tri.clear();
 }
 
+//LOAD OBJECTS
 void LoadObjects(std::vector<Object *>& objects )
 {
   // Defines colors:
@@ -128,4 +133,20 @@ void LoadObjects(std::vector<Object *>& objects )
 	triangles.push_back( Triangle(G,H,F,blue) );
 
   push_box(objects, triangles);
+
+  //Stanford Bunny
+    vector<vec4> out_vertices;
+    vector<vec3> out_faces;
+    vector<Triangle> bunnytriangles;
+    loadObj("./Source/bunny.obj",out_vertices,out_faces);
+    cout << out_vertices.size() << endl;
+    cout << out_faces.size() << endl;
+    for(size_t i = 0; i<out_faces.size(); i++){
+      vec3 face = out_faces[i];
+      bunnytriangles.push_back( Triangle(
+              1.0f*out_vertices[face.x-1],
+              1.0f*out_vertices[face.y-1],
+              1.0f*out_vertices[face.z-1], green));
+    }
+    push_bunny(objects, bunnytriangles);
 }

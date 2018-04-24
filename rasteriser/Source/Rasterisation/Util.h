@@ -10,12 +10,14 @@
 #include <Camera.h>
 #include <Light.h>
 
+enum Draw {SCENE_AMBIENT, SCENE_SHADOW, SHADOW, SHADOWS_OFF};
 typedef struct Pixel
 {
     int x;
     int y;
     float zinv;
     glm::vec4 pos3d;
+    glm::vec4 conicalPos;
 } Pixel;
 
 typedef struct Vertex
@@ -23,11 +25,13 @@ typedef struct Vertex
     glm::vec4 position;
 } Vertex;
 
+
 void DrawPolygonRasterisation(screen* screen,
         const std::vector<Vertex>& vertices,
         vec3 color,
         Camera* cam,
         Light* light,
         vec4 currentNormal,
-        vec3 currentReflectance);
+        vec3 currentReflectance,
+        Draw type);
 #endif

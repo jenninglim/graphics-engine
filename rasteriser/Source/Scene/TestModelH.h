@@ -1,13 +1,13 @@
 #ifndef TEST_MODEL_CORNEL_BOX_H
 #define TEST_MODEL_CORNEL_BOX_H
 
-// Defines a simple test model: The Cornel Box
-
 #include <glm/glm.hpp>
 #include <vector>
 #include "Config.h"
 #include "Object.h"
 #include "Box.h"
+#include "Bunny.h"
+#include "ObjLoader.h"
 
 using glm::vec3;
 using glm::vec4;
