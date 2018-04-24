@@ -3,6 +3,9 @@
 using namespace std;
 using glm::vec3;
 
+
+void drawPixels(screen * screen, Camera* cam);
+
 Scene::Scene(){
     this->cam = new Camera();
     this->light = new Light();
@@ -61,6 +64,7 @@ void Scene::Draw(screen* screen){
     for (int j = 0; j < SCREEN_WIDTH; j++)
     {
       cam->depthBuffer[i][j] = 0.0f;
+      cam->pixels[i][j] = vec3(0);
     }
   }
   //DRAW THE POLYGONS
@@ -68,5 +72,14 @@ void Scene::Draw(screen* screen){
     //FIRST IS CORNELL BOX
     objects[i]->DrawPolygon(screen,cam,light);
   }
+  drawPixels(screen, cam);
 
+}
+
+void drawPixels(screen * screen, Camera* cam){
+  for(int i = 0; i< SCREEN_HEIGHT; i++){
+    for(int j = 0; j < SCREEN_WIDTH; j++){
+      PutPixelSDL(screen,j,i,cam->pixels[i][j]);
+    }
+  }
 }

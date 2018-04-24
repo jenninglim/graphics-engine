@@ -10,6 +10,7 @@
 #include <Camera.h>
 #include <Light.h>
 
+
 typedef struct Pixel
 {
     int x;

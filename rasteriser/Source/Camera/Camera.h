@@ -10,6 +10,7 @@ class Camera
 {
 
     public:
+
         float focalLength;
         float yaw;
         glm::vec4 cameraPos;
@@ -18,6 +19,8 @@ class Camera
         glm::vec4 initialDirection;
         mat4 increR;
         float depthBuffer[SCREEN_HEIGHT][SCREEN_WIDTH];
+        glm::vec3 pixels[SCREEN_HEIGHT][SCREEN_WIDTH];
+
 
     Camera()
     {
