@@ -146,7 +146,7 @@ void PixelShader(screen* screen,
     {
 
       cam->depthBuffer[y][x] = p.zinv;
-      cam->pixels[y][x] = finalColour* currentColor;
+      cam->pixels[x][y] = finalColour* currentColor;
       //PutPixelSDL( screen, x, y, finalColour* currentColor );
     }
   }

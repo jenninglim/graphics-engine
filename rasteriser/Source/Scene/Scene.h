@@ -2,6 +2,7 @@
 #include "Light.h"
 #include "TestModelH.h"
 #include <SDL.h>
+#include "Post.h"
 
 
 class Scene

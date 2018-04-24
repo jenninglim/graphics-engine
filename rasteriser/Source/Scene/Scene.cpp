@@ -64,22 +64,23 @@ void Scene::Draw(screen* screen){
     for (int j = 0; j < SCREEN_WIDTH; j++)
     {
       cam->depthBuffer[i][j] = 0.0f;
-      cam->pixels[i][j] = vec3(0);
     }
   }
+  cam->initialisePixels();
   //DRAW THE POLYGONS
   for(size_t i = 0; i<objects.size(); i++){
     //FIRST IS CORNELL BOX
     objects[i]->DrawPolygon(screen,cam,light);
   }
+  post_processing(cam->pixels);
   drawPixels(screen, cam);
 
 }
 
 void drawPixels(screen * screen, Camera* cam){
-  for(int i = 0; i< SCREEN_HEIGHT; i++){
-    for(int j = 0; j < SCREEN_WIDTH; j++){
-      PutPixelSDL(screen,j,i,cam->pixels[i][j]);
+  for(int i = 0; i< SCREEN_WIDTH; i++){
+    for(int j = 0; j < SCREEN_HEIGHT; j++){
+      PutPixelSDL(screen,i,j,cam->pixels[i][j]);
     }
   }
 }

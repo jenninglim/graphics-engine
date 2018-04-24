@@ -19,7 +19,7 @@ class Camera
         glm::vec4 initialDirection;
         mat4 increR;
         float depthBuffer[SCREEN_HEIGHT][SCREEN_WIDTH];
-        glm::vec3 pixels[SCREEN_HEIGHT][SCREEN_WIDTH];
+        glm::vec3 pixels[SCREEN_WIDTH][SCREEN_HEIGHT];
 
 
     Camera()
@@ -65,6 +65,17 @@ class Camera
         updateRotation();
         this->facingDirection = glm::inverse(this->R) * this->initialDirection;
     }
+
+    void initialisePixels(){
+      for (int i = 0 ; i < SCREEN_WIDTH; i++)
+      {
+        for (int j = 0; j < SCREEN_HEIGHT; j++)
+        {
+          this->pixels[i][j] = vec3(0);
+        }
+      }
+    }
+
     private:
     void updateRotation()
     {
