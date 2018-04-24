@@ -3,8 +3,11 @@
 
 #include "Config.h"
 #include <vector>
+#include <iostream>
 #include "glm/gtx/string_cast.hpp"
+
 using namespace glm;
+using namespace std;
 
 //Camera
 class Camera
@@ -13,22 +16,23 @@ class Camera
     public:
         float focalLength;
         float yaw;
-        glm::vec4 cameraPos;
-        glm::mat4 R;
-        glm::vec4 facingDirection;
-        glm::vec4 initialDirection;
+        vec4 cameraPos;
+        mat4 R;
+        vec4 facingDirection;
+        vec4 initialDirection;
         mat4 increR;
         float depthBuffer[SCREEN_HEIGHT][SCREEN_WIDTH];
-        glm::vec3 pixels[SCREEN_WIDTH][SCREEN_HEIGHT];
+        vec3 pixels[SCREEN_WIDTH][SCREEN_HEIGHT];
         float stencilBuffer[SCREEN_HEIGHT][SCREEN_WIDTH];
         bool stencilWritten[SCREEN_HEIGHT][SCREEN_WIDTH];
-        std::vector<float> stencilInvStore[SCREEN_HEIGHT][SCREEN_WIDTH];
+        vector<float> stencilInvStore[SCREEN_HEIGHT][SCREEN_WIDTH];
 
     Camera()
     {
         this->cameraPos =  vec4(0,0,-4,1);
         this->focalLength = CAM_FOCAL_LENGTH;
         this->initialDirection = vec4(0,0,1,0);
+        this->facingDirection = this->initialDirection;
         yaw = 0;
         R = mat4(1.0);
         vec4 v0(glm::cos(ROTATION_SPEED), 0, glm::sin(ROTATION_SPEED),0);
@@ -47,6 +51,7 @@ class Camera
         vec4 v2(0, 1, 0,0);
         this->increR = mat4(v0,v2,v1,vec4(0,0,0,1));
         this->initialDirection = vec4(0,0,1,0);
+        this->facingDirection = this->initialDirection;
     }
 
     void forward(){
@@ -88,6 +93,5 @@ class Camera
     }
 
 };
-
 
 #endif

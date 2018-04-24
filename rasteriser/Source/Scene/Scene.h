@@ -6,6 +6,7 @@
 #include "Edge.h"
 #include <algorithm>
 
+void drawPixels(screen * screen, Camera* cam);
 
 class Scene
 {

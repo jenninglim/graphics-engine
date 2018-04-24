@@ -22,14 +22,7 @@ class Light
         this->diffuseLightIntensity = (float)DIFFUSE_INTENSITY * vec3(1,1,1);
         this->specularLightIntensity = (float)SPECULAR_INTENSITY * vec3(1,1,1);
     }
-    /*
-    Light(vec4 position, vec3 specularLightIntensity, vec3 ambientLightIntensity, vec3 diffuseLightIntensity)
-        :position(position), specularLightIntensity(specularLightIntensity),
-        ambientLightIntensity(ambientLightIntensity), diffuseLightIntensity(diffuseLightIntensity)
-    {
 
-    }
-    */
     void forward(){
         this->position = this->position + vec4(0,0,0.1,0);
     }

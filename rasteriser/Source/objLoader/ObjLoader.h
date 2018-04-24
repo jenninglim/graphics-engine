@@ -4,7 +4,6 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-
 using namespace std;
 using glm::vec4;
 using glm::vec3;

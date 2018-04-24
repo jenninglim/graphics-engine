@@ -18,6 +18,7 @@ public:
 	}
 
 public:
+	//DRAW POLYGON WITHOUT SHADOWS
 	void DrawPolygon(screen* screen, Camera* cam, Light* light){
 		for(uint32_t i=0; i<triangles.size(); ++i){
 
@@ -30,7 +31,7 @@ public:
 	    DrawPolygonRasterisation(screen, vertices, triangles[i].color, cam, light, currentNormal, currentReflectance, Draw::SHADOWS_OFF);
 	  }
 	}
-
+	//DRAW POLYGON WITH JUST AMBIENT LIGHTING
 	void DrawPolygonAmbient(screen* screen, Camera* cam, Light* light){
 		for(uint32_t i=0; i<triangles.size(); ++i){
 
@@ -43,7 +44,7 @@ public:
 	    DrawPolygonRasterisation(screen, vertices, triangles[i].color, cam, light, currentNormal, currentReflectance, Draw::SCENE_AMBIENT);
 	  }
 	}
-
+	//DRAW POLYGON BASED ON STENCIL BUFFER VALUES
 	void DrawPolygonShadow(screen* screen, Camera* cam, Light* light){
 		for(uint32_t i=0; i<triangles.size(); ++i){
 			vec4 currentNormal = glm::normalize(triangles[i].normal);
@@ -55,7 +56,7 @@ public:
 			DrawPolygonRasterisation(screen, vertices, triangles[i].color, cam, light, currentNormal, currentReflectance, Draw::SCENE_SHADOW);
 		}
 	}
-
+	//DRAW SHADOW VOLUME MODELLING HARD SHADOWS
 	void DrawShadowVolume(screen *screen, Camera* cam, Light* light){
 		for(uint32_t i=0; i<shadowVolume.size(); ++i){
 			vec4 currentNormal = glm::normalize(shadowVolume[i].normal);
@@ -69,6 +70,7 @@ public:
 	}
 
 private:
+	//SCALE BOX TO BE WITHIN -1 AND 1
 	void ScaleBox(vector<Triangle>& triangles){
 		//std::cout << triangles[0].v0 << endl;
 	  for( size_t i=0; i<triangles.size(); ++i )

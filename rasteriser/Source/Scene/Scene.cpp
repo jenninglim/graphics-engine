@@ -3,13 +3,9 @@
 using namespace std;
 using glm::vec3;
 
-
-void drawPixels(screen * screen, Camera* cam);
-
 Scene::Scene(){
     this->cam = new Camera();
     this->light = new Light();
-    //LoadCornellBox(this->cornellBox);
     LoadObjects(this->objects);
   }
 
@@ -57,8 +53,9 @@ void Scene::Update(const uint8_t* keystate){
     }
 }
 
+//DRAW OBJECTS TO SCREEN
 void Scene::Draw(screen* screen){
-
+  //INITIALISE BUFFERS
   for (int i = 0 ; i < SCREEN_HEIGHT; i++)
   {
     for (int j = 0; j < SCREEN_WIDTH; j++)
@@ -70,6 +67,7 @@ void Scene::Draw(screen* screen){
   }
   cam->initialisePixels();
 
+  //CALL DRAWING METHODS
   if(!SHADOWS){
     for(size_t i = 0; i<objects.size(); i++){
       objects[i]->DrawPolygon(screen,cam,light);
@@ -80,21 +78,20 @@ void Scene::Draw(screen* screen){
     DrawShadowVolumes(screen);
     DrawPolygonShadows(screen);
   }
-
+  //POST_PROCESSING - AA TO SMOOTH EDGES
   post_processing(cam->pixels);
+  //DRAW TO SDL SCREEN
   drawPixels(screen, cam);
-
 }
 
-
+//DRAW POLYGONS WITH AMBIENT LIGHTING
 void Scene::DrawPolygonsAmbient(screen* screen){
-  //DRAW THE POLYGONS
   for(size_t i = 0; i<objects.size(); i++){
-    //FIRST IS CORNELL BOX
     objects[i]->DrawPolygonAmbient(screen,cam,light);
   }
 }
 
+//CREATE SHADOW VOLUMES FOR OBJECTS
 void Scene::CreateShadowVolumes(){
   for(size_t i = 0; i<objects.size(); i++){
     //ALL OBJECTS EXCEPT CORNELL BOX
@@ -151,8 +148,8 @@ void Scene::CreateShadowVolumes(){
   }
 }
 
+//DRAW SHADOW VOLUMES
 void Scene::DrawShadowVolumes(screen *screen){
-  //DRAW THE POLYGONS
   for(size_t i = 0; i<objects.size(); i++){
     //NOT CORNELL BOX
     if(i >0 && BUNNYSHADOWS){
@@ -166,6 +163,7 @@ void Scene::DrawShadowVolumes(screen *screen){
   }
 }
 
+//RENDER AGAIN WITH SHADOW VOLUMES INCLUDED
 void Scene::DrawPolygonShadows(screen *screen){
   for(size_t i = 0; i<objects.size(); i++){
     //FIRST IS CORNELL BOX
@@ -173,8 +171,7 @@ void Scene::DrawPolygonShadows(screen *screen){
   }
 }
 
-
-
+//DRAW TO SDL SCREEN
 void drawPixels(screen * screen, Camera* cam){
   for(int i = 0; i< SCREEN_WIDTH; i++){
     for(int j = 0; j < SCREEN_HEIGHT; j++){

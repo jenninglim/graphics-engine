@@ -20,7 +20,8 @@ public:
 	{
 
 	}
-  
+
+  //COMPARE IF EDGES ARE THE SAME 
   bool CompareEdges(Edge &e) const{
     return ((vertex1 == e.vertex1 && vertex2 == e.vertex2) || (vertex1 == e.vertex2 && vertex2 == e.vertex1));
   }

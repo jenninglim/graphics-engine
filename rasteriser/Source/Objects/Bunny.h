@@ -14,11 +14,12 @@ class Bunny : public Object
 public:
 	Bunny(vector<Triangle>& tri) : Object(tri)
 	{
-		BunnyRotate(triangles, 2.3);
-		BunnyTranslate(triangles, vec4(0.3,0.4,-0.5,0));
+		RotateX(triangles, 2.3);
+		Translate(triangles, vec4(0.3,0.4,-0.5,0));
 	}
 
 public:
+	//DRAW POLYGON WITHOUT SHADOWS
   void DrawPolygon(screen* screen, Camera* cam, Light* light){
     for(uint32_t i=0; i<triangles.size(); ++i){
 
@@ -32,6 +33,7 @@ public:
     }
   }
 
+	//DRAW POLYGON WITH JUST AMBIENT LIGHTING
   void DrawPolygonAmbient(screen* screen, Camera* cam, Light* light){
 		for(uint32_t i=0; i<triangles.size(); ++i){
 
@@ -44,7 +46,8 @@ public:
 	    DrawPolygonRasterisation(screen, vertices, triangles[i].color, cam, light, currentNormal, currentReflectance, Draw::SCENE_AMBIENT);
 	  }
 	}
-
+	
+	//DRAW POLYGON BASED ON STENCIL BUFFER VALUES
 	void DrawPolygonShadow(screen* screen, Camera* cam, Light* light){
 		for(uint32_t i=0; i<triangles.size(); ++i){
 			vec4 currentNormal = glm::normalize(triangles[i].normal);
@@ -57,6 +60,7 @@ public:
 		}
 	}
 
+	//DRAW SHADOW VOLUME MODELLING HARD SHADOWS
 	void DrawShadowVolume(screen *screen, Camera* cam, Light* light){
 		for(uint32_t i=0; i<shadowVolume.size(); ++i){
 			vec4 currentNormal = glm::normalize(shadowVolume[i].normal);
@@ -69,15 +73,4 @@ public:
 		}
 	}
 
-	void BunnyRotate(vector<Triangle> &triangles, float radians){
-		for(size_t i = 0; i < triangles.size(); i++){
-			triangles[i].RotateXAxis(radians);
-		}
-	}
-
-	void BunnyTranslate(vector<Triangle> &triangles, vec4 translation){
-		for(size_t i = 0; i < triangles.size(); i++){
-			triangles[i].Translate(translation);
-		}
-	}
 };

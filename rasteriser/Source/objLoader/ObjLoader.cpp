@@ -8,6 +8,7 @@ using namespace std;
 using glm::vec4;
 using glm::vec3;
 
+//LOAD OBJECT INTO 2 VECTORS - VERTICES AND FACES
 bool loadObj(
         const char * path,
         vector<vec4> & out_vertices,
